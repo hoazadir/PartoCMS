@@ -3,9 +3,9 @@
 
 // ==================== تنظیمات دیتابیس ====================
 define('DB_HOST', '127.0.0.1');
-define('DB_NAME', 'grapesjs_cms');
-define('DB_USER', 'root');
-define('DB_PASS', '@PASS757ho@');
+define('DB_NAME', 'YOUR_DB_NAME_HERE');
+define('DB_USER', 'YOUR_DB_USER_HERE');
+define('DB_PASS', 'YOUR_DB_PASSWORD_HERE');
 define('DB_CHARSET', 'utf8mb4');
 
 // ==================== تشخیص خودکار آدرس سایت ====================
@@ -43,6 +43,14 @@ define('UPLOAD_URL', SITE_URL . '/assets/uploads/');
 
 // ==================== شروع سشن ====================
 if (session_status() === PHP_SESSION_NONE) {
+// Session save path - تضمین می‌کند مسیر معتبر باشد
+$sessionPath = __DIR__ . '/logs/sessions';
+if (!is_dir($sessionPath)) {
+    @mkdir($sessionPath, 0700, true);
+}
+if (is_dir($sessionPath) && is_writable($sessionPath)) {
+    session_save_path($sessionPath);
+}
     session_start();
 }
 

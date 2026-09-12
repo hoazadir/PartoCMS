@@ -1,34 +1,45 @@
-# Gradle files
-.gradle/
-build/
+# ==================== فایل‌های حساس ====================
+config.php
+config.local.php
+.env
+.env.*
+*.secret
 
-# Local configuration file (sdk path, etc)
-local.properties
+# ==================== بکاپ‌ها ====================
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+*.zip
+*.bak
+*.bak-*
+*.broken-*
+*.old
 
-# Log/OS Files
+# ==================== لاگ‌ها و session ====================
+logs/
 *.log
+sess_*
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+# ==================== Composer ====================
+/vendor/
+node_modules/
 
-# IntelliJ
-*.iml
+# ==================== آپلودهای کاربران ====================
+# (فقط تصاویر کاربران - اختیاری)
+assets/uploads/img_*
+assets/uploads/*.jpg
+assets/uploads/*.png
+assets/uploads/*.gif
+
+# ==================== فایل‌های سیستم ====================
+.DS_Store
+Thumbs.db
+*.swp
 .idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+.vscode/
 
-# Keystore files
-*.jks
-*.keystore
-
-# Google Services (e.g. APIs or Firebase)
-google-services.json
-
-# Android Profiling
-*.hprof
+# ==================== فایل‌های موقت ====================
+tmp_*
+*.tmp
+*.temp

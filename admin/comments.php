@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/auth_check.php';
 
 // اول چک کن لاگین هست یا نه
 if (!isLoggedIn()) {
