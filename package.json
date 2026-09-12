@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "grapesjs-plugin-forms": "^2.0.6"
+  }
+}

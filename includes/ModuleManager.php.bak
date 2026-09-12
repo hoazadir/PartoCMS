@@ -1,0 +1,68 @@
+<?php
+class ModuleManager {
+    private $pdo;
+    private $modules = [];
+
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+        $this->loadModules();
+    }
+
+    private function loadModules() {
+        try {
+            $stmt = $this->pdo->query("SELECT * FROM modules WHERE is_enabled = 1");
+            while ($row = $stmt->fetch()) {
+                $this->modules[$row['slug']] = $row;
+            }
+        } catch (Exception $e) {
+            $this->modules = [];
+        }
+    }
+
+    public function isEnabled($slug) {
+        return isset($this->modules[$slug]);
+    }
+
+    public function getAll() {
+        $stmt = $this->pdo->query("SELECT * FROM modules ORDER BY name");
+        return $stmt->fetchAll();
+    }
+
+    public function getEnabled() {
+        return $this->modules;
+    }
+
+    public function enable($slug) {
+        $stmt = $this->pdo->prepare("UPDATE modules SET is_enabled = 1 WHERE slug = ?");
+        $result = $stmt->execute([$slug]);
+        $this->loadModules();
+        return $result;
+    }
+
+    public function disable($slug) {
+        $stmt = $this->pdo->prepare("UPDATE modules SET is_enabled = 0 WHERE slug = ?");
+        $result = $stmt->execute([$slug]);
+        $this->loadModules();
+        return $result;
+    }
+
+    public function register($slug, $name, $description = '', $version = '1.0.0') {
+        $stmt = $this->pdo->prepare("
+            INSERT INTO modules (slug, name, description, version)
+            VALUES (?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE name = VALUES(name), description = VALUES(description), version = VALUES(version)
+        ");
+        return $stmt->execute([$slug, $name, $description, $version]);
+    }
+
+    public function getMenuItems() {
+        $items = [];
+        foreach ($this->modules as $slug => $mod) {
+            $menuFile = __DIR__ . "/../modules/{$slug}/menu.php";
+            if (file_exists($menuFile)) {
+                $items = array_merge($items, include $menuFile);
+            }
+        }
+        return $items;
+    }
+}

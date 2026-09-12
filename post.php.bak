@@ -1,0 +1,369 @@
+<?php
+require_once __DIR__ . '/config.php';
+
+$id = $_GET['id'] ?? null;
+$slug = $_GET['slug'] ?? null;
+
+if (!$id && !$slug) {
+    header('Location: index.php');
+    exit;
+}
+
+$pdo = getDB();
+
+if ($id && is_numeric($id)) {
+    $stmt = $pdo->prepare("
+        SELECT ci.*, ct.name as type_name, ct.icon as type_icon, u.username as author,
+               c.name as category_name, c.color as category_color, c.icon as category_icon
+        FROM content_items ci
+        LEFT JOIN content_types ct ON ct.id = ci.type_id
+        LEFT JOIN users u ON u.id = ci.author_id
+        LEFT JOIN categories c ON c.id = ci.category_id
+        WHERE ci.id = ? AND ci.status = 'published'
+    ");
+    $stmt->execute([$id]);
+} elseif ($slug) {
+    $stmt = $pdo->prepare("
+        SELECT ci.*, ct.name as type_name, ct.icon as type_icon, u.username as author,
+               c.name as category_name, c.color as category_color, c.icon as category_icon
+        FROM content_items ci
+        LEFT JOIN content_types ct ON ct.id = ci.type_id
+        LEFT JOIN users u ON u.id = ci.author_id
+        LEFT JOIN categories c ON c.id = ci.category_id
+        WHERE ci.slug = ? AND ci.status = 'published'
+    ");
+    $stmt->execute([$slug]);
+} else {
+    header('Location: index.php');
+    exit;
+}
+
+$post = $stmt->fetch();
+
+if (!$post) {
+    http_response_code(404);
+    ?>
+    <!DOCTYPE html>
+    <html lang="fa" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>محتوا یافت نشد</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+        <style>body { font-family: Tahoma, sans-serif; background: #f8f9fa; }</style>
+    </head>
+    <body>
+        <div style="text-align:center; padding: 100px 20px;">
+            <div style="font-size: 100px;">🔍</div>
+            <h1 style="color:#e74c3c;">۴۰۴</h1>
+            <p style="color:#7f8c8d;">محتوا یافت نشد یا منتشر نشده است.</p>
+            <a href="index.php" class="btn btn-primary mt-3">← بازگشت به خانه</a>
+        </div>
+    </body>
+    </html>
+    <?php
+    exit;
+}
+
+$siteName = getSetting('site_name', 'وب‌سایت من');
+?>
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= htmlspecialchars($post['title']) ?> | <?= htmlspecialchars($siteName) ?></title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        body { font-family: Tahoma, sans-serif; background: #f8f9fa; margin: 0; }
+        .top-bar { background: #2c3e50; color: #fff; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .top-bar .logo { color: #fff; text-decoration: none; font-size: 16px; font-weight: bold; }
+        .top-bar a { color: #ecf0f1; text-decoration: none; margin-right: 15px; font-size: 13px; }
+        .top-bar a:hover { color: #3498db; }
+        .article { max-width: 850px; margin: 40px auto; background: #fff; padding: 45px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .article h1 { color: #2c3e50; margin: 0 0 15px 0; font-size: 30px; }
+        .article .meta { color: #95a5a6; font-size: 13px; margin-bottom: 25px; padding-bottom: 20px; border-bottom: 2px solid #f0f0f0; display: flex; gap: 15px; flex-wrap: wrap; align-items: center; }
+        .article .meta .badge-cat { display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 15px; color: #fff; font-size: 12px; font-weight: bold; }
+        .article .featured { width: 100%; max-height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 25px; }
+
+        /* محتوا */
+        .article .content { line-height: 1.9; color: #333; font-size: 15px; }
+        .article .content table { width: 100%; border-collapse: collapse; margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .article .content table thead { background: #2c3e50; color: #fff; }
+        .article .content table th { padding: 12px; text-align: right; font-weight: bold; font-size: 14px; border: 1px solid #34495e; }
+        .article .content table td { padding: 12px; border: 1px solid #e0e0e0; font-size: 14px; }
+        .article .content table tbody tr:nth-child(even) { background: #f8f9fa; }
+        .article .content table tbody tr:hover { background: #e9ecef; }
+        .article .content h1 { color: #2c3e50; margin: 25px 0 15px; font-size: 26px; }
+        .article .content h2 { color: #2c3e50; margin: 25px 0 15px; font-size: 22px; }
+        .article .content h3 { color: #34495e; margin: 20px 0 10px; font-size: 18px; }
+        .article .content h4 { color: #34495e; margin: 15px 0 10px; font-size: 16px; }
+        .article .content p { margin: 0 0 15px; }
+        .article .content ul, .article .content ol { margin: 15px 0; padding-right: 25px; }
+        .article .content li { margin-bottom: 8px; }
+        .article .content a { color: #3498db; text-decoration: none; border-bottom: 1px dotted #3498db; }
+        .article .content a:hover { color: #2980b9; border-bottom-style: solid; }
+        .article .content img { max-width: 100%; height: auto; border-radius: 8px; margin: 15px 0; }
+        .article .content blockquote { border-right: 4px solid #3498db; padding: 12px 20px; background: #f8f9fa; color: #555; margin: 20px 0; border-radius: 0 8px 8px 0; font-style: italic; }
+        .article .content code { background: #f4f4f4; padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #e74c3c; font-size: 13px; }
+        .article .content pre { background: #2c3e50; color: #62c462; padding: 15px; border-radius: 8px; overflow-x: auto; font-family: monospace; font-size: 13px; direction: ltr; text-align: left; }
+        .article .content pre code { background: none; color: inherit; padding: 0; }
+        .article .content hr { border: none; border-top: 2px solid #f0f0f0; margin: 25px 0; }
+
+        /* دیدگاه‌ها */
+        .comment-item { background: #f8f9fa; border-radius: 12px; padding: 20px; margin-bottom: 15px; border-right: 4px solid #3498db; }
+        .comment-avatar { width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; font-size: 20px; flex-shrink: 0; }
+        .reply-item { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 10px; border-right: 3px solid #27ae60; }
+
+        @media (max-width: 768px) {
+            .article { margin: 20px 15px; padding: 25px; }
+            .top-bar { padding: 12px 15px; flex-wrap: wrap; gap: 10px; }
+            .article .content table { font-size: 12px; }
+            .article .content table th, .article .content table td { padding: 8px 6px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <a href="index.php" class="logo">🏠 <?= htmlspecialchars($siteName) ?></a>
+    <div>
+        <a href="index.php">خانه</a>
+        <?php if (isLoggedIn()): ?>
+            <a href="admin/index.php">داشبورد</a>
+            <a href="admin/logout.php">خروج</a>
+        <?php endif; ?>
+    </div>
+</div>
+
+<div class="article">
+    <div style="font-size: 42px; margin-bottom: 10px;"><?= $post['type_icon'] ?: '📄' ?></div>
+    <h1><?= htmlspecialchars($post['title']) ?></h1>
+
+    <div class="meta">
+        <span>👤 <?= htmlspecialchars($post['author'] ?? 'ناشناس') ?></span>
+        <span>📅 <?= date('Y/m/d', strtotime($post['created_at'])) ?></span>
+        <?php if (!empty($post['category_name'])): ?>
+            <span class="badge-cat" style="background:<?= htmlspecialchars($post['category_color'] ?? '#95a5a6') ?>;">
+                <?= htmlspecialchars($post['category_icon'] ?? '📁') ?>
+                <?= htmlspecialchars($post['category_name']) ?>
+            </span>
+        <?php endif; ?>
+        <?php if (!empty($post['type_name'])): ?>
+            <span>📁 <?= htmlspecialchars($post['type_name']) ?></span>
+        <?php endif; ?>
+    </div>
+
+    <?php if (!empty($post['featured_image'])): ?>
+        <img src="<?= htmlspecialchars($post['featured_image']) ?>" alt="<?= htmlspecialchars($post['title']) ?>" class="featured">
+    <?php endif; ?>
+
+    <!-- محتوا -->
+    <div class="content"><?= $post['content'] ?></div>
+
+    <!-- ==================== دیدگاه‌ها ==================== -->
+    <?php
+    // دریافت دیدگاه‌های تایید شده
+    $stmt = $pdo->prepare("
+        SELECT c.*, u.username as registered_username
+        FROM comments c
+        LEFT JOIN users u ON u.id = c.user_id
+        WHERE c.content_id = ? AND c.status = 'approved' AND c.parent_id IS NULL
+        ORDER BY c.created_at DESC
+    ");
+    $stmt->execute([$post['id']]);
+    $comments = $stmt->fetchAll();
+
+    // پاسخ‌ها
+    $replies = [];
+    if (!empty($comments)) {
+        $ids = array_column($comments, 'id');
+        $in = str_repeat('?,', count($ids) - 1) . '?';
+        $stmt = $pdo->prepare("
+            SELECT c.*, u.username as registered_username
+            FROM comments c
+            LEFT JOIN users u ON u.id = c.user_id
+            WHERE c.parent_id IN ($in) AND c.status = 'approved'
+            ORDER BY c.created_at ASC
+        ");
+        $stmt->execute($ids);
+        foreach ($stmt->fetchAll() as $r) {
+            $replies[$r['parent_id']][] = $r;
+        }
+    }
+
+    $commentCount = count($comments);
+    ?>
+
+    <div id="comments-section" style="margin-top: 50px; padding-top: 40px; border-top: 3px solid #f0f0f0;">
+        <h3 style="color: #2c3e50; margin-bottom: 25px;">
+            <i class="bi bi-chat-dots"></i>
+            دیدگاه‌ها
+            <span class="badge bg-secondary" style="font-size: 14px;"><?= $commentCount ?></span>
+        </h3>
+
+        <?php if (empty($comments)): ?>
+            <div class="alert alert-info text-center">
+                <i class="bi bi-chat-square-text fs-1 d-block mb-2"></i>
+                هنوز دیدگاهی ثبت نشده. اولین نفر باشید!
+            </div>
+        <?php else: ?>
+            <?php foreach ($comments as $c): ?>
+                <div class="comment-item">
+                    <div style="display: flex; gap: 15px;">
+                        <div class="comment-avatar">
+                            <?= mb_substr($c['author_name'], 0, 1) ?>
+                        </div>
+                        <div style="flex: 1;">
+                            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                                <div>
+                                    <strong style="color: #2c3e50; font-size: 15px;"><?= htmlspecialchars($c['author_name']) ?></strong>
+                                    <?php if ($c['user_id']): ?>
+                                        <span class="badge bg-success" style="font-size: 10px;">✓ عضو سایت</span>
+                                    <?php endif; ?>
+                                </div>
+                                <small style="color: #95a5a6;">📅 <?= date('Y/m/d H:i', strtotime($c['created_at'])) ?></small>
+                            </div>
+                            <div style="color: #333; line-height: 1.9; font-size: 14px;">
+                                <?= nl2br(htmlspecialchars($c['comment'])) ?>
+                            </div>
+                            <button onclick="replyTo(<?= $c['id'] ?>, '<?= htmlspecialchars(addslashes($c['author_name'])) ?>')"
+                                    class="btn btn-sm btn-outline-primary mt-2">
+                                <i class="bi bi-reply"></i> پاسخ
+                            </button>
+                        </div>
+                    </div>
+
+                    <?php if (!empty($replies[$c['id']])): ?>
+                        <div style="margin-right: 65px; margin-top: 15px;">
+                            <?php foreach ($replies[$c['id']] as $r): ?>
+                                <div class="reply-item">
+                                    <div style="display: flex; gap: 12px;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: #27ae60; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; flex-shrink: 0;">
+                                            <?= mb_substr($r['author_name'], 0, 1) ?>
+                                        </div>
+                                        <div style="flex: 1;">
+                                            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 8px;">
+                                                <strong style="color: #2c3e50; font-size: 14px;"><?= htmlspecialchars($r['author_name']) ?></strong>
+                                                <small style="color: #95a5a6;"><?= date('Y/m/d H:i', strtotime($r['created_at'])) ?></small>
+                                            </div>
+                                            <div style="color: #333; line-height: 1.8; font-size: 13px;">
+                                                <?= nl2br(htmlspecialchars($r['comment'])) ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        <?php endif; ?>
+
+        <!-- فرم ثبت دیدگاه -->
+        <div style="background: #fff; border-radius: 12px; padding: 30px; margin-top: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.06);">
+            <h4 style="color: #2c3e50; margin-bottom: 20px;">
+                <i class="bi bi-pencil-square"></i> دیدگاه خود را بنویسید
+            </h4>
+
+            <div id="commentMsg"></div>
+
+            <form id="commentForm">
+                <input type="hidden" name="content_id" value="<?= $post['id'] ?>">
+                <input type="hidden" name="parent_id" id="parentId" value="">
+
+                <div id="replyInfo" style="display:none; background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
+                    <span>در پاسخ به: <strong id="replyToName"></strong></span>
+                    <button type="button" onclick="cancelReply()" class="btn btn-sm btn-link text-danger">لغو</button>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">نام <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" required
+                               value="<?= isLoggedIn() ? htmlspecialchars($_SESSION['username']) : '' ?>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">ایمیل <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control" required
+                               value="<?= isLoggedIn() ? htmlspecialchars($_SESSION['email'] ?? '') : '' ?>">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">وب‌سایت (اختیاری)</label>
+                        <input type="url" name="website" class="form-control" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">دیدگاه شما <span class="text-danger">*</span></label>
+                    <textarea name="comment" class="form-control" rows="5" required
+                              placeholder="نظر خود را بنویسید..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-send"></i> ارسال دیدگاه
+                </button>
+                <small class="text-muted d-block mt-2">
+                    <i class="bi bi-info-circle"></i> دیدگاه شما پس از تأیید مدیر نمایش داده می‌شود
+                </small>
+            </form>
+        </div>
+    </div>
+
+    <hr style="margin: 30px 0;">
+    <a href="index.php" class="btn btn-outline-primary">
+        <i class="bi bi-arrow-right"></i> بازگشت به خانه
+    </a>
+</div>
+
+<script>
+function replyTo(id, name) {
+    document.getElementById('parentId').value = id;
+    document.getElementById('replyToName').textContent = name;
+    document.getElementById('replyInfo').style.display = 'block';
+    document.querySelector('textarea[name="comment"]').focus();
+    document.getElementById('comments-section').scrollIntoView({behavior: 'smooth'});
+}
+
+function cancelReply() {
+    document.getElementById('parentId').value = '';
+    document.getElementById('replyInfo').style.display = 'none';
+}
+
+document.getElementById('commentForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById('submitBtn');
+    const msg = document.getElementById('commentMsg');
+    const formData = new FormData(this);
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> در حال ارسال...';
+    msg.innerHTML = '';
+
+    try {
+        const res = await fetch('api/comment.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(Object.fromEntries(formData))
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            msg.innerHTML = '<div class="alert alert-success">✅ ' + data.message + '</div>';
+            this.reset();
+            cancelReply();
+        } else {
+            msg.innerHTML = '<div class="alert alert-danger">❌ ' + (data.error || 'خطا در ارسال') + '</div>';
+        }
+    } catch (err) {
+        msg.innerHTML = '<div class="alert alert-danger">❌ خطا در ارتباط با سرور</div>';
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-send"></i> ارسال دیدگاه';
+});
+</script>
+
+</body>
+</html>
