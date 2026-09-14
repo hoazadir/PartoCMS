@@ -44,12 +44,36 @@ if (!$post) {
     http_response_code(404);
     ?>
     <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
+    <html <?= __html_attrs() ?>>
     <head>
         <meta charset="UTF-8">
         <title>محتوا یافت نشد</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-        <style>body { font-family: Tahoma, sans-serif; background: #f8f9fa; }</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
+        <style>body { font-family: Tahoma, sans-serif; background: #f8f9fa; }
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
     </head>
     <body>
         <div style="text-align:center; padding: 100px 20px;">
@@ -109,7 +133,7 @@ if ($customTemplateId) {
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -118,7 +142,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     $seo->setPost($post);
     echo $seo->render();
     ?>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f8f9fa; margin: 0; }
@@ -167,23 +191,47 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             .article .content table { font-size: 12px; }
             .article .content table th, .article .content table td { padding: 8px 6px; }
         }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
 
 <div class="top-bar">
     <a href="index.php" class="logo">🏠 <?= htmlspecialchars($siteName) ?></a>
     <div>
-        <a href="index.php">خانه</a>
+        <a href="index.php"><?= __t('fe_home', [], 'خانه') ?></a>
         <?php if (isLoggedIn()): ?>
             <?php if (in_array($_SESSION['role'] ?? '', ['admin', 'editor', 'author'])): ?>
-                <a href="admin/index.php">پنل مدیریت</a>
+                <a href="admin/index.php"><?= __t('fe_admin_panel', [], 'پنل مدیریت') ?></a>
             <?php endif; ?>
-            <a href="user/index.php">پنل کاربری</a>
-            <a href="logout.php">خروج</a>
+            <a href="user/index.php"><?= __t('fe_user_panel', [], 'پنل کاربری') ?></a>
+            <a href="logout.php"><?= __t('fe_logout', [], 'خروج') ?></a>
         <?php else: ?>
-            <a href="login.php">ورود</a>
-            <a href="register.php">ثبت‌نام</a>
+            <a href="login.php"><?= __t('fe_login', [], 'ورود') ?></a>
+            <a href="register.php"><?= __t('fe_register', [], 'ثبت‌نام') ?></a>
         <?php endif; ?>
     </div>
 </div>
@@ -327,7 +375,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 
                 <div id="replyInfo" style="display:none; background: #fff3cd; padding: 10px; border-radius: 8px; margin-bottom: 15px;">
                     <span>در پاسخ به: <strong id="replyToName"></strong></span>
-                    <button type="button" onclick="cancelReply()" class="btn btn-sm btn-link text-danger">لغو</button>
+                    <button type="button" onclick="cancelReply()" class="btn btn-sm btn-link text-danger"><?= __t('fe_cancel', [], 'لغو') ?></button>
                 </div>
 
                 <div class="row">
@@ -350,7 +398,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 <div class="mb-3">
                     <label class="form-label">دیدگاه شما <span class="text-danger">*</span></label>
                     <textarea name="comment" class="form-control" rows="5" required
-                              placeholder="نظر خود را بنویسید..."></textarea>
+                              placeholder="<?= __t('fe_write_comment', [], 'نظر خود را بنویسید...') ?>"></textarea>
                 </div>
 
                 <button type="submit" class="btn btn-primary" id="submitBtn">

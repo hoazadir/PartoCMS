@@ -22,11 +22,11 @@ $posts->execute([$userId]);
 $posts = $posts->fetchAll();
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <title>مقالات من | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
@@ -47,14 +47,14 @@ $posts = $posts->fetchAll();
 
 <div class="sidebar">
     <div class="brand"><h5>👤 پنل کاربری</h5></div>
-    <a href="index.php"><i class="bi bi-speedometer2"></i> <span>داشبورد</span></a>
-    <a href="profile.php"><i class="bi bi-person"></i> <span>پروفایل</span></a>
-    <a href="password.php"><i class="bi bi-key"></i> <span>تغییر رمز</span></a>
-    <a href="posts.php" class="active"><i class="bi bi-file-text"></i> <span>مقالات من</span></a>
-    <a href="comments.php"><i class="bi bi-chat-dots"></i> <span>دیدگاه‌های من</span></a>
+    <a href="index.php"><i class="bi bi-speedometer2"></i> <span><?= __t('fe_dashboard', [], 'داشبورد') ?></span></a>
+    <a href="profile.php"><i class="bi bi-person"></i> <span><?= __t('fe_profile', [], 'پروفایل') ?></span></a>
+    <a href="password.php"><i class="bi bi-key"></i> <span><?= __t('fe_change_password', [], 'تغییر رمز') ?></span></a>
+    <a href="posts.php" class="active"><i class="bi bi-file-text"></i> <span><?= __t('fe_my_posts', [], 'مقالات من') ?></span></a>
+    <a href="comments.php"><i class="bi bi-chat-dots"></i> <span><?= __t('fe_my_comments', [], 'دیدگاه‌های من') ?></span></a>
     <hr style="border-color:#34495e;margin:5px 0;">
     <a href="../index.php"><i class="bi bi-house"></i> <span>صفحه اصلی</span></a>
-    <a href="../logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span>خروج</span></a>
+    <a href="../logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span><?= __t('fe_logout', [], 'خروج') ?></span></a>
 </div>
 
 <div class="main">
@@ -87,7 +87,7 @@ $posts = $posts->fetchAll();
                                 </span>
                             <?php endif; ?>
                             <div class="mt-2">
-                                <a href="../post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary" target="_blank">مشاهده</a>
+                                <a href="../post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-outline-primary" target="_blank"><?= __t('fe_view', [], 'مشاهده') ?></a>
                             </div>
                         </div>
                     </div>

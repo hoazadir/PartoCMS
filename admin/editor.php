@@ -12,7 +12,7 @@ $templateId = $_GET['id'] ?? null;
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">

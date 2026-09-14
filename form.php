@@ -21,12 +21,12 @@ $fields = json_decode($form['fields'] ?? '[]', true) ?: [];
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($form['name']) ?> | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
@@ -58,20 +58,44 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(52, 152, 219, 0.4); }
         .alert-success { background: #d4edda; color: #155724; padding: 20px; border-radius: 10px; text-align: center; font-size: 15px; }
         .alert-error { background: #f8d7da; color: #721c24; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
 
 <div class="top-bar">
     <a href="index.php" class="logo">🏠 <?= htmlspecialchars($siteName) ?></a>
     <div>
-        <a href="index.php">خانه</a>
+        <a href="index.php"><?= __t('fe_home', [], 'خانه') ?></a>
         <?php if (isLoggedIn()): ?>
-            <a href="user/index.php">پنل کاربری</a>
-            <a href="logout.php">خروج</a>
+            <a href="user/index.php"><?= __t('fe_user_panel', [], 'پنل کاربری') ?></a>
+            <a href="logout.php"><?= __t('fe_logout', [], 'خروج') ?></a>
         <?php else: ?>
-            <a href="login.php">ورود</a>
-            <a href="register.php">ثبت‌نام</a>
+            <a href="login.php"><?= __t('fe_login', [], 'ورود') ?></a>
+            <a href="register.php"><?= __t('fe_register', [], 'ثبت‌نام') ?></a>
         <?php endif; ?>
     </div>
 </div>

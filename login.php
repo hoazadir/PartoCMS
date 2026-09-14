@@ -63,12 +63,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ورود | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         * { box-sizing: border-box; }
@@ -106,7 +106,31 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         .error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
         .register-link { text-align: center; margin-top: 20px; font-size: 13px; color: #7f8c8d; }
         .register-link a { color: #27ae60; text-decoration: none; font-weight: bold; }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
     <div class="login-box">
@@ -124,7 +148,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 <input type="text" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>
             </div>
             <div class="form-group">
-                <label>رمز عبور</label>
+                <label><?= __t('fe_password', [], 'رمز عبور') ?></label>
                 <input type="password" name="password" required>
             </div>
             <button type="submit" class="btn-login">

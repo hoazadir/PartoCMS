@@ -18,12 +18,36 @@ if (!$category) {
     http_response_code(404);
     ?>
     <!DOCTYPE html>
-    <html lang="fa" dir="rtl">
+    <html <?= __html_attrs() ?>>
     <head>
         <meta charset="UTF-8">
         <title>دسته یافت نشد</title>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
-        <style>body { font-family: Tahoma, sans-serif; background: #f8f9fa; }</style>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
+        <style>body { font-family: Tahoma, sans-serif; background: #f8f9fa; }
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
     </head>
     <body>
         <div style="text-align:center; padding: 100px 20px;">
@@ -67,12 +91,12 @@ $posts = $stmt->fetchAll();
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>دسته <?= htmlspecialchars($category['name']) ?> | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f8f9fa; margin: 0; }
@@ -102,17 +126,41 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             .category-header { padding: 40px 15px; }
             .category-header h1 { font-size: 26px; }
         }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
 
 <div class="top-bar">
     <a href="index.php" class="logo">🏠 <?= htmlspecialchars($siteName) ?></a>
     <div>
-        <a href="index.php">خانه</a>
+        <a href="index.php"><?= __t('fe_home', [], 'خانه') ?></a>
         <?php if (isLoggedIn()): ?>
-            <a href="admin/index.php">داشبورد</a>
-            <a href="admin/logout.php">خروج</a>
+            <a href="admin/index.php"><?= __t('fe_dashboard', [], 'داشبورد') ?></a>
+            <a href="admin/logout.php"><?= __t('fe_logout', [], 'خروج') ?></a>
         <?php endif; ?>
     </div>
 </div>
@@ -154,7 +202,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                                 👤 <?= htmlspecialchars($p['author'] ?? 'ناشناس') ?> 
                                 | 📅 <?= date('Y/m/d', strtotime($p['created_at'])) ?>
                             </div>
-                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary">بیشتر بخوانید →</a>
+                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary"><?= __t('fe_read_more', [], 'بیشتر بخوانید →') ?></a>
                         </div>
                     </div>
                 </div>
@@ -167,7 +215,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 <ul class="pagination justify-content-center">
                     <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?slug=<?= urlencode($slug) ?>&page=<?= $page - 1 ?>">← قبلی</a>
+                            <a class="page-link" href="?slug=<?= urlencode($slug) ?>&page=<?= $page - 1 ?>"><?= __t('fe_previous', [], '← قبلی') ?></a>
                         </li>
                     <?php endif; ?>
 
@@ -179,7 +227,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 
                     <?php if ($page < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?slug=<?= urlencode($slug) ?>&page=<?= $page + 1 ?>">بعدی →</a>
+                            <a class="page-link" href="?slug=<?= urlencode($slug) ?>&page=<?= $page + 1 ?>"><?= __t('fe_next', [], 'بعدی →') ?></a>
                         </li>
                     <?php endif; ?>
                 </ul>
