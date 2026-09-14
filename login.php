@@ -2,7 +2,6 @@
 require_once __DIR__ . '/config.php';
 
 if (isLoggedIn()) {
-    // بر اساس نقش هدایت کن
     $roleSlug = $_SESSION['role'] ?? 'user';
     if (in_array($roleSlug, ['admin', 'editor', 'author'])) {
         header('Location: admin/index.php');
@@ -19,14 +18,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password)) {
-        $error = 'نام کاربری و رمز عبور الزامی است';
+        $error = __t('fe_req_credentials', [], 'نام کاربری و رمز عبور الزامی است');
     } else {
         try {
             $pdo = getDB();
             $stmt = $pdo->prepare("
-                SELECT u.*, r.name as role_name, r.slug as role_slug 
-                FROM users u 
-                LEFT JOIN roles r ON r.id = u.role_id 
+                SELECT u.*, r.name as role_name, r.slug as role_slug
+                FROM users u
+                LEFT JOIN roles r ON r.id = u.role_id
                 WHERE (u.username = ? OR u.email = ?) AND u.is_active = 1
             ");
             $stmt->execute([$username, $username]);
@@ -41,10 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['role_name'] = $user['role_name'];
                 $_SESSION['role_slug'] = $user['role_slug'];
 
-                // ذخیره آخرین ورود
                 $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?")->execute([$user['id']]);
 
-                // هدایت بر اساس نقش
                 if (in_array($user['role_slug'], ['admin', 'editor', 'author'])) {
                     header('Location: admin/index.php');
                 } else {
@@ -52,22 +49,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 exit;
             } else {
-                $error = 'نام کاربری یا رمز عبور اشتباه است';
+                $error = __t('fe_wrong_credentials', [], 'نام کاربری یا رمز عبور اشتباه است');
             }
         } catch (PDOException $e) {
-            $error = 'خطا در اتصال: ' . $e->getMessage();
+            $error = __t('fe_db_error', [], 'خطا در اتصال') . ': ' . $e->getMessage();
         }
     }
 }
 
 $siteName = getSetting('site_name', 'وب‌سایت من');
+$welcomeMsg = str_replace('{site}', htmlspecialchars($siteName), __t('fe_login_welcome', [], 'به {site} خوش آمدید'));
 ?>
 <!DOCTYPE html>
 <html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ورود | <?= htmlspecialchars($siteName) ?></title>
+    <title><?= __t('fe_login', [], 'ورود') ?> | <?= htmlspecialchars($siteName) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -106,37 +104,16 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         .error { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; }
         .register-link { text-align: center; margin-top: 20px; font-size: 13px; color: #7f8c8d; }
         .register-link a { color: #27ae60; text-decoration: none; font-weight: bold; }
-    
-    /* ==================== DIRECTION SUPPORT ==================== */
-    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
 
-    /* LTR — Bootstrap LTR خودش کار می‌کند */
-
-    /* اصلاحات اضافی برای عناصر خاص */
-    html[dir="ltr"] body { direction: ltr; text-align: left; }
-    html[dir="rtl"] body { direction: rtl; text-align: right; }
-
-    /* منوی اصلی */
-    html[dir="ltr"] .main-nav { flex-direction: row; }
-    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
-
-    /* زیرمنو در LTR */
-    html[dir="ltr"] .submenu { right: auto; left: 100%; }
-
-    /* pagination */
-    html[dir="ltr"] .article .content table th { text-align: left; }
-    html[dir="rtl"] .article .content table th { text-align: right; }
-
-    /* blockquote */
-    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
-
-</style>
+        html[dir="ltr"] body { direction: ltr; text-align: left; }
+        html[dir="rtl"] body { direction: rtl; text-align: right; }
+    </style>
 </head>
 <body>
     <div class="login-box">
         <div class="logo">🔐</div>
-        <h1>ورود به حساب</h1>
-        <p class="subtitle">به <?= htmlspecialchars($siteName) ?> خوش آمدید</p>
+        <h1><?= __t('fe_login_heading', [], 'ورود به حساب') ?></h1>
+        <p class="subtitle"><?= $welcomeMsg ?></p>
 
         <?php if ($error): ?>
             <div class="error">❌ <?= htmlspecialchars($error) ?></div>
@@ -144,7 +121,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 
         <form method="post">
             <div class="form-group">
-                <label>نام کاربری یا ایمیل</label>
+                <label><?= __t('fe_username_or_email', [], 'نام کاربری یا ایمیل') ?></label>
                 <input type="text" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required autofocus>
             </div>
             <div class="form-group">
@@ -152,12 +129,13 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 <input type="password" name="password" required>
             </div>
             <button type="submit" class="btn-login">
-                <i class="bi bi-box-arrow-in-left"></i> ورود
+                <i class="bi bi-box-arrow-in-left"></i> <?= __t('fe_login', [], 'ورود') ?>
             </button>
         </form>
 
         <div class="register-link">
-            حساب کاربری ندارید؟ <a href="register.php">ثبت‌نام کنید</a>
+            <?= __t('fe_no_account', [], 'حساب کاربری ندارید؟') ?>
+            <a href="register.php"><?= __t('fe_register_now', [], 'ثبت‌نام کنید') ?></a>
         </div>
     </div>
 </body>
