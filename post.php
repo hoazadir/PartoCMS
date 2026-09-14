@@ -40,6 +40,9 @@ if ($id && is_numeric($id)) {
 
 $post = $stmt->fetch();
 
+// 🌍 اعمال ترجمه بر اساس زبان فعلی
+if ($post) $post = applyTranslationToPost($post);
+
 if (!$post) {
     http_response_code(404);
     ?>
