@@ -39,13 +39,13 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 $siteDescription = getSetting('site_description', 'ساخته شده با سیستم مدیریت محتوا');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($siteName) ?></title>
     <meta name="description" content="<?= htmlspecialchars($siteDescription) ?>">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; margin: 0; background: #f8f9fa; }
@@ -97,7 +97,31 @@ $siteDescription = getSetting('site_description', 'ساخته شده با سیس
             .hero p { font-size: 15px; }
             .main-nav { justify-content: center; }
         }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
 
@@ -106,18 +130,18 @@ $siteDescription = getSetting('site_description', 'ساخته شده با سیس
     <span>👋 <?= htmlspecialchars($_SESSION['username']) ?> (<?= htmlspecialchars($_SESSION['role_name'] ?? '') ?>)</span>
     <div>
         <?php if (in_array($_SESSION['role'] ?? '', ['admin', 'editor', 'author'])): ?>
-            <a href="admin/index.php" style="color:#3498db;text-decoration:none;margin:0 8px;">پنل مدیریت</a>
+            <a href="admin/index.php" style="color:#3498db;text-decoration:none;margin:0 8px;"><?= __t('fe_admin_panel', [], 'پنل مدیریت') ?></a>
         <?php endif; ?>
-        <a href="user/index.php" style="color:#3498db;text-decoration:none;margin:0 8px;">پنل کاربری</a>
-        <a href="logout.php" style="color:#e74c3c;text-decoration:none;margin:0 8px;">خروج</a>
+        <a href="user/index.php" style="color:#3498db;text-decoration:none;margin:0 8px;"><?= __t('fe_user_panel', [], 'پنل کاربری') ?></a>
+        <a href="logout.php" style="color:#e74c3c;text-decoration:none;margin:0 8px;"><?= __t('fe_logout', [], 'خروج') ?></a>
     </div>
 </div>
 <?php else: ?>
 <div class="admin-bar" style="background: #2c3e50; color: #fff; padding: 8px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
-    <span>خوش آمدید!</span>
+    <span><?= __t('fe_welcome', [], 'خوش آمدید!') ?></span>
     <div>
-        <a href="login.php" style="color:#3498db;text-decoration:none;margin:0 8px;">ورود</a>
-        <a href="register.php" style="color:#27ae60;text-decoration:none;margin:0 8px;">ثبت‌نام</a>
+        <a href="login.php" style="color:#3498db;text-decoration:none;margin:0 8px;"><?= __t('fe_login', [], 'ورود') ?></a>
+        <a href="register.php" style="color:#27ae60;text-decoration:none;margin:0 8px;"><?= __t('fe_register', [], 'ثبت‌نام') ?></a>
     </div>
 </div>
 <?php endif; ?>
@@ -140,7 +164,7 @@ if ($menuHtml):
         <h1><?= htmlspecialchars($siteName) ?></h1>
         <p><?= htmlspecialchars($siteDescription) ?></p>
         <form method="get" action="search.php" class="search-form">
-            <input type="text" name="q" placeholder="جستجو در سایت...">
+            <input type="text" name="q" placeholder="<?= __t('fe_search_site', [], 'جستجو در سایت...') ?>">
             <button type="submit"><i class="bi bi-search"></i> جستجو</button>
         </form>
     </div>
@@ -205,7 +229,7 @@ if ($menuHtml):
                                 👤 <?= htmlspecialchars($p['author'] ?? 'ناشناس') ?>
                                 | 📅 <?= date('Y/m/d', strtotime($p['created_at'])) ?>
                             </div>
-                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary" style="align-self:flex-start;">بیشتر بخوانید →</a>
+                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary" style="align-self:flex-start;"><?= __t('fe_read_more', [], 'بیشتر بخوانید →') ?></a>
                         </div>
                     </div>
                 </div>
@@ -218,7 +242,7 @@ if ($menuHtml):
                 <ul class="pagination justify-content-center">
                     <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $page - 1 ?>">← قبلی</a>
+                            <a class="page-link" href="?page=<?= $page - 1 ?>"><?= __t('fe_previous', [], '← قبلی') ?></a>
                         </li>
                     <?php endif; ?>
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
@@ -228,7 +252,7 @@ if ($menuHtml):
                     <?php endfor; ?>
                     <?php if ($page < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?page=<?= $page + 1 ?>">بعدی →</a>
+                            <a class="page-link" href="?page=<?= $page + 1 ?>"><?= __t('fe_next', [], 'بعدی →') ?></a>
                         </li>
                     <?php endif; ?>
                 </ul>

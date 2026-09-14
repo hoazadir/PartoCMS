@@ -44,7 +44,7 @@ class PdfReporter {
 
         $html = <<<HTML
 <!DOCTYPE html>
-<html dir="rtl" lang="fa">
+<html <?= __html_attrs() ?>>
 <head>
 <meta charset="UTF-8">
 <style>

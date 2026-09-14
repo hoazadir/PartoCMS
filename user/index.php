@@ -34,12 +34,12 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 $pageTitle = 'پنل کاربری';
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $pageTitle ?> | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
@@ -84,17 +84,17 @@ $pageTitle = 'پنل کاربری';
         <h5>👤 پنل کاربری</h5>
         <small><?= htmlspecialchars($siteName) ?></small>
     </div>
-    <a href="index.php" class="active"><i class="bi bi-speedometer2"></i> <span>داشبورد</span></a>
-    <a href="profile.php"><i class="bi bi-person"></i> <span>پروفایل</span></a>
-    <a href="password.php"><i class="bi bi-key"></i> <span>تغییر رمز</span></a>
-    <a href="posts.php"><i class="bi bi-file-text"></i> <span>مقالات من</span></a>
-    <a href="comments.php"><i class="bi bi-chat-dots"></i> <span>دیدگاه‌های من</span></a>
+    <a href="index.php" class="active"><i class="bi bi-speedometer2"></i> <span><?= __t('fe_dashboard', [], 'داشبورد') ?></span></a>
+    <a href="profile.php"><i class="bi bi-person"></i> <span><?= __t('fe_profile', [], 'پروفایل') ?></span></a>
+    <a href="password.php"><i class="bi bi-key"></i> <span><?= __t('fe_change_password', [], 'تغییر رمز') ?></span></a>
+    <a href="posts.php"><i class="bi bi-file-text"></i> <span><?= __t('fe_my_posts', [], 'مقالات من') ?></span></a>
+    <a href="comments.php"><i class="bi bi-chat-dots"></i> <span><?= __t('fe_my_comments', [], 'دیدگاه‌های من') ?></span></a>
     <hr style="border-color:#34495e;margin:5px 0;">
     <a href="../index.php"><i class="bi bi-house"></i> <span>صفحه اصلی</span></a>
     <?php if (in_array($_SESSION['role'] ?? '', ['admin', 'editor', 'author'])): ?>
-        <a href="../admin/index.php"><i class="bi bi-speedometer"></i> <span>پنل مدیریت</span></a>
+        <a href="../admin/index.php"><i class="bi bi-speedometer"></i> <span><?= __t('fe_admin_panel', [], 'پنل مدیریت') ?></span></a>
     <?php endif; ?>
-    <a href="../logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span>خروج</span></a>
+    <a href="../logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span><?= __t('fe_logout', [], 'خروج') ?></span></a>
 </div>
 
 <div class="main">
@@ -141,28 +141,28 @@ $pageTitle = 'پنل کاربری';
         <div class="col-md-3">
             <a href="profile.php" class="action-card">
                 <div class="icon"><i class="bi bi-person-circle"></i></div>
-                <h5>پروفایل</h5>
-                <small class="text-muted">ویرایش اطلاعات شخصی</small>
+                <h5><?= __t('fe_profile', [], 'پروفایل') ?></h5>
+                <small class="text-muted"><?= __t('fe_edit_profile', [], 'ویرایش اطلاعات شخصی') ?></small>
             </a>
         </div>
         <div class="col-md-3">
             <a href="password.php" class="action-card">
                 <div class="icon"><i class="bi bi-key-fill"></i></div>
-                <h5>تغییر رمز</h5>
+                <h5><?= __t('fe_change_password', [], 'تغییر رمز') ?></h5>
                 <small class="text-muted">بروزرسانی رمز عبور</small>
             </a>
         </div>
         <div class="col-md-3">
             <a href="posts.php" class="action-card">
                 <div class="icon"><i class="bi bi-file-earmark-text"></i></div>
-                <h5>مقالات من</h5>
+                <h5><?= __t('fe_my_posts', [], 'مقالات من') ?></h5>
                 <small class="text-muted"><?= $stats['posts'] ?> مقاله</small>
             </a>
         </div>
         <div class="col-md-3">
             <a href="comments.php" class="action-card">
                 <div class="icon"><i class="bi bi-chat-square-text"></i></div>
-                <h5>دیدگاه‌های من</h5>
+                <h5><?= __t('fe_my_comments', [], 'دیدگاه‌های من') ?></h5>
                 <small class="text-muted"><?= $stats['comments'] ?> دیدگاه</small>
             </a>
         </div>

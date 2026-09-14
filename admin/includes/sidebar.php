@@ -1,6 +1,6 @@
 <?php
 /**
- * Sidebar استاندارد - نسخه ریسپانسیو با مسیرهای مطلق (اصلاح نهایی اسکرول)
+ * Sidebar استاندارد - نسخه ریسپانسیو با مسیرهای مطلق (اصلاح نهایی)
  */
 if (!isset($siteName)) {
     $siteName = function_exists('getSetting') ? getSetting('site_name', 'وب‌سایت من') : 'وب‌سایت من';
@@ -38,13 +38,14 @@ if ($mm) {
     $canModules = $canSettings = $canBackups = true;
 }
 
-// ==================== دسترسی‌های امنیتی: فقط برای ادمین ====================
+// ==================== دسترسی‌های امنیتی ====================
 $canSecurity      = $isAdmin;
 $canTelegram      = $isAdmin;
 $canVirusTotal    = $isAdmin;
 $canSecurityAudit = $isAdmin;
 $can2FA           = $isAdmin;
 $canBackupMgr     = $isAdmin;
+$canLanguages     = $isAdmin;
 
 // ==================== بررسی نمایش گروه‌ها ====================
 $hasContentGroup    = $canContent || $canCategories || $canMedia || $canComments;
@@ -92,7 +93,6 @@ $baseSite  = SITE_URL;
         box-shadow: -2px 0 10px rgba(0,0,0,0.15);
         display: flex;
         flex-direction: column;
-        transition: transform 0.3s ease;
         box-sizing: border-box;
         overscroll-behavior: contain;
         touch-action: pan-y;
@@ -218,7 +218,6 @@ $baseSite  = SITE_URL;
     .menu-single.danger { color: #f87171; }
     .menu-single.danger:hover { background: #7f1d1d; color: #fff; }
 
-    /* ✅ داشبورد امنیتی */
     .menu-single.security-link { color: #fbbf24; }
     .menu-single.security-link:hover { background: #78350f; color: #fef3c7; }
     .menu-single.security-link.active {
@@ -228,7 +227,6 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ راه‌اندازی تلگرام */
     .menu-single.telegram-link { color: #38bdf8; }
     .menu-single.telegram-link:hover { background: #0c4a6e; color: #e0f2fe; }
     .menu-single.telegram-link.active {
@@ -238,7 +236,6 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ ویروس‌یاب VirusTotal */
     .menu-single.virustotal-link { color: #a78bfa; }
     .menu-single.virustotal-link:hover { background: #4c1d95; color: #ede9fe; }
     .menu-single.virustotal-link.active {
@@ -248,7 +245,6 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ تست جامع امنیتی */
     .menu-single.audit-link { color: #10b981; }
     .menu-single.audit-link:hover { background: #064e3b; color: #d1fae5; }
     .menu-single.audit-link.active {
@@ -258,7 +254,6 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ نمودارهای امنیتی */
     .menu-single.graphs-link { color: #6366f1; }
     .menu-single.graphs-link:hover { background: #312e81; color: #e0e7ff; }
     .menu-single.graphs-link.active {
@@ -268,7 +263,6 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ بکاپ خودکار */
     .menu-single.backup-mgr-link { color: #14b8a6; }
     .menu-single.backup-mgr-link:hover { background: #134e4a; color: #ccfbf1; }
     .menu-single.backup-mgr-link.active {
@@ -278,7 +272,15 @@ $baseSite  = SITE_URL;
         font-weight: bold;
     }
 
-    /* ✅ احراز هویت دو مرحله‌ای (2FA) */
+    .menu-single.languages-link { color: #8b5cf6; }
+    .menu-single.languages-link:hover { background: #4c1d95; color: #ede9fe; }
+    .menu-single.languages-link.active {
+        background: linear-gradient(90deg, transparent, rgba(139,92,246,0.2));
+        color: #ede9fe;
+        border-right-color: #8b5cf6;
+        font-weight: bold;
+    }
+
     .menu-single.twofa-link { color: #ec4899; }
     .menu-single.twofa-link:hover { background: #831843; color: #fce7f3; }
     .menu-single.twofa-link.active {
@@ -287,7 +289,7 @@ $baseSite  = SITE_URL;
         border-right-color: #ec4899;
         font-weight: bold;
     }
-    /* نشانگر وضعیت 2FA */
+
     .menu-single .status-dot {
         width: 10px;
         height: 10px;
@@ -300,12 +302,119 @@ $baseSite  = SITE_URL;
         box-shadow: 0 0 8px rgba(16,185,129,0.8);
         animation: pulse-green 2s infinite;
     }
-    .status-dot.disabled {
-        background: #ef4444;
-    }
+    .status-dot.disabled { background: #ef4444; }
     @keyframes pulse-green {
         0%, 100% { opacity: 1; }
         50% { opacity: 0.5; }
+    }
+
+    /* ==================== Language Switcher ==================== */
+    .language-switcher {
+        background: #0f172a;
+        border-bottom: 1px solid #334155;
+        padding: 12px 20px;
+        position: relative;
+    }
+    .language-switcher .switcher-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 13px;
+        color: #cbd5e1;
+        padding: 6px 8px;
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .language-switcher .switcher-header:hover {
+        background: #334155;
+        color: #fff;
+    }
+    .language-switcher .switcher-icon { font-size: 18px; }
+    .language-switcher .switcher-title { color: #94a3b8; font-size: 11px; }
+    .language-switcher .switcher-current {
+        margin-right: auto;
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .language-switcher .switcher-current::after {
+        content: '▼';
+        font-size: 8px;
+        color: #64748b;
+        transition: transform 0.2s;
+    }
+    .language-switcher:hover .switcher-current::after {
+        transform: rotate(180deg);
+    }
+    .language-switcher .switcher-dropdown {
+    display: none;
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    right: 12px;
+    left: 12px;
+    background: #1e293b;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 -8px 25px rgba(0,0,0,0.5);
+    z-index: 9999;
+    max-height: 70vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border: 1px solid #475569;
+    border-bottom: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+}
+    
+    .language-switcher:hover .switcher-dropdown,
+    .language-switcher.open .switcher-dropdown {
+        display: block;
+    }
+    .language-switcher .switcher-dropdown::-webkit-scrollbar { width: 4px; }
+    .language-switcher .switcher-dropdown::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+    .language-switcher .lang-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        color: #cbd5e1;
+        text-decoration: none;
+        font-size: 13px;
+        border-bottom: 1px solid #334155;
+        transition: background 0.2s;
+    }
+    .language-switcher .lang-option:last-child { border-bottom: none; }
+    .language-switcher .lang-option:hover { background: #334155; color: #fff; }
+    .language-switcher .lang-option .lang-flag { font-size: 20px; }
+    .language-switcher .lang-option .lang-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .language-switcher .lang-option .lang-native { font-weight: bold; }
+    .language-switcher .lang-option .lang-code {
+        font-size: 10px;
+        color: #64748b;
+        font-family: monospace;
+    }
+
+    @media (max-width: 900px) {
+        .language-switcher .switcher-dropdown {
+            position: static;
+            margin-top: 10px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+        }
+        .language-switcher.open .switcher-dropdown {
+            display: block;
+            max-height: 400px;
+        }
     }
 
     .menu-bottom {
@@ -353,7 +462,7 @@ $baseSite  = SITE_URL;
     @media (max-width: 900px) {
         .sidebar {
             width: 280px;
-            transform: translateX(100%);
+            right: -300px;
             box-shadow: -5px 0 25px rgba(0,0,0,0.4);
             top: 0;
             bottom: 0;
@@ -361,31 +470,19 @@ $baseSite  = SITE_URL;
             max-height: 100%;
             padding-bottom: 0;
         }
-        .sidebar.mobile-open {
-            transform: translateX(0);
-        }
-
-        .mobile-toggle {
-            display: flex;
-        }
-
+        .sidebar.mobile-open { right: 0; }
+        .mobile-toggle { display: flex; }
         .main {
             margin-right: 0 !important;
             padding: 70px 15px 15px !important;
         }
-
         .menu-group-header { padding: 16px 20px; }
         .menu-single { padding: 16px 20px; }
         .menu-group-items a { padding: 13px 20px 13px 50px; }
     }
 
-    /* ✅ اصلاحات مخصوص لنداسکیپ موبایل */
     @media (max-width: 900px) and (orientation: landscape) {
-        .sidebar {
-            width: 300px;
-            top: 0;
-            bottom: 0;
-        }
+        .sidebar { width: 300px; top: 0; bottom: 0; }
         .sidebar .brand { padding: 12px 20px; }
         .sidebar .brand h5 { font-size: 14px; }
         .sidebar .brand .logo-icon { font-size: 20px; margin-bottom: 4px; }
@@ -403,6 +500,32 @@ $baseSite  = SITE_URL;
             margin-right: 0 !important;
         }
     }
+
+    /* ==================== DIRECTION SUPPORT (RTL/LTR) ==================== */
+    /* پیش‌فرض: RTL — سایدبار روی راست */
+    .sidebar { right: 0; left: auto; }
+    .main { margin-right: 260px; margin-left: 0; }
+
+    /* LTR — سایدبار روی چپ */
+    html[dir="ltr"] .sidebar { right: auto; left: 0; }
+    html[dir="ltr"] .main { margin-right: 0; margin-left: 260px; }
+
+    /* در موبایل */
+    @media (max-width: 900px) {
+        .sidebar { right: -300px !important; left: auto !important; }
+        html[dir="ltr"] .sidebar { right: auto !important; left: -300px !important; }
+        .sidebar.mobile-open { right: 0 !important; }
+        html[dir="ltr"] .sidebar.mobile-open { right: auto !important; left: 0 !important; }
+        .main { margin-right: 0 !important; margin-left: 0 !important; }
+    }
+
+    /* دکمه همبرگر — برعکس در LTR */
+    html[dir="ltr"] .mobile-toggle { right: auto; left: 12px; }
+
+    /* بک‌دراپ */
+    html[dir="ltr"] .sidebar { box-shadow: 5px 0 25px rgba(0,0,0,0.4); }
+    .sidebar { box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
+
 </style>
 
 <!-- Backdrop -->
@@ -418,7 +541,7 @@ $baseSite  = SITE_URL;
     <!-- Brand -->
     <div class="brand">
         <span class="logo-icon">🚀</span>
-        <h5>پنل مدیریت</h5>
+        <h5><?= __t('sidebar_admin_panel', [], 'پنل مدیریت') ?></h5>
         <small><?= htmlspecialchars($siteName) ?></small>
     </div>
 
@@ -428,22 +551,34 @@ $baseSite  = SITE_URL;
         <div class="avatar"><?= htmlspecialchars(mb_substr($_SESSION['username'], 0, 1)) ?></div>
         <div class="info">
             <div class="name"><?= htmlspecialchars($_SESSION['username']) ?></div>
-            <div class="role"><?= htmlspecialchars($_SESSION['role_name'] ?? 'کاربر') ?></div>
+            <div class="role"><?php
+                        $roleSlug = $_SESSION['role_slug'] ?? '';
+                        $roleDisplay = $roleSlug
+                            ? __t('role_' . $roleSlug, [], $_SESSION['role_name'] ?? 'کاربر')
+                            : ($_SESSION['role_name'] ?? 'کاربر');
+                        echo htmlspecialchars($roleDisplay);
+                        ?></div>
         </div>
     </div>
     <?php endif; ?>
 
+    <!-- ==================== Language Switcher ==================== -->
+    <?php
+    $switcherPath = __DIR__ . '/language_switcher.php';
+    if (file_exists($switcherPath)) require $switcherPath;
+    ?>
+
     <!-- ==================== داشبورد ==================== -->
     <a href="<?= $baseAdmin ?>/index.php" class="menu-single <?= $currentFile === 'index.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">📊</span>
-        <span>داشبورد</span>
+        <span><?= __t('menu_dashboard', [], 'داشبورد') ?></span>
     </a>
 
     <!-- ==================== گزارش‌ها ==================== -->
     <?php if ($canReports): ?>
     <a href="<?= $baseAdmin ?>/reports.php" class="menu-single <?= $currentFile === 'reports.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">📈</span>
-        <span>گزارش‌ها</span>
+        <span><?= __t('menu_reports', [], 'گزارش‌ها') ?></span>
     </a>
     <?php endif; ?>
 
@@ -451,7 +586,7 @@ $baseSite  = SITE_URL;
     <?php if ($canSeo): ?>
     <a href="<?= $baseAdmin ?>/seo.php" class="menu-single <?= $currentFile === 'seo.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">🔍</span>
-        <span>تنظیمات SEO</span>
+        <span><?= __t('menu_seo', [], 'تنظیمات SEO') ?></span>
     </a>
     <?php endif; ?>
 
@@ -459,7 +594,7 @@ $baseSite  = SITE_URL;
     <?php if ($canBackups): ?>
     <a href="<?= $baseAdmin ?>/backups.php" class="menu-single <?= $currentFile === 'backups.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">💾</span>
-        <span>پشتیبان‌گیری</span>
+        <span><?= __t('menu_backups', [], 'پشتیبان‌گیری') ?></span>
     </a>
     <?php endif; ?>
 
@@ -467,7 +602,15 @@ $baseSite  = SITE_URL;
     <?php if ($canBackupMgr): ?>
     <a href="<?= $baseAdmin ?>/backup_manager.php" class="menu-single backup-mgr-link <?= $currentFile === 'backup_manager.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">📦</span>
-        <span>بکاپ خودکار</span>
+        <span><?= __t('menu_backup_auto', [], 'بکاپ خودکار') ?></span>
+    </a>
+    <?php endif; ?>
+
+    <!-- ==================== مدیریت زبان‌ها ==================== -->
+    <?php if ($canLanguages): ?>
+    <a href="<?= $baseAdmin ?>/languages.php" class="menu-single languages-link <?= $currentFile === 'languages.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
+        <span class="single-icon">🌍</span>
+        <span><?= __t('menu_languages', [], 'مدیریت زبان‌ها') ?></span>
     </a>
     <?php endif; ?>
 
@@ -475,7 +618,7 @@ $baseSite  = SITE_URL;
     <?php if ($canSecurity): ?>
     <a href="<?= $baseAdmin ?>/security_dashboard.php" class="menu-single security-link <?= $currentFile === 'security_dashboard.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">🛡️</span>
-        <span>داشبورد امنیتی</span>
+        <span><?= __t('menu_security', [], 'داشبورد امنیتی') ?></span>
     </a>
     <?php endif; ?>
 
@@ -483,7 +626,7 @@ $baseSite  = SITE_URL;
     <?php if ($canTelegram): ?>
     <a href="<?= $baseAdmin ?>/telegram_setup.php" class="menu-single telegram-link <?= $currentFile === 'telegram_setup.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">🤖</span>
-        <span>راه‌اندازی تلگرام</span>
+        <span><?= __t('menu_telegram', [], 'راه‌اندازی تلگرام') ?></span>
     </a>
     <?php endif; ?>
 
@@ -491,7 +634,7 @@ $baseSite  = SITE_URL;
     <?php if ($canVirusTotal): ?>
     <a href="<?= $baseAdmin ?>/virustotal_setup.php" class="menu-single virustotal-link <?= $currentFile === 'virustotal_setup.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">🦠</span>
-        <span>ویروس‌یاب VirusTotal</span>
+        <span><?= __t('menu_virustotal', [], 'ویروس‌یاب VirusTotal') ?></span>
     </a>
     <?php endif; ?>
 
@@ -499,7 +642,7 @@ $baseSite  = SITE_URL;
     <?php if ($canSecurityAudit): ?>
     <a href="<?= $baseAdmin ?>/security_audit.php" class="menu-single audit-link <?= $currentFile === 'security_audit.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">🔍</span>
-        <span>تست جامع امنیتی</span>
+        <span><?= __t('menu_audit', [], 'تست جامع امنیتی') ?></span>
     </a>
     <?php endif; ?>
 
@@ -507,53 +650,67 @@ $baseSite  = SITE_URL;
     <?php if ($isAdmin): ?>
     <a href="<?= $baseAdmin ?>/security_graphs.php" class="menu-single graphs-link <?= $currentFile === 'security_graphs.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
         <span class="single-icon">📊</span>
-        <span>نمودارهای امنیتی</span>
+        <span><?= __t('menu_graphs', [], 'نمودارهای امنیتی') ?></span>
     </a>
     <?php endif; ?>
 
-    <!-- ==================== احراز هویت دو مرحله‌ای (2FA) ==================== -->
+    <!-- ==================== احراز هویت دو مرحله‌ای ==================== -->
     <?php if ($can2FA): ?>
     <a href="<?= $baseAdmin ?>/2fa_setup.php" class="menu-single twofa-link <?= $currentFile === '2fa_setup.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()" title="احراز هویت دو مرحله‌ای — <?= $twoFAEnabled ? 'فعال' : 'غیرفعال' ?>">
         <span class="single-icon">🔐</span>
-        <span>احراز هویت دو مرحله‌ای</span>
+        <span><?= __t('menu_2fa', [], 'احراز هویت دو مرحله‌ای') ?></span>
         <span class="status-dot <?= $twoFAEnabled ? 'enabled' : 'disabled' ?>" title="<?= $twoFAEnabled ? 'فعال' : 'غیرفعال' ?>"></span>
     </a>
     <?php endif; ?>
 
-    <!-- ==================== مدیریت محتوا ==================== -->
+    
+    <!-- ==================== ترجمه محتوا ==================== -->
+    <?php if ($isAdmin): ?>
+    <a href="<?= $baseAdmin ?>/content_translate.php" class="menu-single <?= $currentFile === 'content_translate.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()" style="color:#0891b2">
+        <span class="single-icon">🌍</span>
+        <span><?= __t('menu_translate', [], 'ترجمه محتوا') ?></span>
+    </a>
+    <?php endif; ?>
+    
+    <!-- ==================== تنظیمات ترجمه ==================== -->
+    <?php if ($isAdmin): ?>
+    <a href="<?= $baseAdmin ?>/translator_settings.php" class="menu-single <?= $currentFile === 'translator_settings.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()" style="color:#0891b2">
+        <span class="single-icon">⚙️</span>
+        <span>تنظیمات ترجمه</span>
+    </a>
+    <?php endif; ?>    
+
+<!-- ==================== مدیریت محتوا ==================== -->
     <?php if ($hasContentGroup): ?>
     <div class="menu-group <?= $isContentGroup ? 'open has-active' : '' ?>" data-group="content">
         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
             <span class="group-icon">📝</span>
-            <span class="group-title">مدیریت محتوا</span>
+            <span class="group-title"><?= __t('menu_content', [], 'مدیریت محتوا') ?></span>
             <span class="arrow">▼</span>
         </div>
         <div class="menu-group-items">
             <?php if ($canContent): ?>
             <a href="<?= $baseSite ?>/modules/content/admin.php" class="<?= strpos($currentPath, 'modules/content') !== false ? 'active' : '' ?>">
                 <span class="item-icon">📄</span>
-                <span>مقالات و صفحات</span>
+                <span><?= __t('menu_posts', [], 'مقالات و صفحات') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canCategories): ?>
             <a href="<?= $baseAdmin ?>/categories.php" class="<?= $currentFile === 'categories.php' ? 'active' : '' ?>">
                 <span class="item-icon">🏷</span>
-                <span>دسته‌بندی‌ها</span>
+                <span><?= __t('menu_categories', [], 'دسته‌بندی‌ها') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canMedia): ?>
             <a href="<?= $baseAdmin ?>/media.php" class="<?= $currentFile === 'media.php' ? 'active' : '' ?>">
                 <span class="item-icon">🖼</span>
-                <span>رسانه‌ها</span>
+                <span><?= __t('menu_media', [], 'رسانه‌ها') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canComments): ?>
             <a href="<?= $baseAdmin ?>/comments.php" class="<?= $currentFile === 'comments.php' ? 'active' : '' ?>">
                 <span class="item-icon">💬</span>
-                <span>دیدگاه‌ها</span>
+                <span><?= __t('menu_comments', [], 'دیدگاه‌ها') ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -565,21 +722,20 @@ $baseSite  = SITE_URL;
     <div class="menu-group <?= $isModulesGroup ? 'open has-active' : '' ?>" data-group="modules">
         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
             <span class="group-icon">🧩</span>
-            <span class="group-title">ابزارها</span>
+            <span class="group-title"><?= __t('menu_tools', [], 'ابزارها') ?></span>
             <span class="arrow">▼</span>
         </div>
         <div class="menu-group-items">
             <?php if ($canForms): ?>
             <a href="<?= $baseAdmin ?>/forms.php" class="<?= in_array($currentFile, ['forms.php', 'form-edit.php', 'form-submissions.php']) ? 'active' : '' ?>">
                 <span class="item-icon">📋</span>
-                <span>فرم‌ساز</span>
+                <span><?= __t('menu_forms', [], 'فرم‌ساز') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canMenus): ?>
             <a href="<?= $baseAdmin ?>/menus.php" class="<?= in_array($currentFile, ['menus.php', 'menu-edit.php']) ? 'active' : '' ?>">
                 <span class="item-icon">🔗</span>
-                <span>منوساز</span>
+                <span><?= __t('menu_menus', [], 'منوساز') ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -591,21 +747,20 @@ $baseSite  = SITE_URL;
     <div class="menu-group <?= $isAppearanceGroup ? 'open has-active' : '' ?>" data-group="appearance">
         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
             <span class="group-icon">🎨</span>
-            <span class="group-title">ظاهر سایت</span>
+            <span class="group-title"><?= __t('menu_appearance', [], 'ظاهر سایت') ?></span>
             <span class="arrow">▼</span>
         </div>
         <div class="menu-group-items">
             <?php if ($canTemplates): ?>
             <a href="<?= $baseAdmin ?>/templates.php" class="<?= $currentFile === 'templates.php' ? 'active' : '' ?>">
                 <span class="item-icon">📦</span>
-                <span>مدیریت قالب‌ها</span>
+                <span><?= __t('menu_templates', [], 'مدیریت قالب‌ها') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canEditor): ?>
             <a href="<?= $baseAdmin ?>/editor.php" class="<?= $currentFile === 'editor.php' ? 'active' : '' ?>">
                 <span class="item-icon">✏️</span>
-                <span>طراح قالب</span>
+                <span><?= __t('menu_editor', [], 'طراح قالب') ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -617,21 +772,20 @@ $baseSite  = SITE_URL;
     <div class="menu-group <?= $isUsersGroup ? 'open has-active' : '' ?>" data-group="users">
         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
             <span class="group-icon">👥</span>
-            <span class="group-title">کاربران</span>
+            <span class="group-title"><?= __t('menu_users', [], 'کاربران') ?></span>
             <span class="arrow">▼</span>
         </div>
         <div class="menu-group-items">
             <?php if ($canUsers): ?>
             <a href="<?= $baseAdmin ?>/users.php" class="<?= $currentFile === 'users.php' ? 'active' : '' ?>">
                 <span class="item-icon">👤</span>
-                <span>لیست کاربران</span>
+                <span><?= __t('menu_users_list', [], 'لیست کاربران') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canRoles): ?>
             <a href="<?= $baseAdmin ?>/roles.php" class="<?= $currentFile === 'roles.php' ? 'active' : '' ?>">
                 <span class="item-icon">🛡</span>
-                <span>نقش‌ها و دسترسی</span>
+                <span><?= __t('menu_roles', [], 'نقش‌ها و دسترسی') ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -643,21 +797,20 @@ $baseSite  = SITE_URL;
     <div class="menu-group <?= $isSettingsGroup ? 'open has-active' : '' ?>" data-group="settings">
         <div class="menu-group-header" onclick="toggleMenuGroup(this)">
             <span class="group-icon">⚙️</span>
-            <span class="group-title">تنظیمات</span>
+            <span class="group-title"><?= __t('menu_settings', [], 'تنظیمات') ?></span>
             <span class="arrow">▼</span>
         </div>
         <div class="menu-group-items">
             <?php if ($canModules): ?>
             <a href="<?= $baseAdmin ?>/modules.php" class="<?= $currentFile === 'modules.php' ? 'active' : '' ?>">
                 <span class="item-icon">🧩</span>
-                <span>ماژول‌ها</span>
+                <span><?= __t('menu_modules', [], 'ماژول‌ها') ?></span>
             </a>
             <?php endif; ?>
-
             <?php if ($canSettings): ?>
             <a href="<?= $baseAdmin ?>/settings.php" class="<?= $currentFile === 'settings.php' ? 'active' : '' ?>">
                 <span class="item-icon">🛠</span>
-                <span>تنظیمات سایت</span>
+                <span><?= __t('menu_settings_site', [], 'تنظیمات سایت') ?></span>
             </a>
             <?php endif; ?>
         </div>
@@ -668,11 +821,11 @@ $baseSite  = SITE_URL;
     <div class="menu-bottom">
         <a href="<?= $baseSite ?>/index.php" target="_blank" class="menu-single">
             <span class="single-icon">🌐</span>
-            <span>مشاهده سایت</span>
+            <span><?= __t('menu_view_site', [], 'مشاهده سایت') ?></span>
         </a>
         <a href="<?= $baseAdmin ?>/logout.php" class="menu-single danger">
             <span class="single-icon">🚪</span>
-            <span>خروج</span>
+            <span><?= __t('menu_logout', [], 'خروج') ?></span>
         </a>
     </div>
 
@@ -724,6 +877,7 @@ function toggleMenuGroup(header) {
 
 // ==================== Restore State on Load ====================
 document.addEventListener('DOMContentLoaded', () => {
+    // بازیابی گروه‌های باز
     const openGroups = JSON.parse(localStorage.getItem('sidebar_open_groups') || '[]');
     document.querySelectorAll('.menu-group').forEach(group => {
         const name = group.dataset.group;
@@ -735,6 +889,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // بستن سایدبار در موبایل پس از کلیک روی لینک
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', () => {
             if (window.innerWidth <= 900) {
@@ -743,6 +898,27 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+     
+    // بستن dropdown با انتخاب زبان
+    document.querySelectorAll('.language-switcher .lang-option').forEach(link => {
+        link.addEventListener('click', () => {
+            setTimeout(() => {
+                const switcher = document.querySelector('.language-switcher');
+                if (switcher) switcher.classList.remove('open');
+            }, 100);
+        });
+    });
+
+
+        // بستن با کلیک بیرون
+        document.addEventListener('click', (e) => {
+            const switcher = document.querySelector('.language-switcher');
+            if (switcher && !switcher.contains(e.target)) {
+                switcher.classList.remove('open');
+            }
+        });
+
+    // بستن با Esc
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') closeMobileSidebar();
     });

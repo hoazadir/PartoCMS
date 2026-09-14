@@ -50,12 +50,12 @@ if (!empty($q)) {
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
+<html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>جستجو: <?= htmlspecialchars($q) ?> | <?= htmlspecialchars($siteName) ?></title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f8f9fa; margin: 0; }
@@ -83,17 +83,41 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             .search-hero h1 { font-size: 22px; }
             .search-hero .search-box { flex-direction: column; }
         }
-    </style>
+    
+    /* ==================== DIRECTION SUPPORT ==================== */
+    /* RTL پیش‌فرض — Bootstrap RTL خودش کار می‌کند */
+
+    /* LTR — Bootstrap LTR خودش کار می‌کند */
+
+    /* اصلاحات اضافی برای عناصر خاص */
+    html[dir="ltr"] body { direction: ltr; text-align: left; }
+    html[dir="rtl"] body { direction: rtl; text-align: right; }
+
+    /* منوی اصلی */
+    html[dir="ltr"] .main-nav { flex-direction: row; }
+    html[dir="rtl"] .main-nav { flex-direction: row-reverse; }
+
+    /* زیرمنو در LTR */
+    html[dir="ltr"] .submenu { right: auto; left: 100%; }
+
+    /* pagination */
+    html[dir="ltr"] .article .content table th { text-align: left; }
+    html[dir="rtl"] .article .content table th { text-align: right; }
+
+    /* blockquote */
+    html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
+
+</style>
 </head>
 <body>
 
 <div class="top-bar">
     <a href="index.php" class="logo">🏠 <?= htmlspecialchars($siteName) ?></a>
     <div>
-        <a href="index.php">خانه</a>
+        <a href="index.php"><?= __t('fe_home', [], 'خانه') ?></a>
         <?php if (isLoggedIn()): ?>
-            <a href="admin/index.php">داشبورد</a>
-            <a href="admin/logout.php">خروج</a>
+            <a href="admin/index.php"><?= __t('fe_dashboard', [], 'داشبورد') ?></a>
+            <a href="admin/logout.php"><?= __t('fe_logout', [], 'خروج') ?></a>
         <?php endif; ?>
     </div>
 </div>
@@ -103,7 +127,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     <h1>🔍 جستجو در سایت</h1>
     <form method="get" class="search-box">
         <input type="text" name="q" placeholder="کلمه مورد نظر را وارد کنید..." value="<?= htmlspecialchars($q) ?>" required>
-        <button type="submit">جستجو</button>
+        <button type="submit"><?= __t('fe_search', [], 'جستجو') ?></button>
     </form>
 </div>
 
@@ -126,9 +150,9 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     <?php elseif (empty($posts)): ?>
         <div class="alert alert-warning text-center py-5">
             <div style="font-size: 60px;">😕</div>
-            <h5>نتیجه‌ای یافت نشد</h5>
+            <h5><?= __t('fe_no_results', [], 'نتیجه‌ای یافت نشد') ?></h5>
             <p class="text-muted">لطفاً کلمات دیگری را امتحان کنید</p>
-            <a href="index.php" class="btn btn-primary mt-3">بازگشت به خانه</a>
+            <a href="index.php" class="btn btn-primary mt-3"><?= __t('fe_back_home', [], 'بازگشت به خانه') ?></a>
         </div>
     <?php else: ?>
         <div class="row g-4">
@@ -146,7 +170,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                             <div style="font-size: 11px; color: #95a5a6; margin-bottom: 12px;">
                                 📅 <?= date('Y/m/d', strtotime($p['created_at'])) ?>
                             </div>
-                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary">بیشتر بخوانید →</a>
+                            <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary"><?= __t('fe_read_more', [], 'بیشتر بخوانید →') ?></a>
                         </div>
                     </div>
                 </div>
@@ -159,7 +183,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 <ul class="pagination justify-content-center">
                     <?php if ($page > 1): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?q=<?= urlencode($q) ?>&page=<?= $page - 1 ?>">← قبلی</a>
+                            <a class="page-link" href="?q=<?= urlencode($q) ?>&page=<?= $page - 1 ?>"><?= __t('fe_previous', [], '← قبلی') ?></a>
                         </li>
                     <?php endif; ?>
                     <?php for ($i = 1; $i <= $totalPages; $i++): ?>
@@ -169,7 +193,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                     <?php endfor; ?>
                     <?php if ($page < $totalPages): ?>
                         <li class="page-item">
-                            <a class="page-link" href="?q=<?= urlencode($q) ?>&page=<?= $page + 1 ?>">بعدی →</a>
+                            <a class="page-link" href="?q=<?= urlencode($q) ?>&page=<?= $page + 1 ?>"><?= __t('fe_next', [], 'بعدی →') ?></a>
                         </li>
                     <?php endif; ?>
                 </ul>
