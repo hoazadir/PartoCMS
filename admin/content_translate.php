@@ -3,7 +3,7 @@
  * PartoCMS - Content Translation Management
  */
 require_once __DIR__ . '/auth_check.php';
-require_once __DIR__ . '/includes/content_translator.php';
+require_once __DIR__ . '/includes/multi_translator.php';
 
 if (($_SESSION['role'] ?? '') !== 'admin') {
     header('Location: ' . SITE_URL . '/admin/index.php');
@@ -12,7 +12,7 @@ if (($_SESSION['role'] ?? '') !== 'admin') {
 
 if (!isset($pdo) && function_exists('getDB')) $pdo = getDB();
 
-$translator = new ContentTranslator($pdo);
+$translator = new MultiTranslator($pdo);
 $message = '';
 $messageType = '';
 
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $messageType = 'danger';
         }
     } elseif ($action === 'auto_translate_all') {
-        $results = $translator->translateAll($contentId, $_SESSION['user_id'] ?? null);
+        $results = $translator->translateAllLanguages($contentId, $_SESSION['user_id'] ?? null);
         $success = 0;
         $errors = [];
         foreach ($results as $code => $res) {
@@ -246,22 +246,97 @@ body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
         <i class="bi bi-arrow-right"></i> بازگشت به لیست
     </a>
 
-    <!-- عملیات خودکار -->
+         <!-- عملیات خودکار -->
+    <?php
+    // 🌍 تشخیص provider های فعال
+    $activeProviders = [];
+    $providerLabels = [
+        'deepl'     => ['label' => 'DeepL',     'icon' => '🥇', 'note' => 'کیفیت برتر'],
+        'microsoft' => ['label' => 'Microsoft', 'icon' => '🥈', 'note' => '۲M کاراکتر/ماه'],
+        'yandex'    => ['label' => 'Yandex',    'icon' => '🥉', 'note' => '۱M کاراکتر'],
+        'google'    => ['label' => 'Google',    'icon' => '🔵', 'note' => 'rate limit'],
+        'mymemory'  => ['label' => 'MyMemory',  'icon' => '⚪', 'note' => 'کیفیت پایین'],
+    ];
+    try {
+        $keys = [
+            'deepl'     => 'deepl_api_key',
+            'microsoft' => 'microsoft_api_key',
+            'yandex'    => 'yandex_api_key',
+        ];
+        foreach ($keys as $prov => $keyName) {
+            $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = ? LIMIT 1");
+            $stmt->execute([$keyName]);
+            if (trim($stmt->fetchColumn() ?: '')) {
+                $activeProviders[] = $prov;
+            }
+        }
+        // provider های بدون کلید
+        $activeProviders[] = 'google';
+        $activeProviders[] = 'mymemory';
+    } catch (Throwable $e) {}
+
+    $providerCount = count($activeProviders);
+    $topProvider = $activeProviders[0] ?? 'mymemory';
+    $topLabel = $providerLabels[$topProvider]['label'] ?? 'نامشخص';
+    $topIcon = $providerLabels[$topProvider]['icon'] ?? '🤖';
+    ?>
     <div class="card">
-        <div class="header">🤖 ترجمه خودکار (MyMemory API — رایگان)</div>
+        <div class="header">
+            🤖 ترجمه خودکار — <strong><?= $providerCount ?> سرویس فعال</strong>
+        </div>
         <div class="body">
             <p style="font-size:13px;color:#64748b;margin-top:0">
-                ترجمه خودکار به تمام ۱۹ زبان غیر فارسی. کیفیت متوسط، سرعت بالا.
+                ترجمه موازی به تمام ۱۹ زبان غیر فارسی.
+                بهترین ترجمه از بین همه سرویس‌ها <strong>خودکار انتخاب</strong> می‌شود.
             </p>
+
+            <!-- نمایش provider های فعال -->
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px">
+                <?php foreach ($activeProviders as $i => $p): ?>
+                    <?php $info = $providerLabels[$p] ?? ['label' => $p, 'icon' => '❓', 'note' => '']; ?>
+                    <span style="
+                        display:inline-flex;align-items:center;gap:5px;
+                        padding:5px 12px;border-radius:15px;font-size:12px;
+                        background:<?= $i === 0 ? '#d1fae5' : '#f1f5f9' ?>;
+                        color:<?= $i === 0 ? '#065f46' : '#475569' ?>;
+                        border:1px solid <?= $i === 0 ? '#10b981' : '#e2e8f0' ?>;
+                        font-weight:<?= $i === 0 ? 'bold' : 'normal' ?>;
+                    ">
+                        <?= $info['icon'] ?>
+                        <strong><?= htmlspecialchars($info['label']) ?></strong>
+                        <?php if ($info['note']): ?>
+                            <span style="opacity:.7;font-size:10px">(<?= htmlspecialchars($info['note']) ?>)</span>
+                        <?php endif; ?>
+                        <?php if ($i === 0): ?>
+                            <span style="background:#10b981;color:#fff;padding:1px 6px;border-radius:8px;font-size:10px">★ برنده</span>
+                        <?php endif; ?>
+                    </span>
+                <?php endforeach; ?>
+            </div>
+
             <form method="post" style="display:inline">
                 <input type="hidden" name="action" value="auto_translate_all">
-                <button type="submit" class="btn-a btn-all" onclick="return confirm('ترجمه به ۱۹ زبان؟ ممکن است چند دقیقه طول بکشد.');">
+                <button type="submit" class="btn-a btn-all"
+                        onclick="return confirm('ترجمه به ۱۹ زبان با <?= $providerCount ?> سرویس؟ ممکن است چند دقیقه طول بکشد.');">
                     <i class="bi bi-magic"></i> ترجمه به همه زبان‌ها
                 </button>
             </form>
+
+            <a href="translator_settings.php" style="
+                display:inline-flex;align-items:center;gap:6px;
+                padding:10px 18px;border-radius:8px;font-size:13px;font-weight:bold;
+                color:#0891b2;background:#ecfeff;text-decoration:none;margin:4px;
+                border:2px solid #0891b2;
+            ">
+                <i class="bi bi-gear"></i> تنظیمات سرویس‌ها
+            </a>
+
+            <p style="font-size:11px;color:#94a3b8;margin-top:12px;margin-bottom:0">
+                💡 سرویس برنده بر اساس <strong>کیفیت + وزن provider + سرعت</strong> انتخاب می‌شود.
+                DeepL بالاترین اولویت را دارد.
+            </p>
         </div>
     </div>
-
     <!-- متن مبدأ -->
     <div class="card">
         <div class="header">📄 متن اصلی (فارسی)</div>

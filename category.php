@@ -14,6 +14,9 @@ $stmt = $pdo->prepare("SELECT * FROM categories WHERE slug = ? AND is_active = 1
 $stmt->execute([$slug]);
 $category = $stmt->fetch();
 
+// 🌍 ترجمه دسته
+if ($category) $category = applyTranslationToCategory($category);
+
 if (!$category) {
     http_response_code(404);
     ?>
@@ -88,6 +91,9 @@ $stmt = $pdo->prepare("
 $stmt->execute([$category['id']]);
 $posts = $stmt->fetchAll();
 
+// 🌍 ترجمه مقالات
+$posts = applyTranslationsToPosts($posts);
+
 $siteName = getSetting('site_name', 'وب‌سایت من');
 ?>
 <!DOCTYPE html>
@@ -95,7 +101,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دسته <?= htmlspecialchars($category['name']) ?> | <?= htmlspecialchars($siteName) ?></title>
+    <title><?= __t('fe_category', [], 'دسته') ?> <?= htmlspecialchars($category['name']) ?> | <?= htmlspecialchars($siteName) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
@@ -173,7 +179,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         <p><?= htmlspecialchars($category['description']) ?></p>
     <?php endif; ?>
     <div style="margin-top: 15px; opacity: 0.9; font-size: 14px;">
-        📝 <?= $total ?> مطلب در این دسته
+        📝 <?= $total ?> <?= __t('fe_posts_in_category_short', [], 'مطلب در این دسته') ?>
     </div>
 </div>
 
@@ -182,8 +188,8 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     <?php if (empty($posts)): ?>
         <div class="alert alert-info text-center py-5">
             <i class="bi bi-inbox fs-1 d-block mb-3"></i>
-            <h5>هنوز مطلبی در این دسته منتشر نشده است</h5>
-            <a href="index.php" class="btn btn-primary mt-3">مشاهده همه مطالب</a>
+            <h5><?= __t('fe_no_posts_category', [], 'هنوز مطلبی در این دسته منتشر نشده است') ?></h5>
+            <a href="index.php" class="btn btn-primary mt-3"><?= __t('fe_view_all_posts', [], 'مشاهده همه مطالب') ?></a>
         </div>
     <?php else: ?>
         <div class="row g-4">
@@ -199,7 +205,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                             <h4><?= htmlspecialchars($p['title']) ?></h4>
                             <p><?= htmlspecialchars(mb_substr($p['excerpt'] ?: strip_tags($p['content']), 0, 120)) ?>...</p>
                             <div style="font-size: 11px; color: #95a5a6; margin-bottom: 12px;">
-                                👤 <?= htmlspecialchars($p['author'] ?? 'ناشناس') ?> 
+                                👤 <?= htmlspecialchars($p['author'] ?? __t('fe_anonymous', [], 'ناشناس')) ?> 
                                 | 📅 <?= date('Y/m/d', strtotime($p['created_at'])) ?>
                             </div>
                             <a href="post.php?id=<?= $p['id'] ?>" class="btn btn-sm btn-primary"><?= __t('fe_read_more', [], 'بیشتر بخوانید →') ?></a>

@@ -25,6 +25,10 @@ $posts = $pdo->query("
     LIMIT {$perPage} OFFSET {$offset}
 ")->fetchAll();
 
+
+// 🌍 اعمال ترجمه بر اساس زبان فعلی
+$posts = applyTranslationsToPosts($posts);
+
 // دسته‌های فعال
 $categories = $pdo->query("
     SELECT c.*,

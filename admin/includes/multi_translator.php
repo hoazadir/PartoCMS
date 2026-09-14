@@ -1,10 +1,12 @@
 <?php
 /**
- * PartoCMS - Multi-Provider Translator (Final v5)
+ * PartoCMS - Multi-Provider Translator (Final v6.1)
  * - چند provider موازی
  * - کیفیت‌سنجی خودکار با تشخیص garbage
- * - Tie-breaking هوشمند بر اساس provider
+ * - Tie-breaking هوشمند (score + provider weight + priority)
  * - Cache با اعتبارسنجی مجدد
+ * - v6:   وزن‌دهی به score + متعادل‌سازی qualityScore + محدودسازی MyMemory
+ * - v6.1: یکسان‌سازی وزن در testProviders + source language داینامیک + کش وزنی
  */
 
 class MultiTranslator {
@@ -27,7 +29,10 @@ class MultiTranslator {
         'https://lingva.garudalinux.org',
     ];
 
-    // وزن provider ها برای tie-breaking
+    /**
+     * وزن provider ها برای tie-breaking
+     * هر چه بیشتر = اولویت بالاتر
+     */
     private $providerWeight = [
         'deepl'     => 100,
         'microsoft' => 90,
@@ -36,7 +41,29 @@ class MultiTranslator {
         'lingva'    => 60,
         'libre'     => 50,
         'mymemory'  => 20,
+        'cache'     => 0,
     ];
+
+    /**
+     * v6.1: priority صریح — عدد کمتر = برنده در tie-break نهایی
+     * (پشتیبان weight در موارد لبه‌ای)
+     */
+    private $providerPriority = [
+        'deepl'     => 1,
+        'microsoft' => 2,
+        'yandex'    => 3,
+        'google'    => 4,
+        'lingva'    => 5,
+        'libre'     => 6,
+        'mymemory'  => 7,
+        'cache'     => 99,
+    ];
+
+    /** v6: حداقل اختلاف وزن provider برای invalidate کردن کش ضعیف */
+    private $cacheInvalidateThreshold = 30;
+
+    /** v6.1: حداکثر افت score مجاز DeepL نسبت به بهترین provider دیگر (برای انتخاب ترجیحی) */
+    private $deeplToleranceBonus = 8;
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
@@ -85,6 +112,20 @@ class MultiTranslator {
     }
 
     // ============================================================
+    //   v6.1: Scoring helper (یکسان برای translateAll و testProviders)
+    // ============================================================
+
+    /**
+     * وزن provider رو روی base score اعمال می‌کنه
+     * DeepL (100) → +10، MyMemory (20) → -6، Google (70) → +4
+     */
+    private function applyWeight(int $baseScore, string $provider): int {
+        $weight = $this->providerWeight[$provider] ?? 30;
+        $weightBonus = (int) round(($weight - 50) / 5);
+        return max(0, min(100, $baseScore + $weightBonus));
+    }
+
+    // ============================================================
     //   Main Translate
     // ============================================================
 
@@ -99,17 +140,20 @@ class MultiTranslator {
         // چک کش اول
         $cached = $this->getCache($text, $from, $to);
         if ($cached) {
+            // v6.1: score کش رو هم وزنی کن
+            $weightedScore = $this->applyWeight($cached['score'], $cached['provider']);
             return [
                 'best' => [
                     'provider' => $cached['provider'] ?? 'cache',
                     'text'     => $cached['text'],
-                    'score'    => $cached['score'] ?? 85,
+                    'score'    => $weightedScore,
                 ],
                 'all' => [[
                     'provider' => $cached['provider'] ?? 'cache',
                     'text'     => $cached['text'],
-                    'score'    => $cached['score'] ?? 85,
+                    'score'    => $weightedScore,
                     'ms'       => 0,
+                    'from_cache' => true,
                 ]],
             ];
         }
@@ -122,13 +166,15 @@ class MultiTranslator {
             $ms = round((microtime(true) - $start) * 1000);
 
             if (is_string($result) && !empty($result)) {
-                $result = $this->cleanResult($result);
-                $score = $this->qualityScore($result, $text, $from, $to);
+                $result    = $this->cleanResult($result);
+                $baseScore = $this->qualityScore($result, $text, $from, $to);
+                $score     = $this->applyWeight($baseScore, $provider);
 
                 $allResults[] = [
                     'provider' => $provider,
                     'text'     => $result,
                     'score'    => $score,
+                    'base'     => $baseScore, // برای debug
                     'ms'       => $ms,
                 ];
 
@@ -146,16 +192,37 @@ class MultiTranslator {
             ];
         }
 
-        // مرتب‌سازی: نمره > وزن provider > سرعت
+        // v6.1: مرتب‌سازی با weight + priority + speed (سه لایه tie-break)
         usort($allResults, function($a, $b) {
+            // ۱) score نزولی
             if ($a['score'] !== $b['score']) return $b['score'] <=> $a['score'];
+
+            // ۲) weight نزولی
             $wa = $this->providerWeight[$a['provider']] ?? 30;
             $wb = $this->providerWeight[$b['provider']] ?? 30;
             if ($wa !== $wb) return $wb <=> $wa;
+
+            // ۳) priority صعودی (کمتر بهتر)
+            $pa = $this->providerPriority[$a['provider']] ?? 50;
+            $pb = $this->providerPriority[$b['provider']] ?? 50;
+            if ($pa !== $pb) return $pa <=> $pb;
+
+            // ۴) سرعت صعودی
             return $a['ms'] <=> $b['ms'];
         });
 
         $best = $allResults[0];
+
+        // v6.1: ترجیح DeepL — اگه اختلاف score کمتر از tolerance باشه، DeepL برنده
+        if ($best['provider'] !== 'deepl') {
+            $deeplResult = null;
+            foreach ($allResults as $r) {
+                if ($r['provider'] === 'deepl') { $deeplResult = $r; break; }
+            }
+            if ($deeplResult && ($best['score'] - $deeplResult['score']) <= $this->deeplToleranceBonus) {
+                $best = $deeplResult;
+            }
+        }
 
         // ذخیره در کش فقط اگر نمره قابل قبول باشد
         if ($saveToCache && $best['score'] >= 60) {
@@ -192,12 +259,36 @@ class MultiTranslator {
             $score -= 25;
         }
 
-        // ❌ نسبت طول غیرطبیعی
+        // ✅ نسبت طول — برای زبان مقصد لاتین آسان‌گیرتر
+        $latinTargets  = ['en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'tr', 'id', 'vi'];
+        $isLatinTarget = in_array($to, $latinTargets);
         $ratio = mb_strlen($translated) / max(mb_strlen($original), 1);
-        if ($ratio < 0.3 || $ratio > 4) {
-            $score -= 25;
-        } elseif ($ratio >= 0.5 && $ratio <= 2.5) {
-            $score += 15;
+
+        if ($isLatinTarget) {
+            if ($ratio < 0.2 || $ratio > 3.5) {
+                $score -= 20;
+            } elseif ($ratio >= 0.4 && $ratio <= 2.0) {
+                $score += 10;
+            }
+        } else {
+            if ($ratio < 0.4 || $ratio > 3) {
+                $score -= 20;
+            } elseif ($ratio >= 0.6 && $ratio <= 2.0) {
+                $score += 10;
+            }
+        }
+
+        // ✅ چک شباهت با متن اصلی (جلوگیری از کپی)
+        if (mb_strlen($original) > 20) {
+            $similarity = 0;
+            similar_text(
+                mb_strtolower($original),
+                mb_strtolower($translated),
+                $similarity
+            );
+            if ($similarity > 80) {
+                $score -= 40;
+            }
         }
 
         // ✅ وجود حروف الفبای مقصد
@@ -221,8 +312,7 @@ class MultiTranslator {
         }
 
         // ✅ اگر لاتین هدف است
-        $latinTargets = ['en', 'de', 'fr', 'es', 'it', 'pt', 'nl', 'pl', 'tr', 'id', 'vi'];
-        if (in_array($to, $latinTargets)) {
+        if ($isLatinTarget) {
             $latinCount = preg_match_all('/[a-zA-Z]/', $translated);
             $totalChars = mb_strlen($translated);
             if ($totalChars > 0 && $latinCount / $totalChars > 0.6) {
@@ -253,9 +343,24 @@ class MultiTranslator {
         $lang = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$lang) return ['error' => 'Language not found'];
 
-        $fields = ['title', 'excerpt', 'content'];
+        // ✅ v6.1: زبان مبدأ داینامیک
+        $sourceLangCode = 'fa-IR'; // پیش‌فرض
+        if (!empty($content['language_id'])) {
+            try {
+                $s = $this->pdo->prepare("SELECT code FROM languages WHERE id = ? LIMIT 1");
+                $s->execute([$content['language_id']]);
+                $detected = $s->fetchColumn();
+                if ($detected) $sourceLangCode = $detected;
+            } catch (Throwable $e) {}
+        } elseif (!empty($content['language_code'])) {
+            $sourceLangCode = $content['language_code'];
+        } elseif (!empty($content['lang'])) {
+            $sourceLangCode = $content['lang'];
+        }
+
+        $fields       = ['title', 'excerpt', 'content'];
         $translations = [];
-        $report = [];
+        $report       = [];
 
         foreach ($fields as $field) {
             $sourceText = $content[$field] ?? '';
@@ -264,7 +369,7 @@ class MultiTranslator {
                 continue;
             }
 
-            $result = $this->translateAll($sourceText, 'fa-IR', $targetLangCode, true);
+            $result = $this->translateAll($sourceText, $sourceLangCode, $targetLangCode, true);
             $translations[$field] = $result['best']['text'] ?? '';
 
             // ذخیره همه نسخه‌ها
@@ -284,10 +389,9 @@ class MultiTranslator {
         }
 
         // میانگین نمره
-        $scores = array_map(fn($r) => $r['score'] ?? 0, $report);
+        $scores   = array_map(fn($r) => $r['score'] ?? 0, $report);
         $avgScore = !empty($scores) ? round(array_sum($scores) / count($scores)) : 0;
-
-        $status = $avgScore >= 40 ? 'auto' : 'draft';
+        $status   = $avgScore >= 40 ? 'auto' : 'draft';
 
         // ذخیره در content_translations
         try {
@@ -315,6 +419,8 @@ class MultiTranslator {
             'ok'             => true,
             'avg_score'      => $avgScore,
             'status'         => $status,
+            'source_lang'    => $sourceLangCode,
+            'target_lang'    => $targetLangCode,
             'report'         => $report,
             'providers_used' => count($this->providers),
         ];
@@ -364,9 +470,21 @@ class MultiTranslator {
 
             if (!$row) return null;
 
-            // ✅ اعتبارسنجی مجدد کیفیت کش
-            $cachedText = $row['translated_text'];
-            $rescore = $this->qualityScore($cachedText, $text, $from, $to);
+            $cachedText     = $row['translated_text'];
+            $cachedProvider = $row['provider'] ?? 'cache';
+            $rescore        = $this->qualityScore($cachedText, $text, $from, $to);
+
+            // ✅ اگر کش از provider ضعیف و provider قوی‌تر در دسترسه → بی‌اعتبار
+            $cachedWeight = $this->providerWeight[$cachedProvider] ?? 0;
+            $bestAvailableWeight = 0;
+            foreach ($this->providers as $p) {
+                $bestAvailableWeight = max($bestAvailableWeight, $this->providerWeight[$p] ?? 0);
+            }
+
+            if ($bestAvailableWeight - $cachedWeight > $this->cacheInvalidateThreshold) {
+                // provider قوی‌تر در دسترسه → کش رو نادیده بگیر
+                return null;
+            }
 
             // اگر کش کیفیت پایین داشت → بی‌اعتبار
             if ($rescore < 60) {
@@ -379,8 +497,8 @@ class MultiTranslator {
 
             return [
                 'text'     => $cachedText,
-                'provider' => $row['provider'] ?? 'cache',
-                'score'    => $rescore,
+                'provider' => $cachedProvider,
+                'score'    => $rescore, // خام؛ در translateAll وزنی می‌شه
             ];
         } catch (Throwable $e) { return null; }
     }
@@ -436,16 +554,17 @@ class MultiTranslator {
     // ============================================================
 
     private function cleanResult($text) {
-        $text = preg_replace('/^\s*[-–—•*]+\s*/u', '', $text);
+        // فقط bullet های ابتدای خط، نه خط تیره‌های ترجمه واقعی
+        $text = preg_replace('/^\s*[•*]\s+/u', '', $text);
         $text = preg_replace('/\n{3,}/', "\n\n", $text);
         return trim($text);
     }
 
     private function splitText($text, $maxLen) {
         if (mb_strlen($text) <= $maxLen) return [$text];
-        $chunks = [];
+        $chunks    = [];
         $sentences = preg_split('/(?<=[.!?؟\n])\s+/u', $text);
-        $current = '';
+        $current   = '';
         foreach ($sentences as $s) {
             if (mb_strlen($current . ' ' . $s) > $maxLen) {
                 if ($current) $chunks[] = trim($current);
@@ -496,13 +615,14 @@ class MultiTranslator {
                     'source_lang' => strtoupper($from),
                     'target_lang' => strtoupper($to === 'en' ? 'EN-US' : $to),
                     'preserve_formatting' => '1',
+                    'tag_handling' => 'html',
                 ]),
                 CURLOPT_HTTPHEADER => ['Authorization: DeepL-Auth-Key ' . $key],
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 25,
                 CURLOPT_SSL_VERIFYPEER => true,
             ]);
-            $res = curl_exec($ch);
+            $res  = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if ($code === 403) return ['error' => 'DeepL: key نامعتبر'];
@@ -522,9 +642,8 @@ class MultiTranslator {
         if (!$key) return ['error' => 'no key'];
 
         $region = $this->keys['microsoft_region'] ?? 'global';
-
-        $url = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=$from&to=$to";
-        $body = json_encode([['Text' => $text]], JSON_UNESCAPED_UNICODE);
+        $url    = "https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=$from&to=$to";
+        $body   = json_encode([['Text' => $text]], JSON_UNESCAPED_UNICODE);
 
         $ch = curl_init();
         curl_setopt_array($ch, [
@@ -540,7 +659,7 @@ class MultiTranslator {
             CURLOPT_TIMEOUT => 25,
             CURLOPT_SSL_VERIFYPEER => true,
         ]);
-        $res = curl_exec($ch);
+        $res  = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if ($code === 401) return ['error' => 'Microsoft: key نامعتبر'];
@@ -557,9 +676,9 @@ class MultiTranslator {
         if (!$key) return ['error' => 'no key'];
 
         $url = 'https://translate.yandex.net/api/v1.5/tr.json/translate?' . http_build_query([
-            'key'  => $key,
-            'text' => substr($text, 0, 10000),
-            'lang' => $from . '-' . $to,
+            'key'    => $key,
+            'text'   => substr($text, 0, 10000),
+            'lang'   => $from . '-' . $to,
             'format' => 'plain',
         ]);
         $ch = curl_init();
@@ -568,7 +687,7 @@ class MultiTranslator {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 20,
         ]);
-        $res = curl_exec($ch);
+        $res  = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($code !== 200) return ['error' => "Yandex HTTP $code"];
         $data = json_decode($res, true);
@@ -581,10 +700,10 @@ class MultiTranslator {
         foreach ($this->splitText($text, 4500) as $chunk) {
             $url = 'https://translate.googleapis.com/translate_a/single?' . http_build_query([
                 'client' => 'gtx',
-                'sl' => $from,
-                'tl' => $to,
-                'dt' => 't',
-                'q'  => $chunk,
+                'sl'     => $from,
+                'tl'     => $to,
+                'dt'     => 't',
+                'q'      => $chunk,
             ]);
             $ch = curl_init();
             curl_setopt_array($ch, [
@@ -596,7 +715,7 @@ class MultiTranslator {
                     'Accept: application/json',
                 ],
             ]);
-            $res = curl_exec($ch);
+            $res  = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if ($code === 429) return ['error' => 'Google: rate limited'];
@@ -621,7 +740,7 @@ class MultiTranslator {
                 CURLOPT_TIMEOUT => 12,
                 CURLOPT_SSL_VERIFYPEER => true,
             ]);
-            $res = curl_exec($ch);
+            $res  = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($code === 200) {
                 $data = json_decode($res, true);
@@ -639,7 +758,7 @@ class MultiTranslator {
                 CURLOPT_URL => rtrim($base, '/') . '/translate',
                 CURLOPT_POST => true,
                 CURLOPT_POSTFIELDS => json_encode([
-                    'q' => substr($text, 0, 3000),
+                    'q'      => substr($text, 0, 3000),
                     'source' => $from,
                     'target' => $to,
                     'format' => 'text',
@@ -648,7 +767,7 @@ class MultiTranslator {
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_TIMEOUT => 12,
             ]);
-            $res = curl_exec($ch);
+            $res  = curl_exec($ch);
             $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($code === 200) {
                 $data = json_decode($res, true);
@@ -658,8 +777,13 @@ class MultiTranslator {
         return ['error' => 'all libre instances failed'];
     }
 
-    // ---------- MyMemory ----------
+    // ---------- MyMemory (محدود شده در v6) ----------
     private function pMyMemory($text, $from, $to) {
+        // فقط برای متن‌های کوتاه
+        if (mb_strlen($text) > 300) {
+            return ['error' => 'MyMemory: text too long'];
+        }
+
         $url = 'https://api.mymemory.translated.net/get?' . http_build_query([
             'q'        => substr($text, 0, 500),
             'langpair' => $from . '|' . $to,
@@ -671,42 +795,75 @@ class MultiTranslator {
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 15,
         ]);
-        $res = curl_exec($ch);
+        $res  = curl_exec($ch);
         $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($code !== 200) return ['error' => 'MyMemory: HTTP fail'];
 
         $data = json_decode($res, true);
-        $t = $data['responseData']['translatedText'] ?? '';
+        $t    = $data['responseData']['translatedText'] ?? '';
         if (empty($t)) return ['error' => 'MyMemory: empty'];
-        if (stripos($t, 'MYMEMORY WARNING') !== false) return ['error' => 'MyMemory: limit'];
+
+        // چک‌های اضافی
+        if (stripos($t, 'MYMEMORY WARNING') !== false)     return ['error' => 'MyMemory: limit'];
+        if (stripos($t, 'PLEASE SELECT') !== false)        return ['error' => 'MyMemory: invalid'];
+        if (stripos($t, 'QUERY LENGTH LIMIT') !== false)   return ['error' => 'MyMemory: length'];
+
+        // اگر match دقیق با اصلی (کپی) → رد کن
+        if (mb_strtolower(trim($t)) === mb_strtolower(trim($text))) {
+            return ['error' => 'MyMemory: returned source'];
+        }
+
+        // اگر quality پایین از خود MyMemory
+        $quality = $data['responseData']['match'] ?? 0;
+        if ($quality < 0.5 && mb_strlen($text) > 30) {
+            return ['error' => 'MyMemory: low match'];
+        }
+
         return $t;
     }
 
     // ============================================================
-    //   Test
+    //   Test — v6.1: با وزن
     // ============================================================
 
     public function testProviders() {
-        $results = [];
+        $results  = [];
         $testText = 'سلام، حال شما چطور است؟';
 
         foreach ($this->providers as $p) {
             $start = microtime(true);
-            $r = $this->callProvider($p, $testText, 'fa', 'en');
-            $ms = round((microtime(true) - $start) * 1000);
+            $r     = $this->callProvider($p, $testText, 'fa', 'en');
+            $ms    = round((microtime(true) - $start) * 1000);
 
             if (is_string($r) && !empty($r)) {
-                $r = $this->cleanResult($r);
-                $score = $this->qualityScore($r, $testText, 'fa', 'en');
-                $results[$p] = ['ok' => true, 'result' => $r, 'score' => $score, 'ms' => $ms];
+                $r         = $this->cleanResult($r);
+                $baseScore = $this->qualityScore($r, $testText, 'fa', 'en');
+                $score     = $this->applyWeight($baseScore, $p); // ✅ v6.1: وزنی
+
+                $results[$p] = [
+                    'ok'     => true,
+                    'result' => $r,
+                    'score'  => $score,
+                    'base'   => $baseScore,
+                    'ms'     => $ms,
+                ];
             } else {
                 $results[$p] = [
-                    'ok' => false,
+                    'ok'    => false,
                     'error' => is_array($r) ? ($r['error'] ?? '?') : 'failed',
-                    'ms' => $ms,
+                    'ms'    => $ms,
                 ];
             }
         }
+
+        // ✅ v6.1: sort بر اساس score نزولی برای راحتی خواندن
+        uasort($results, function($a, $b) {
+            $sa = $a['score'] ?? -1;
+            $sb = $b['score'] ?? -1;
+            if ($sa !== $sb) return $sb <=> $sa;
+            return 0;
+        });
+
         return $results;
     }
 }
