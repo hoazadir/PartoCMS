@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // اعتبارسنجی
     $errors = [];
-    if (empty($username)) $errors[] = 'نام کاربری الزامی است';
-    if (strlen($username) < 3) $errors[] = 'نام کاربری حداقل ۳ کاراکتر';
-    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) $errors[] = 'نام کاربری فقط حروف انگلیسی، عدد و آندرلاین';
-    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = 'ایمیل معتبر الزامی است';
-    if (strlen($password) < 6) $errors[] = 'رمز عبور حداقل ۶ کاراکتر';
-    if ($password !== $password2) $errors[] = 'رمز عبور و تکرار آن مطابقت ندارند';
+    if (empty($username)) $errors[] = __t('fe_username_required', [], 'نام کاربری الزامی است');
+    if (strlen($username) < 3) $errors[] = __t('fe_username_min3', [], 'نام کاربری حداقل ۳ کاراکتر');
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) $errors[] = __t('fe_username_format', [], 'نام کاربری فقط حروف انگلیسی، عدد و آندرلاین');
+    if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = __t('fe_email_invalid', [], 'ایمیل معتبر الزامی است');
+    if (strlen($password) < 6) $errors[] = __t('fe_password_min6', [], 'رمز عبور حداقل ۶ کاراکتر');
+    if ($password !== $password2) $errors[] = __t('fe_password_mismatch', [], 'رمز عبور و تکرار آن مطابقت ندارند');
 
     if (empty($errors)) {
         try {
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare("SELECT id FROM users WHERE username = ? OR email = ?");
             $stmt->execute([$username, $email]);
             if ($stmt->fetch()) {
-                $error = 'نام کاربری یا ایمیل قبلاً استفاده شده است';
+                $error = __t('fe_user_exists', [], 'نام کاربری یا ایمیل قبلاً استفاده شده است');
             } else {
                 // نقش پیش‌فرض: کاربر عادی (role_id = 4)
                 $stmt = $pdo->prepare("SELECT id FROM roles WHERE slug = 'user' LIMIT 1");
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ");
                 $stmt->execute([$username, $email, $hashed, $userRoleId]);
                 
-                $success = 'حساب شما با موفقیت ساخته شد! حالا می‌تونید وارد بشید.';
+                $success = __t('fe_account_created', [], 'حساب شما با موفقیت ساخته شد!');
             }
         } catch (PDOException $e) {
             $error = 'خطا: ' . $e->getMessage();
