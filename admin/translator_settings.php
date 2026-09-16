@@ -61,6 +61,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $messageType = $okCount >= 2 ? 'success' : ($okCount === 1 ? 'warning' : 'danger');
     }
 
+    if ($action === 'toggle_auto_translate') {
+        try {
+            $newVal = ($_POST['enabled'] ?? '0') === '1' ? '1' : '0';
+            $stmt = $pdo->prepare("
+                INSERT INTO settings (setting_key, setting_value) VALUES ('auto_translate_on_publish', ?)
+                ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)
+            ");
+            $stmt->execute([$newVal]);
+            $message = $newVal === '1' ? '✅ ترجمه خودکار فعال شد' : '⛔ ترجمه خودکار غیرفعال شد';
+            $messageType = 'success';
+        } catch (Throwable $e) {
+            $message = '❌ خطا: ' . $e->getMessage();
+            $messageType = 'danger';
+        }
+    }
+
     if ($action === 'clear_stats') {
         $pdo->exec("UPDATE provider_stats SET 
             total_calls=0, success_calls=0, failed_calls=0, 
@@ -272,6 +288,46 @@ body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
         </div>
     </form>
 
+    <!-- Auto Translate Setting -->
+    <?php
+    $autoTranslateEnabled = false;
+    try {
+        $stmt = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'auto_translate_on_publish' LIMIT 1");
+        $stmt->execute();
+        $autoTranslateEnabled = ($stmt->fetchColumn() === '1');
+    } catch (Throwable $e) {}
+    ?>
+    <div class="card">
+        <div class="header">
+            <h5>⚡ ترجمه خودکار در انتشار</h5>
+            <?php if ($autoTranslateEnabled): ?>
+                <span class="provider-status st-ok"><i class="bi bi-check-circle"></i> فعال</span>
+            <?php else: ?>
+                <span class="provider-status st-off">غیرفعال</span>
+            <?php endif; ?>
+        </div>
+        <div class="body">
+            <div class="help-box">
+                🎯 وقتی فعال باشه، هر مقاله‌ای که <strong>publish</strong> می‌شه، خودکار به همه زبان‌های فعال ترجمه می‌شه.
+                <br>
+                ⏱ ترجمه در <strong>پس‌زمینه</strong> اجرا می‌شه — کاربر فوری پاسخ می‌گیره.
+                <br>
+                📱 نتیجه به <strong>Telegram</strong> فرستاده می‌شه (اگه تنظیم شده باشه).
+            </div>
+
+            <form method="post" style="display:inline">
+                <input type="hidden" name="action" value="toggle_auto_translate">
+                <input type="hidden" name="enabled" value="<?= $autoTranslateEnabled ? '0' : '1' ?>">
+                <button type="submit" class="btn-a <?= $autoTranslateEnabled ? 'btn-warning-a' : 'btn-success-a' ?>">
+                    <?php if ($autoTranslateEnabled): ?>
+                        <i class="bi bi-x-circle"></i> غیرفعال کردن
+                    <?php else: ?>
+                        <i class="bi bi-lightning-charge"></i> فعال کردن
+                    <?php endif; ?>
+                </button>
+            </form>
+        </div>
+    </div>
     <!-- تست و آمار -->
     <div class="card">
         <div class="header"><h5>🧪 تست و آمار</h5></div>
