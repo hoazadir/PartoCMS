@@ -3,8 +3,9 @@
  * PartoCMS - Auto Translator
  * ترجمه خودکار محتوا در زمان انتشار
  *
- * @version 1.0
+ * @version 1.1
  * @date 2026-09-16
+ * - v1.1: setsid + nohup برای اجرای مستقل پس‌زمینه
  */
 class AutoTranslator {
 
@@ -15,13 +16,11 @@ class AutoTranslator {
     public function __construct($pdo) {
         $this->pdo = $pdo;
 
-        // بارگذاری MultiTranslator
         if (!class_exists('MultiTranslator')) {
             require_once __DIR__ . '/multi_translator.php';
         }
         $this->multiTranslator = new MultiTranslator($pdo);
 
-        // بارگذاری Telegram (اختیاری)
         $this->initTelegram();
     }
 
@@ -81,9 +80,6 @@ class AutoTranslator {
         return $this->setSetting('auto_translate_on_publish', $enabled ? '1' : '0');
     }
 
-    /**
-     * لیست زبان‌های هدف (همه زبان‌های فعال غیر از پیش‌فرض)
-     */
     public function getTargetLanguages(): array {
         try {
             $stmt = $this->pdo->query("
@@ -101,21 +97,11 @@ class AutoTranslator {
     // ============================================================
     //   اجرای اصلی
     // ============================================================
-    /**
-     * وقتی محتوایی publish شد، این متد صدا زده می‌شه
-     *
-     * @param int $contentId
-     * @param int|null $userId
-     * @param bool $async        اگه true، در پس‌زمینه اجرا می‌شه
-     * @return array
-     */
     public function onPublish(int $contentId, ?int $userId = null, bool $async = true): array {
-        // چک فعال بودن
         if (!$this->isEnabled()) {
             return ['ok' => false, 'skipped' => true, 'reason' => 'auto_translate_disabled'];
         }
 
-        // چک وجود محتوا و status=published
         try {
             $stmt = $this->pdo->prepare("SELECT id, title, status FROM content_items WHERE id = ? LIMIT 1");
             $stmt->execute([$contentId]);
@@ -138,7 +124,8 @@ class AutoTranslator {
     }
 
     /**
-     * اجرای پس‌زمینه — کاربر فوری پاسخ می‌گیره
+     * ✅ اجرای پس‌زمینه مستقل (setsid + nohup)
+     * کاربر فوری پاسخ می‌گیره، پردازش از سرور PHP جدا می‌شه
      */
     private function runAsync(int $contentId, ?int $userId): array {
         try {
@@ -148,23 +135,49 @@ class AutoTranslator {
             }
 
             $php = PHP_BINARY ?: 'php';
-            $cmd = sprintf(
-                '%s %s %d %d > /dev/null 2>&1 &',
-                escapeshellcmd($php),
-                escapeshellarg($script),
-                $contentId,
-                (int) ($userId ?? 0)
-            );
+            $logFile = __DIR__ . '/../../logs/auto_translate.log';
+
+            // لاگ dir
+            $logDir = dirname($logFile);
+            if (!is_dir($logDir)) {
+                @mkdir($logDir, 0755, true);
+            }
+
+            // چک وجود setsid
+            $setsidPath = trim(@shell_exec('which setsid 2>/dev/null') ?: '');
+
+            if (!empty($setsidPath)) {
+                // ✅ با setsid — پردازش کاملاً مستقل
+                $cmd = sprintf(
+                    '%s nohup %s %s %d %d >> %s 2>&1 < /dev/null &',
+                    escapeshellcmd($setsidPath),
+                    escapeshellcmd($php),
+                    escapeshellarg($script),
+                    $contentId,
+                    (int) ($userId ?? 0),
+                    escapeshellarg($logFile)
+                );
+            } else {
+                // ⚠️ fallback به nohup تنها
+                $cmd = sprintf(
+                    'nohup %s %s %d %d >> %s 2>&1 < /dev/null &',
+                    escapeshellcmd($php),
+                    escapeshellarg($script),
+                    $contentId,
+                    (int) ($userId ?? 0),
+                    escapeshellarg($logFile)
+                );
+            }
+
             @exec($cmd);
 
-            // لاگ در activity_log
             $this->logActivity('auto_translate_queued', $contentId, $userId, 'queued');
 
             return [
                 'ok' => true,
                 'queued' => true,
                 'content_id' => $contentId,
-                'message' => 'ترجمه در پس‌زمینه شروع شد. نتیجه به تلگرام ارسال می‌شود.',
+                'message' => 'ترجمه در پس‌زمینه شروع شد.',
             ];
         } catch (Throwable $e) {
             return ['ok' => false, 'error' => $e->getMessage()];
@@ -172,7 +185,7 @@ class AutoTranslator {
     }
 
     /**
-     * اجرای همزمان (در cron یا direct call)
+     * اجرای همزمان (در cron یا CLI)
      */
     public function run(int $contentId, ?int $userId = null): array {
         $start = microtime(true);
@@ -215,17 +228,14 @@ class AutoTranslator {
                 $errors[] = $lang['code'] . ': ' . $e->getMessage();
             }
 
-            // کمی صبر بین زبان‌ها
             usleep(300000);
         }
 
         $duration = round(microtime(true) - $start, 2);
 
-        // لاگ
         $this->logActivity('auto_translate_done', $contentId, $userId,
             "ok=$ok, fail=$fail, duration={$duration}s");
 
-        // اطلاع تلگرام
         $this->notifyTelegram($contentId, $ok, $fail, $duration, $errors);
 
         return [
@@ -256,7 +266,7 @@ class AutoTranslator {
                 $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
             ]);
         } catch (Throwable $e) {
-            // جدول ممکنه ستون‌های متفاوتی داشته باشه — silent
+            // silent
         }
     }
 
