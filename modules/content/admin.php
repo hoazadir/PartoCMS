@@ -75,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 if ($isNew) {
                     $stmt = $pdo->prepare("
-                        INSERT INTO content_items 
+                        INSERT INTO content_items
                         (type_id, category_id, title, slug, content, excerpt, featured_image, status, author_id,
                          meta_title, meta_description, meta_keywords, og_image, canonical_url, no_index)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -87,11 +87,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $data['meta_title'], $data['meta_description'], $data['meta_keywords'],
                         $data['og_image'], $data['canonical_url'], $data['no_index']
                     ]);
+                    $savedContentId = (int)$pdo->lastInsertId();
                 } else {
                     $stmt = $pdo->prepare("
-                        UPDATE content_items 
-                        SET type_id=?, category_id=?, title=?, slug=?, content=?, excerpt=?, 
-                            featured_image=?, status=?, meta_title=?, meta_description=?, 
+                        UPDATE content_items
+                        SET type_id=?, category_id=?, title=?, slug=?, content=?, excerpt=?,
+                            featured_image=?, status=?, meta_title=?, meta_description=?,
                             meta_keywords=?, og_image=?, canonical_url=?, no_index=?
                         WHERE id=?
                     ");
@@ -102,7 +103,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $data['og_image'], $data['canonical_url'], $data['no_index'],
                         $id
                     ]);
+                    $savedContentId = (int)$id;
                 }
+
+                // ==================== AUTO TRANSLATE HOOK ====================
+                // وقتی محتوا publish شد، ترجمه خودکار در پس‌زمینه اجرا می‌شود
+                if ($data['status'] === 'published' && $savedContentId > 0) {
+                    try {
+                        require_once __DIR__ . '/../../admin/includes/auto_translator.php';
+                        if (class_exists('AutoTranslator')) {
+                            $autoT = new AutoTranslator($pdo);
+                            $autoT->onPublish($savedContentId, $_SESSION['user_id'] ?? null, true);
+                        }
+                    } catch (Throwable $e) {
+                        error_log("AutoTranslate hook error: " . $e->getMessage());
+                    }
+                }
+                // ==================== END AUTO TRANSLATE HOOK ====================
+
                 header('Location: ?msg=saved');
                 exit;
             } catch (PDOException $e) {
@@ -118,8 +136,8 @@ if (isset($_GET['msg'])) {
 
 // ========== داده‌ها ==========
 $items = $pdo->query("
-    SELECT ci.*, 
-        ct.name as type_name, ct.icon as type_icon, 
+    SELECT ci.*,
+        ct.name as type_name, ct.icon as type_icon,
         u.username as author_name,
         c.name as category_name, c.color as category_color, c.icon as category_icon
     FROM content_items ci
