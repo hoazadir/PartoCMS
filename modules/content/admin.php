@@ -106,14 +106,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $savedContentId = (int)$id;
                 }
 
-                // ==================== AUTO TRANSLATE HOOK ====================
-                // وقتی محتوا publish شد، ترجمه خودکار در پس‌زمینه اجرا می‌شود
+                // ==================== AUTO TRANSLATE HOOK (v2 — Queue) ====================
+                // وقتی محتوا publish شد، به صف ترجمه اضافه می‌شود
                 if ($data['status'] === 'published' && $savedContentId > 0) {
                     try {
-                        require_once __DIR__ . '/../../admin/includes/auto_translator.php';
-                        if (class_exists('AutoTranslator')) {
-                            $autoT = new AutoTranslator($pdo);
-                            $autoT->onPublish($savedContentId, $_SESSION['user_id'] ?? null, true);
+                        require_once __DIR__ . '/../../admin/includes/queue_manager.php';
+                        require_once __DIR__ . '/../../admin/includes/environment.php';
+
+                        if (class_exists('QueueManager')) {
+                            // چک فعال بودن
+                            $enabled = false;
+                            try {
+                                $stmtS = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'auto_translate_on_publish' LIMIT 1");
+                                $stmtS->execute();
+                                $enabled = ($stmtS->fetchColumn() === '1');
+                            } catch (Throwable $e) {}
+
+                            if ($enabled) {
+                                $queue = new QueueManager($pdo);
+                                $result = $queue->enqueueContent($savedContentId, $_SESSION['user_id'] ?? null, 5);
+
+                                // ⚡ اگه محیط اجازه می‌ده، سریع شروع کن (اختیاری)
+                                if (!empty($result['added']) && Environment::hasSetsid()) {
+                                    $script = realpath(__DIR__ . '/../../admin/cron_translation_queue.php');
+                                    if ($script) {
+                                        $php = PHP_BINARY ?: 'php';
+                                        $logFile = __DIR__ . '/../../logs/translation_queue.log';
+                                        $cmd = sprintf(
+                                            '%s nohup %s %s %d >> %s 2>&1 < /dev/null &',
+                                            escapeshellcmd(trim((string)@shell_exec('which setsid 2>/dev/null'))),
+                                            escapeshellcmd($php),
+                                            escapeshellarg($script),
+                                            min(5, (int)$result['added']),
+                                            escapeshellarg($logFile)
+                                        );
+                                        @exec($cmd);
+                                    }
+                                }
+                            }
                         }
                     } catch (Throwable $e) {
                         error_log("AutoTranslate hook error: " . $e->getMessage());
