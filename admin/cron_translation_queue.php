@@ -1,7 +1,7 @@
 <?php
 /**
  * PartoCMS - Translation Queue Worker
- * پردازش صف ترجمه
+ * پردازش صف ترجمه + اطلاع Telegram
  *
  * Usage:
  *   php cron_translation_queue.php          ← ۱ job
@@ -37,6 +37,28 @@ try {
     $pdo = getDB();
     $queue = new QueueManager($pdo);
 
+    // ============================================================
+    //   Telegram init
+    // ============================================================
+    $telegram = null;
+    try {
+        $token  = trim((string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'telegram_bot_token'")->fetchColumn());
+        $chatId = trim((string)$pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'telegram_chat_id'")->fetchColumn());
+
+        if ($token && $chatId) {
+            $tgPath = __DIR__ . '/includes/telegram_notifier.php';
+            if (file_exists($tgPath)) {
+                require_once $tgPath;
+                if (class_exists('TelegramNotifier')) {
+                    $telegram = new TelegramNotifier($token, $chatId);
+                }
+            }
+        }
+    } catch (Throwable $e) {
+        $telegram = null;
+    }
+
+    // ریست گیرکرده‌ها
     $reset = $queue->resetStuck();
     if ($reset > 0) {
         qlog("♻️ Reset $reset stuck job(s)");
@@ -45,6 +67,7 @@ try {
     $processed = 0;
     $succeeded = 0;
     $failed = 0;
+    $processedContentIds = []; // برای چک نهایی
 
     while ($processed < $maxJobs && (time() - $startTime) < $timeLimit) {
         $job = $queue->getNextJob();
@@ -54,6 +77,8 @@ try {
         }
 
         $processed++;
+        $processedContentIds[(int)$job['content_id']] = true;
+
         qlog("▶️ Job #{$job['id']}: content={$job['content_id']} → {$job['language_code']} (attempt {$job['attempts']})");
 
         try {
@@ -86,6 +111,67 @@ try {
 
     $elapsed = time() - $startTime;
     qlog("✅ Worker done — processed: $processed, ok: $succeeded, fail: $failed, time: {$elapsed}s");
+
+    // ============================================================
+    //   Telegram Notification — فقط اگه همه jobهای محتوا تموم شدن
+    // ============================================================
+    if ($telegram && !empty($processedContentIds)) {
+        foreach (array_keys($processedContentIds) as $cid) {
+            try {
+                // چک pending/processing
+                $stmt = $pdo->prepare("
+                    SELECT COUNT(*) FROM translation_queue
+                    WHERE content_id = ?
+                      AND status IN ('pending', 'processing')
+                ");
+                $stmt->execute([$cid]);
+                $stillPending = (int)$stmt->fetchColumn();
+
+                if ($stillPending > 0) {
+                    qlog("📢 Content #$cid — هنوز $stillPending job در صف");
+                    continue;
+                }
+
+                // همه تموم شد
+                $stmt = $pdo->prepare("SELECT title FROM content_items WHERE id = ? LIMIT 1");
+                $stmt->execute([$cid]);
+                $title = $stmt->fetchColumn() ?: "#$cid";
+
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM content_translations WHERE content_id = ?");
+                $stmt->execute([$cid]);
+                $transCount = (int)$stmt->fetchColumn();
+
+                $stmt = $pdo->prepare("
+                    SELECT 
+                        SUM(CASE WHEN status = 'done' THEN 1 ELSE 0 END) as done_cnt,
+                        SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as fail_cnt
+                    FROM translation_queue WHERE content_id = ?
+                ");
+                $stmt->execute([$cid]);
+                $counts = $stmt->fetch(PDO::FETCH_ASSOC);
+
+                $icon = ((int)$counts['fail_cnt'] > 0) ? '⚠️' : '✅';
+
+                $msg = "{$icon} <b>ترجمه خودکار کامل شد</b>\n";
+                $msg .= "━━━━━━━━━━━━━━━━\n";
+                $msg .= "📝 مقاله: <b>" . htmlspecialchars(mb_substr($title, 0, 60)) . "</b>\n";
+                $msg .= "🆔 ID: <code>{$cid}</code>\n";
+                $msg .= "🌍 ترجمه‌ها: <b>{$transCount}</b> زبان\n";
+                $msg .= "✅ موفق: {$counts['done_cnt']}\n";
+                if ((int)$counts['fail_cnt'] > 0) {
+                    $msg .= "❌ خطا: {$counts['fail_cnt']}\n";
+                }
+                $msg .= "⏱ زمان این اجرا: {$elapsed}s\n";
+                $msg .= "🕐 " . date('Y-m-d H:i:s');
+
+                $telegram->sendMessage($msg);
+                qlog("📢 Telegram notification sent for content #$cid");
+
+            } catch (Throwable $e) {
+                qlog("⚠️ Telegram error for #$cid: " . $e->getMessage());
+            }
+        }
+    }
 
 } catch (Throwable $e) {
     qlog("❌ Fatal: " . $e->getMessage());
