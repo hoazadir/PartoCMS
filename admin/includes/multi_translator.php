@@ -41,6 +41,7 @@ class MultiTranslator {
         'lingva'    => 60,
         'libre'     => 50,
         'mymemory'  => 20,
+        'argos'     => 85,
         'cache'     => 0,
     ];
 
@@ -590,6 +591,7 @@ class MultiTranslator {
             case 'lingva':    return $this->pLingva($text, $from, $to);
             case 'libre':     return $this->pLibre($text, $from, $to);
             case 'mymemory':  return $this->pMyMemory($text, $from, $to);
+            case 'argos':     return $this->pArgos($text, $from, $to);
             default: return ['error' => 'unknown provider'];
         }
     }
@@ -778,6 +780,53 @@ class MultiTranslator {
     }
 
     // ---------- MyMemory (محدود شده در v6) ----------
+
+    // ---------- Argos Translate (آفلاین) ----------
+    private function pArgos($text, $from, $to) {
+        if (!class_exists('Environment')) {
+            $envPath = __DIR__ . '/environment.php';
+            if (file_exists($envPath)) require_once $envPath;
+        }
+        if (!class_exists('Environment') || !Environment::hasArgos()) {
+            return ['error' => 'Argos not installed'];
+        }
+
+        $fromCode = strtolower(substr($from, 0, 2));
+        $toCode   = strtolower(substr($to, 0, 2));
+
+        if ($fromCode === $toCode) {
+            return $text;
+        }
+
+        try {
+            $cmd = sprintf(
+                'argos-translate --from %s --to %s %s 2>&1',
+                escapeshellarg($fromCode),
+                escapeshellarg($toCode),
+                escapeshellarg($text)
+            );
+
+            $output = [];
+            $code = 0;
+            @exec($cmd, $output, $code);
+
+            if ($code !== 0 || empty($output)) {
+                return ['error' => 'Argos CLI failed (exit: ' . $code . ')'];
+            }
+
+            $result = trim(implode("\n", $output));
+
+            if (empty($result)) {
+                return ['error' => 'Argos empty result'];
+            }
+
+            return $result;
+
+        } catch (Throwable $e) {
+            return ['error' => 'Argos exception: ' . $e->getMessage()];
+        }
+    }
+
     private function pMyMemory($text, $from, $to) {
         // فقط برای متن‌های کوتاه
         if (mb_strlen($text) > 300) {
