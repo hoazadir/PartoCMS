@@ -818,29 +818,7 @@ $baseSite  = SITE_URL;
     <?php endif; ?>
 
     <!-- ==================== Bottom ==================== -->
-        <!-- ========== ماژول‌های داینامیک ========== -->
-    <?php if ($isAdmin): ?>
-        <?php
-        try {
-            $rP = __DIR__ . '/module_registry.php';
-            $sP = __DIR__ . '/module_registry_sidebar.php';
-            if (file_exists($rP) && file_exists($sP)) {
-                require_once $rP;
-                require_once $sP;
-                if (class_exists('ModuleRegistry') && class_exists('ModuleRegistrySidebar')) {
-                    if (!isset($pdo)) $pdo = getDB();
-                    $mr = new ModuleRegistry($pdo);
-                    $mrs = new ModuleRegistrySidebar($mr);
-                    echo $mrs->renderGroups($currentFile, $currentPath, $baseAdmin, $mm, $isAdmin);
-                }
-            }
-        } catch (Throwable $e) {
-            error_log("Sidebar registry error: " . $e->getMessage());
-        }
-        ?>
-    <?php endif; ?>
-
-<div class="menu-bottom">
+    <div class="menu-bottom">
         <a href="<?= $baseSite ?>/index.php" target="_blank" class="menu-single">
             <span class="single-icon">🌐</span>
             <span><?= __t('menu_view_site', [], 'مشاهده سایت') ?></span>
