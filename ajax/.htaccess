@@ -1,0 +1,14 @@
+# ==================== PartoCMS AJAX Security ====================
+<FilesMatch "\.(bak|backup|old|orig|save|swp|tmp|log)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(config|\.env|composer)">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>
