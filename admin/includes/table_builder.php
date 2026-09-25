@@ -76,7 +76,7 @@ class TableBuilder {
 
             // اندازه
             $stmt = $this->pdo->prepare("
-                SELECT 
+                SELECT
                     TABLE_ROWS,
                     ROUND(((DATA_LENGTH + INDEX_LENGTH) / 1024), 2) AS size_kb,
                     ENGINE,
@@ -164,26 +164,6 @@ class TableBuilder {
     //   ساخت جدول
     // ============================================================
 
-    /**
-     * ساخت جدول جدید
-     *
-     * @param string $tableName
-     * @param array $columns  آرایه‌ای از:
-     *   [
-     *     'name' => 'id',
-     *     'type' => 'INT',
-     *     'length' => 11,        // اختیاری
-     *     'nullable' => false,
-     *     'default' => null,
-     *     'auto_increment' => true,
-     *     'primary' => true,
-     *     'unique' => false,
-     *     'index' => false,
-     *     'unsigned' => false,
-     *     'enum_values' => [],   // برای ENUM
-     *     'comment' => '',
-     *   ]
-     */
     public function createTable(string $tableName, array $columns): array {
         // اعتبارسنجی نام جدول
         $check = $this->validateIdentifier($tableName, 'table');
@@ -234,11 +214,8 @@ class TableBuilder {
             // DEFAULT
             if (isset($col['default']) && $col['default'] !== '' && $col['default'] !== null) {
                 $default = $col['default'];
-                // مقادیر خاص
                 if (in_array(strtoupper($default), ['CURRENT_TIMESTAMP', 'NOW()'])) {
                     $def .= " DEFAULT CURRENT_TIMESTAMP";
-                } elseif (is_numeric($default) && !in_array($type, ['VARCHAR','TEXT','LONGTEXT','DATE','TIME','DATETIME','ENUM'])) {
-                    $def .= " DEFAULT " . $this->pdo->quote($default);
                 } else {
                     $def .= " DEFAULT " . $this->pdo->quote($default);
                 }
@@ -392,12 +369,33 @@ class TableBuilder {
     //   Helpers
     // ============================================================
 
+    /**
+     * بررسی وجود جدول
+     * از information_schema استفاده می‌کند (fix برای MariaDB که با
+     * SHOW TABLES LIKE ? باگ دارد و همیشه false برمی‌گرداند)
+     */
     public function tableExists(string $table): bool {
+        // روش ۱: information_schema (دقیق‌ترین روش)
         try {
-            $stmt = $this->pdo->prepare("SHOW TABLES LIKE ?");
+            $stmt = $this->pdo->prepare("
+                SELECT COUNT(*)
+                FROM information_schema.TABLES
+                WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?
+            ");
             $stmt->execute([$table]);
-            return (bool)$stmt->fetchColumn();
+            if ((int)$stmt->fetchColumn() > 0) {
+                return true;
+            }
         } catch (Throwable $e) {
+            error_log("tableExists [info_schema] error for '$table': " . $e->getMessage());
+        }
+
+        // روش ۲: fallback با SHOW TABLES و چک در PHP
+        try {
+            $tables = $this->pdo->query("SHOW TABLES")->fetchAll(PDO::FETCH_COLUMN);
+            return in_array($table, $tables, true);
+        } catch (Throwable $e) {
+            error_log("tableExists [SHOW TABLES] error for '$table': " . $e->getMessage());
             return false;
         }
     }

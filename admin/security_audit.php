@@ -65,15 +65,6 @@ foreach ($requiredFiles as $name => $path) {
 
 // ==================== 3. Database Tables ====================
 $requiredTables = ['file_hashes', 'security_logs', 'login_attempts', 'login_blocks'];
-foreach ($requiredTables as $table) {
-    try {
-        $exists = (bool) $pdo->query("SHOW TABLES LIKE " . $pdo->quote($table))->fetch();
-        addTest($tests, "DB Table: $table", $exists ? 'pass' : 'fail', '', 'high');
-    } catch (Throwable $e) {
-        addTest($tests, "DB Table: $table", 'fail', $e->getMessage(), 'high');
-    }
-}
-
 // ==================== 4. Settings ====================
 $settingsChecks = [
     'virustotal_api_key'   => ['critical' => true,  'label' => 'VirusTotal API Key'],

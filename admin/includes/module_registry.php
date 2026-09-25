@@ -3,8 +3,8 @@
  * PartoCMS - Module Registry
  * نقشه‌ی ماژول‌ها → فایل‌های واقعی
  *
- * @version 1.1
- * @date 2026-09-17
+ * @version 1.2
+ * @date 2026-09-19
  * استراتژی: بدون انتقال فیزیکی، فقط ثبت نقشه
  */
 class ModuleRegistry {
@@ -109,7 +109,7 @@ class ModuleRegistry {
         ],
     ];
 
-    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro'];
+    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai'];
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
@@ -118,53 +118,108 @@ class ModuleRegistry {
 
     private function loadRegistry() {
         try {
+            // بررسی وجود جدول module_files
             $stmt = $this->pdo->query("SHOW TABLES LIKE 'module_files'");
-            if (!$stmt->fetchColumn()) {
-                $this->registry = self::$defaultMap;
-                return;
-            }
-
-            $rows = $this->pdo->query("
-                SELECT module_slug, file_type, file_key, file_path
-                FROM module_files
-                ORDER BY module_slug, file_type, file_key
-            ")->fetchAll(PDO::FETCH_ASSOC);
-
-            if (empty($rows)) {
-                $this->registry = self::$defaultMap;
-                return;
-            }
+            $hasModuleFiles = (bool) $stmt->fetchColumn();
 
             $map = [];
-            foreach ($rows as $r) {
-                $slug = $r['module_slug'];
-                if (!isset(self::$defaultMap[$slug])) continue;
 
-                $type = $r['file_type'];
-                $key  = $r['file_key'];
+            // مرحله ۱: اگر جدول module_files وجود دارد، از آن بخوان
+            if ($hasModuleFiles) {
+                $rows = $this->pdo->query("
+                    SELECT module_slug, file_type, file_key, file_path
+                    FROM module_files
+                    ORDER BY module_slug, file_type, file_key
+                ")->fetchAll(PDO::FETCH_ASSOC);
 
-                if (!isset($map[$slug])) {
-                    $map[$slug] = self::$defaultMap[$slug];
-                    $map[$slug]['pages'] = [];
-                    $map[$slug]['includes'] = [];
-                    $map[$slug]['cron'] = [];
+                foreach ($rows as $r) {
+                    $slug = $r['module_slug'];
+                    $type = $r['file_type'];
+                    $key  = $r['file_key'];
+
+                    // ساخت ساختار پایه اگر وجود ندارد
+                    if (!isset($map[$slug])) {
+                        if (isset(self::$defaultMap[$slug])) {
+                            $map[$slug] = self::$defaultMap[$slug];
+                        } else {
+                            // ماژول Generated
+                            $map[$slug] = [
+                                'name'       => $slug,
+                                'icon'       => '📦',
+                                'menu_group' => 'generated',
+                                'sort_order' => 500,
+                                'is_core'    => 0,
+                                'pages'      => [],
+                                'includes'   => [],
+                                'cron'       => [],
+                            ];
+                        }
+                        // پاک کردن آرایه‌های پیش‌فرض تا دوباره پر شوند
+                        if (isset(self::$defaultMap[$slug])) {
+                            $map[$slug]['pages']    = [];
+                            $map[$slug]['includes'] = [];
+                            $map[$slug]['cron']     = [];
+                        }
+                    }
+
+                    if (!isset($map[$slug][$type])) {
+                        $map[$slug][$type] = [];
+                    }
+                    $map[$slug][$type][$key] = $r['file_path'];
                 }
-
-                $map[$slug][$type][$key] = $r['file_path'];
             }
 
-            foreach ($this->pdo->query("SELECT slug, name, icon, menu_group, sort_order, is_core FROM modules")->fetchAll(PDO::FETCH_ASSOC) as $m) {
-                if (isset($map[$m['slug']])) {
-                    $map[$m['slug']]['name']       = $m['name'];
-                    $map[$m['slug']]['icon']       = $m['icon'] ?: '📦';
-                    $map[$m['slug']]['menu_group'] = $m['menu_group'] ?: self::$defaultMap[$m['slug']]['menu_group'];
-                    $map[$m['slug']]['sort_order'] = (int)$m['sort_order'];
-                    $map[$m['slug']]['is_core']    = (int)$m['is_core'];
+            // مرحله ۲: خواندن همه ماژول‌های فعال از جدول modules
+            $modules = $this->pdo->query("
+                SELECT slug, name, icon, menu_group, sort_order, is_core
+                FROM modules
+                WHERE is_enabled = 1
+            ")->fetchAll(PDO::FETCH_ASSOC);
+
+            foreach ($modules as $m) {
+                $slug = $m['slug'];
+
+                // اگر ماژول در map نیست (نه در module_files و نه در defaultMap)
+                if (!isset($map[$slug])) {
+                    if (isset(self::$defaultMap[$slug])) {
+                        // از defaultMap
+                        $map[$slug] = self::$defaultMap[$slug];
+                    } else {
+                        // ماژول Generated — مسیر پیش‌فرض
+                        $map[$slug] = [
+                            'name'       => $m['name'],
+                            'icon'       => $m['icon'] ?: '📦',
+                            'menu_group' => $m['menu_group'] ?: 'generated',
+                            'sort_order' => (int) $m['sort_order'],
+                            'is_core'    => (int) $m['is_core'],
+                            'pages'      => [
+                                'admin' => 'modules/generated/' . $slug . '/admin.php',
+                            ],
+                            'includes'   => [],
+                            'cron'       => [],
+                        ];
+                        continue;
+                    }
                 }
+
+                // به‌روزرسانی اطلاعات از دیتابیس
+                if (isset($map[$slug])) {
+                    $map[$slug]['name']       = $m['name'];
+                    $map[$slug]['icon']       = $m['icon'] ?: ($map[$slug]['icon'] ?? '📦');
+                    $map[$slug]['menu_group'] = $m['menu_group'] ?: ($map[$slug]['menu_group'] ?? 'generated');
+                    $map[$slug]['sort_order'] = (int) $m['sort_order'];
+                    $map[$slug]['is_core']    = (int) $m['is_core'];
+                }
+            }
+
+            // اگر جدول modules خالی بود، از defaultMap استفاده کن
+            if (empty($map)) {
+                $map = self::$defaultMap;
             }
 
             $this->registry = $map;
         } catch (Throwable $e) {
+            error_log("ModuleRegistry loadRegistry error: " . $e->getMessage());
             $this->registry = self::$defaultMap;
         }
     }
@@ -203,7 +258,10 @@ class ModuleRegistry {
                     'modules' => [],
                 ];
             }
-            $groups[$g]['modules'][] = $m;
+            // اضافه کردن slug به module برای استفاده در سایدبار
+            $key = array_search($m, $this->registry, true);
+            $m['slug'] = $key !== false ? $key : '';
+            $groups[$g]['modules'][$m['slug']] = $m;
         }
         uasort($groups, fn($a, $b) => $a['sort'] <=> $b['sort']);
         return $groups;
@@ -221,7 +279,9 @@ class ModuleRegistry {
             'translation'  => 'ترجمه محتوا',
             'security'     => 'امنیت',
             'backup_auto'  => 'پشتیبان‌گیری خودکار',
-            'tools_pro'    => 'ابزارهای حرفه‌ای',
+            'tools_pro'    => '🔧 ابزارهای حرفه‌ای',
+            'ai'           => 'هوش مصنوعی',
+            'generated'    => 'ماژول‌های ساخته شده',
             default        => '📦 ' . $slug,
         };
     }

@@ -1,0 +1,14 @@
+{
+    "slug": "contacts",
+    "name": "مخاطبین",
+    "icon": "📇",
+    "menu_group": "generated",
+    "sort_order": 500,
+    "is_core": 0,
+    "pages": {
+        "admin": "modules\/generated\/contacts\/admin.php",
+        "form": "modules\/generated\/contacts\/form.php",
+        "list": "modules\/generated\/contacts\/list.php",
+        "view": "modules\/generated\/contacts\/view.php"
+    }
+}

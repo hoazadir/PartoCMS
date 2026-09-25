@@ -526,6 +526,120 @@ $baseSite  = SITE_URL;
     html[dir="ltr"] .sidebar { box-shadow: 5px 0 25px rgba(0,0,0,0.4); }
     .sidebar { box-shadow: -5px 0 25px rgba(0,0,0,0.4); }
 
+
+    /* ==================== Sub-Group (زیرگروه ماژول) ==================== */
+    .generated-root { background: rgba(124, 58, 237, 0.08); }
+    .menu-subgroup { margin: 2px 0; }
+    .menu-subgroup-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px 10px 14px;
+        cursor: pointer;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #cbd5e1;
+        border-radius: 8px;
+        margin: 1px 6px;
+        transition: all 0.2s;
+        user-select: none;
+    }
+    .menu-subgroup-header:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .menu-subgroup.open .menu-subgroup-header { color: #a78bfa; }
+    .menu-subgroup-header .subgroup-icon { font-size: 14px; }
+    .menu-subgroup-header .subgroup-title { flex: 1; }
+    .menu-subgroup-header .subgroup-arrow {
+        font-size: 9px;
+        transition: transform 0.25s;
+        color: #64748b;
+    }
+    .menu-subgroup.open .subgroup-arrow { transform: rotate(180deg); color: #a78bfa; }
+    .menu-subgroup-items {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-right: 14px;
+    }
+    .menu-subgroup.open .menu-subgroup-items { max-height: 400px; }
+    .menu-subgroup-items a {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 12px;
+        margin: 1px 8px 1px 8px;
+        font-size: 12px;
+        color: #94a3b8;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.15s;
+        border-right: 2px solid transparent;
+    }
+    .menu-subgroup-items a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+    .menu-subgroup-items a.active {
+        background: linear-gradient(90deg, rgba(124,58,237,0.25), transparent);
+        color: #fff;
+        border-right-color: #a78bfa;
+        font-weight: 600;
+    }
+    .menu-subgroup-items .item-icon { font-size: 13px; }
+
+
+    /* ==================== Sub-Group (زیرگروه ماژول) ==================== */
+    .generated-root { background: rgba(124, 58, 237, 0.08); }
+    .menu-subgroup { margin: 2px 0; }
+    .menu-subgroup-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 18px 10px 14px;
+        cursor: pointer;
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #cbd5e1;
+        border-radius: 8px;
+        margin: 1px 6px;
+        transition: all 0.2s;
+        user-select: none;
+    }
+    .menu-subgroup-header:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .menu-subgroup.open .menu-subgroup-header { color: #a78bfa; }
+    .menu-subgroup-header .subgroup-icon { font-size: 14px; }
+    .menu-subgroup-header .subgroup-title { flex: 1; }
+    .menu-subgroup-header .subgroup-arrow {
+        font-size: 9px;
+        transition: transform 0.25s;
+        color: #64748b;
+    }
+    .menu-subgroup.open .subgroup-arrow { transform: rotate(180deg); color: #a78bfa; }
+    .menu-subgroup-items {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        padding-right: 14px;
+    }
+    .menu-subgroup.open .menu-subgroup-items { max-height: 400px; }
+    .menu-subgroup-items a {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 12px;
+        margin: 1px 8px 1px 8px;
+        font-size: 12px;
+        color: #94a3b8;
+        text-decoration: none;
+        border-radius: 6px;
+        transition: all 0.15s;
+        border-right: 2px solid transparent;
+    }
+    .menu-subgroup-items a:hover { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+    .menu-subgroup-items a.active {
+        background: linear-gradient(90deg, rgba(124,58,237,0.25), transparent);
+        color: #fff;
+        border-right-color: #a78bfa;
+        font-weight: 600;
+    }
+    .menu-subgroup-items .item-icon { font-size: 13px; }
+
 </style>
 
 <!-- Backdrop -->
@@ -813,6 +927,18 @@ $baseSite  = SITE_URL;
                 <span><?= __t('menu_settings_site', [], 'تنظیمات سایت') ?></span>
             </a>
             <?php endif; ?>
+            <?php if ($isAdmin): ?>
+            <a href="<?= $baseAdmin ?>/ai_settings.php" class="<?= $currentFile === 'ai_settings.php' ? 'active' : '' ?>">
+                <span class="item-icon">🤖</span>
+                <span><?= __t('menu_ai_assistant', [], 'دستیار هوشمند') ?></span>
+            </a>
+            <?php endif; ?>
+            <?php if ($isAdmin): ?>
+            <a href="<?= $baseAdmin ?>/ai_settings.php" class="<?= $currentFile === 'ai_settings.php' ? 'active' : '' ?>">
+                <span class="item-icon">🤖</span>
+                <span><?= __t('menu_ai_assistant', [], 'دستیار هوشمند') ?></span>
+            </a>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -897,6 +1023,22 @@ function toggleMenuGroup(header) {
     }
 }
 
+// ==================== Toggle Sub-Group (زیرگروه) ====================
+function toggleSubMenu(header) {
+    const sub = header.parentElement;
+    const subId = sub.dataset.subgroup;
+    sub.classList.toggle("open");
+    if (subId) {
+        let openSubs = JSON.parse(localStorage.getItem("sidebar_open_subs") || "[]");
+        if (sub.classList.contains("open")) {
+            if (!openSubs.includes(subId)) openSubs.push(subId);
+        } else {
+            openSubs = openSubs.filter(n => n !== subId);
+        }
+        localStorage.setItem("sidebar_open_subs", JSON.stringify(openSubs));
+    }
+}
+
 // ==================== Restore State on Load ====================
 document.addEventListener('DOMContentLoaded', () => {
     // بازیابی گروه‌های باز
@@ -909,6 +1051,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (group.classList.contains('has-active')) {
             group.classList.add('open');
         }
+
+    // بازیابی زیرگروه‌های باز (ماژول‌های Generated)
+    const openSubs = JSON.parse(localStorage.getItem("sidebar_open_subs") || "[]");
+    document.querySelectorAll(".menu-subgroup").forEach(sub => {
+        const subId = sub.dataset.subgroup;
+        if (subId && openSubs.includes(subId)) {
+            sub.classList.add("open");
+        }
+        if (sub.classList.contains("has-active")) {
+            sub.classList.add("open");
+        }
+    });
     });
 
     // بستن سایدبار در موبایل پس از کلیک روی لینک
