@@ -69,3 +69,31 @@ audit.sh
 # ==================== فایل‌های عجیب ====================
 pdo
 tb
+
+# ==================== backup با شماره ====================
+*.bak[0-9]
+*.bak[0-9][0-9]
+*.step[0-9].bak
+*.pre-*
+*.before_*
+*.urlfix.bak
+
+# ==================== فایل‌های صوتی تست ====================
+uploads/ai_audio/
+*.wav
+*.mp3
+*.ogg
+!assets/audio/*.mp3
+
+# ==================== assets/vendor ====================
+assets/vendor/
+
+# ==================== stunnel و ابزارهای محلی ====================
+stunnel-debug.log
+stunnel.log
+stunnel.conf
+cert.pem
+key.pem
+mkcert
+ngrok-v3-*.tgz
+ngrok
