@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تست Whisper (ماژولار)</title>
+<style>
+body{font-family:Tahoma;padding:20px;background:#f0f0f0}
+button{padding:10px 20px;background:#06b6d4;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px}
+pre{background:#1e293b;color:#10b981;padding:15px;border-radius:8px;font-family:monospace;direction:ltr;text-align:left;min-height:100px;white-space:pre-wrap}
+select,input{padding:10px;border-radius:8px;border:1px solid #ccc;font-size:13px;margin-right:10px}
+</style>
+</head>
+<body>
+<h2>🎤 تست Whisper — نسخه ماژولار</h2>
+<input type="file" id="file" accept="audio/*">
+<select id="lang">
+    <option value="auto" selected>🔄 خودکار</option>
+    <option value="fa">فارسی</option>
+    <option value="en">English</option>
+    <option value="ar">العربية</option>
+</select>
+<button onclick="upload()">🚀 ارسال</button>
+<pre id="out">نتیجه اینجا...</pre>
+
+<script>
+async function upload() {
+    const f = document.getElementById('file').files[0];
+    const lang = document.getElementById('lang').value;
+    if (!f) return alert('فایل انتخاب کنید');
+    const out = document.getElementById('out');
+    out.textContent = '⏳ در حال پردازش...';
+    const fd = new FormData();
+    fd.append('audio', f);
+    fd.append('language', lang);
+    try {
+        const r = await fetch('/ajax/ai_transcribe.php', {method: 'POST', body: fd});
+        const t = await r.text();
+        out.textContent = t;
+    } catch(e) {
+        out.textContent = '❌ ' + e.message;
+    }
+}
+</script>
+</body>
+</html>

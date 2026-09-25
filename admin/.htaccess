@@ -1,0 +1,14 @@
+# ==================== PartoCMS Admin Security ====================
+
+<FilesMatch "\.(bak|backup|old|orig|save|swp|tmp|log)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+<IfModule mod_headers.c>
+    Header set X-Robots-Tag "noindex, nofollow"
+</IfModule>

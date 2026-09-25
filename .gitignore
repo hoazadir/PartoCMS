@@ -1,48 +1,71 @@
-# ==================== فایل‌های حساس ====================
+# ==================== فایل‌های حساس (هرگز به Git نروند) ====================
 config.php
 config.local.php
 .env
-.env.*
-*.secret
+.env.local
+.env.*.local
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+cert.pem
+key.pem
+mkcert
+cloudflared
+stunnel.conf
 
-# ==================== بکاپ‌های دیتابیس (بحرانی) ====================
-backups/
-*.sql
-*.sql.gz
-*.dump
+# ==================== وابستگی‌ها ====================
+/vendor/
+/node_modules/
 
-# ==================== بکاپ‌های عمومی ====================
-*.bak
-*.bak-*
-*.broken-*
-*.old
-*.backup
-
-# ==================== لاگ‌ها و session ====================
+# ==================== لاگ‌ها و کش ====================
 logs/
 *.log
-sess_*
-cron_stdout.log
-cron.log
+!logs/.gitkeep
+cache/
+*.cache
 
-# ==================== Composer و Node ====================
-/vendor/
-node_modules/
+# ==================== Backup و نسخه‌های قدیمی ====================
+*.bak
+*.bak-*
+*.backup
+*.broken
+backups/
+_backups_archive/
 
-# ==================== فایل‌های کاربران ====================
-# (تصاویر آپلودی - اگر می‌خواهی exclude کنی، خطوط زیر را از کامنت دربیاور)
-# assets/uploads/img_*
-# assets/uploads/*.jpg
-# assets/uploads/*.png
+# ==================== فایل‌های حجیم ====================
+ngrok-v3-*.tgz
+*.tgz
 
-# ==================== فایل‌های سیستم ====================
-.DS_Store
-Thumbs.db
-*.swp
-.idea/
-.vscode/
-
-# ==================== فایل‌های موقت ====================
-tmp_*
+# ==================== فایل‌های موقت و IDE ====================
 *.tmp
 *.temp
+*.swp
+*~
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-*
+*.code-workspace
+
+# ==================== فایل‌های شخصی ====================
+notes.txt
+personal/
+private/
+
+# ==================== فایل‌های تست محلی ====================
+test_mic.php
+test_mic_diag.php
+https_test.php
+test_record.html
+test_upload.html
+chat_test.php
+find-free-port.sh
+check-ports.sh
+audit.sh
+
+# ==================== فایل‌های عجیب ====================
+pdo
+tb

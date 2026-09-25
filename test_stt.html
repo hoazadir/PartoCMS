@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>تست STT Download</title>
+<style>
+body{font-family:Tahoma;padding:20px;background:#f0f0f0}
+button{padding:10px 20px;background:#06b6d4;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:bold;font-size:14px;margin:5px}
+pre{background:#1e293b;color:#10b981;padding:15px;border-radius:8px;font-family:monospace;direction:ltr;text-align:left;min-height:100px;white-space:pre-wrap;font-size:12px}
+.status{padding:15px;background:#fff;border-radius:8px;margin:10px 0;font-size:13px}
+</style>
+</head>
+<body>
+<h2>🎤 تست دانلود STT</h2>
+
+<div>
+    <button onclick="startPull('tiny')">📥 tiny</button>
+    <button onclick="startPull('base')">📥 base</button>
+    <button onclick="startPull('small')">📥 small</button>
+    <button onclick="startPull('medium')">📥 medium</button>
+    <button onclick="startPull('large-v3')">📥 large-v3</button>
+</div>
+
+<div id="status" class="status">آماده</div>
+<pre id="log">لاگ:</pre>
+
+<script>
+let pollTimer = null;
+
+function log(msg) {
+    const el = document.getElementById('log');
+    el.textContent += '\n[' + new Date().toLocaleTimeString('fa-IR') + '] ' + msg;
+    el.scrollTop = el.scrollHeight;
+}
+
+function setStatus(msg) {
+    document.getElementById('status').textContent = msg;
+}
+
+async function startPull(model) {
+    setStatus('در حال ارسال درخواست برای: ' + model);
+    log('شروع: ' + model);
+
+    try {
+        const fd = new FormData();
+        fd.append('model', model);
+
+        const r = await fetch('/ajax/ai_stt_pull_start.php', {
+            method: 'POST',
+            body: fd,
+        });
+
+        log('HTTP: ' + r.status);
+        const text = await r.text();
+        log('پاسخ: ' + text);
+
+        if (!r.ok) {
+            setStatus('❌ خطای ' + r.status);
+            return;
+        }
+
+        const data = JSON.parse(text);
+        if (!data.ok) {
+            setStatus('❌ ' + (data.error || 'خطا'));
+            return;
+        }
+
+        setStatus('✅ ' + (data.message || 'دانلود شروع شد'));
+        pollStatus(model);
+    } catch (e) {
+        log('خطا: ' + e.message);
+        setStatus('❌ ' + e.message);
+    }
+}
+
+function pollStatus(model) {
+    if (pollTimer) clearInterval(pollTimer);
+
+    pollTimer = setInterval(async () => {
+        try {
+            const r = await fetch('/ajax/ai_stt_pull_status.php?model=' + encodeURIComponent(model));
+            const data = await r.json();
+
+            if (!data.ok) {
+                log('Status خطا: ' + (data.error || '?'));
+                return;
+            }
+
+            const s = data.status;
+            const pct = s.percent || 0;
+            const dl = s.downloaded ? (s.downloaded / 1048576).toFixed(1) : '0';
+            const tot = s.total ? (s.total / 1048576).toFixed(1) : '0';
+
+            let sizeText = dl + ' / ' + tot + ' MB';
+            if (s.status === 'success' && s.size) {
+                sizeText = (s.size / 1048576).toFixed(1) + ' MB';
+            }
+
+            setStatus('📊 ' + s.status + ' — ' + pct + '% (' + sizeText + ') — منبع: ' + (s.source || '?'));
+
+            if (s.status === 'success' || s.status === 'error') {
+                clearInterval(pollTimer);
+                pollTimer = null;
+                log('پایان: ' + s.status);
+            }
+        } catch (e) {
+            log('poll خطا: ' + e.message);
+        }
+    }, 2000);
+}
+</script>
+</body>
+</html>

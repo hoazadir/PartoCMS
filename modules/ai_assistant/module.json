@@ -1,0 +1,12 @@
+{
+    "slug": "ai_assistant",
+    "name": "دستیار هوشمند",
+    "icon": "🤖",
+    "menu_group": "ai",
+    "sort_order": 150,
+    "is_core": 0,
+    "pages": {
+        "admin": "modules/ai_assistant/admin.php"
+    },
+    "description": "دستیار هوشمند مبتنی بر Ollama برای تحلیل خطا و پیشنهادات"
+}

@@ -213,7 +213,7 @@ class Security {
         header('Referrer-Policy: strict-origin-when-cross-origin');
         
         // Permissions Policy
-        header('Permissions-Policy: geolocation=(), microphone=(), camera=()');
+        header('Permissions-Policy: geolocation=(self), microphone=(self), camera=(self)');
     }
 
     // ==================== Activity Log ====================
