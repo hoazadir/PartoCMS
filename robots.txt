@@ -1,0 +1,15 @@
+# robots.txt for PartoCMS
+# Generated: 2026-09-26
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /logs/
+Disallow: /vendor/
+Disallow: /node_modules/
+Disallow: /cron/
+Disallow: /ajax/
+Disallow: /install/
+
+# Sitemap
+Sitemap: http://localhost/sitemap.xml
