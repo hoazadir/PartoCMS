@@ -62,3 +62,9 @@
 ErrorDocument 403 /error.php?code=403
 ErrorDocument 404 /error.php?code=404
 ErrorDocument 500 /error.php?code=500
+
+# ==================== SEO - Dynamic robots.txt و sitemap.xml ====================
+<IfModule mod_rewrite.c>
+    RewriteRule ^robots\.txt$ robots.php [L]
+    RewriteRule ^sitemap\.xml$ sitemap.php [L]
+</IfModule>
