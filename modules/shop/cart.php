@@ -10,6 +10,12 @@
 require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/includes/ShopManager.php';
 require_once __DIR__ . '/includes/CartManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
 
 $pdo = getDB();
 $shop = new ShopManager($pdo);
@@ -24,9 +30,25 @@ $taxRate = (float) $shop->getSetting('tax_rate', '9');
 $shippingCost = (float) $shop->getSetting('shipping_cost', '50000');
 $freeShippingOver = (float) $shop->getSetting('free_shipping_over', '1000000');
 
-$tax = ($subtotal * $taxRate) / 100;
+// بررسی کوپن اعمال‌شده
+$couponManager = new CouponManager($pdo);
+$appliedCoupon = $_SESSION['applied_coupon'] ?? null;
+$discount = 0;
+
+if ($appliedCoupon) {
+    $recheck = $couponManager->validate($appliedCoupon['code'], $subtotal);
+    if ($recheck['ok']) {
+        $discount = $recheck['discount'];
+    } else {
+        unset($_SESSION['applied_coupon']);
+        $appliedCoupon = null;
+    }
+}
+
+$taxable = max(0, $subtotal - $discount);
+$tax = ($taxable * $taxRate) / 100;
 $shipping = ($subtotal >= $freeShippingOver) ? 0 : $shippingCost;
-$total = $subtotal + $tax + $shipping;
+$total = $taxable + $tax + $shipping;
 
 $siteName = getSetting('site_name', 'وب‌سایت من');
 $pageTitle = 'سبد خرید | ' . $siteName;
@@ -249,6 +271,43 @@ function removeItem(itemId) {
         }
     })
     .catch(() => showAlert('danger', 'خطای شبکه'));
+}
+
+function applyCoupon() {
+    const input = document.getElementById('couponInput');
+    const code = input.value.trim();
+    const msgEl = document.getElementById('couponMessage');
+
+    if (!code) {
+        msgEl.innerHTML = '<span class="text-danger">کد تخفیف را وارد کنید</span>';
+        return;
+    }
+
+    msgEl.innerHTML = '<span class="text-muted">در حال بررسی...</span>';
+
+    fetch(BASE_URL + '/ajax/apply-coupon.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({code: code})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.ok) {
+            msgEl.innerHTML = '<span class="text-success">' + data.message + '</span>';
+            setTimeout(() => location.reload(), 800);
+        } else {
+            msgEl.innerHTML = '<span class="text-danger">' + (data.error || 'خطا') + '</span>';
+        }
+    })
+    .catch(() => {
+        msgEl.innerHTML = '<span class="text-danger">خطای شبکه</span>';
+    });
+}
+
+function removeCoupon() {
+    fetch(BASE_URL + '/ajax/remove-coupon.php', {method: 'POST'})
+    .then(() => location.reload())
+    .catch(() => location.reload());
 }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
