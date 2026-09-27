@@ -293,15 +293,36 @@ $sidebarFile = __DIR__ . '/../../../admin/includes/sidebar.php';
                 </div>
 
                 <div class="card mb-3">
-                    <div class="card-header"><i class="bi bi-image"></i> تصویر</div>
+                    <div class="card-header"><i class="bi bi-image"></i> تصویر محصول</div>
                     <div class="card-body">
-                        <label class="form-label">URL تصویر</label>
-                        <input type="text" name="image" class="form-control" id="imageUrl"
-                               value="<?= htmlspecialchars($_POST['image'] ?? $product['image'] ?? '') ?>">
-                        <?php if (!empty($product['image']) || !empty($_POST['image'])): ?>
-                            <img src="<?= htmlspecialchars($_POST['image'] ?? $product['image'] ?? '') ?>"
-                                 class="img-fluid mt-2 rounded" style="max-height: 200px;">
-                        <?php endif; ?>
+                        <!-- پیش‌نمایش تصویر -->
+                        <div id="imagePreviewBox" class="mb-3 text-center" style="<?= (!empty($product['image']) || !empty($_POST['image'])) ? '' : 'display:none;' ?>">
+                            <img id="imagePreview" 
+                                 src="<?= htmlspecialchars($_POST['image'] ?? $product['image'] ?? '') ?>"
+                                 class="img-fluid rounded" style="max-height: 200px;">
+                        </div>
+
+                        <!-- دکمه آپلود -->
+                        <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="document.getElementById('imageFileInput').click()">
+                            <i class="bi bi-upload"></i> انتخاب تصویر از گالری/فایل
+                        </button>
+
+                        <!-- input فایل (مخفی) -->
+                        <input type="file" id="imageFileInput" accept="image/*" style="display:none" onchange="uploadImage(this)">
+
+                        <!-- وضعیت آپلود -->
+                        <div id="uploadStatus" class="small text-muted text-center mb-2"></div>
+
+                        <!-- فیلد URL (برای ویرایش دستی یا نمایش) -->
+                        <label class="form-label small">یا URL تصویر را وارد کنید:</label>
+                        <input type="text" name="image" class="form-control form-control-sm" id="imageUrl"
+                               value="<?= htmlspecialchars($_POST['image'] ?? $product['image'] ?? '') ?>"
+                               onchange="updatePreview(this.value)">
+                        
+                        <!-- دکمه حذف تصویر -->
+                        <button type="button" class="btn btn-outline-danger btn-sm w-100 mt-2" onclick="removeImage()">
+                            <i class="bi bi-trash"></i> حذف تصویر
+                        </button>
                     </div>
                 </div>
 
@@ -326,6 +347,84 @@ $sidebarFile = __DIR__ . '/../../../admin/includes/sidebar.php';
     </form>
 </div>
 
+<script>
+const SHOP_BASE_URL = '<?= $shop->getUrl() ?>';
+
+/**
+ * آپلود تصویر
+ */
+async function uploadImage(input) {
+    if (!input.files || !input.files[0]) return;
+
+    const file = input.files[0];
+    const statusEl = document.getElementById('uploadStatus');
+    const previewBox = document.getElementById('imagePreviewBox');
+    const previewImg = document.getElementById('imagePreview');
+
+    // نمایش پیش‌نمایش محلی (قبل از آپلود)
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        previewImg.src = e.target.result;
+        previewBox.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    // آپلود به سرور
+    statusEl.innerHTML = '<i class="bi bi-hourglass-split"></i> در حال آپلود...';
+
+    const formData = new FormData();
+    formData.append('image', file);
+
+    try {
+        const response = await fetch(SHOP_BASE_URL + '/ajax/upload-image.php', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.ok) {
+            document.getElementById('imageUrl').value = data.url;
+            previewImg.src = data.url;
+            previewBox.style.display = 'block';
+            statusEl.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> آپلود شد</span>';
+            setTimeout(() => statusEl.innerHTML = '', 3000);
+        } else {
+            statusEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> ' + (data.error || 'خطا') + '</span>';
+            previewBox.style.display = 'none';
+        }
+    } catch (err) {
+        statusEl.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> خطای شبکه</span>';
+        previewBox.style.display = 'none';
+    }
+
+    // پاک کردن input برای امکان انتخاب مجدد
+    input.value = '';
+}
+
+/**
+ * به‌روزرسانی پیش‌نمایش با URL دستی
+ */
+function updatePreview(url) {
+    const previewBox = document.getElementById('imagePreviewBox');
+    const previewImg = document.getElementById('imagePreview');
+    if (url && url.trim()) {
+        previewImg.src = url;
+        previewBox.style.display = 'block';
+    } else {
+        previewBox.style.display = 'none';
+    }
+}
+
+/**
+ * حذف تصویر
+ */
+function removeImage() {
+    document.getElementById('imageUrl').value = '';
+    document.getElementById('imagePreviewBox').style.display = 'none';
+    document.getElementById('uploadStatus').innerHTML = '';
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
