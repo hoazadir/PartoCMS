@@ -91,7 +91,20 @@ class ShopManager
      */
     public function generateSlug(string $text, string $table = 'shop_products'): string
     {
+        // حذف فاصله‌های اضافی
+        $text = trim($text);
+
+        // تبدیل حروف فارسی/عربی به معادل لاتین (اگر ممکن باشد)
+        $text = $this->transliterate($text);
+
+        // اگر transliterate موفق نبود، از hash استفاده کن
         $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $text), '-'));
+
+        if (empty($slug)) {
+            // برای نام‌های غیرلاتین (مثل فارسی)، از hash کوتاه استفاده کن
+            $slug = 'cat-' . substr(md5($text . time()), 0, 8);
+        }
+
         $original = $slug;
         $counter = 1;
 
@@ -101,6 +114,25 @@ class ShopManager
         }
 
         return $slug;
+    }
+
+    /**
+     * تبدیل کاراکترهای غیرلاتین به لاتین
+     */
+    private function transliterate(string $text): string
+    {
+        $map = [
+            'آ' => 'a', 'ا' => 'a', 'ب' => 'b', 'پ' => 'p', 'ت' => 't',
+            'ث' => 's', 'ج' => 'j', 'چ' => 'ch', 'ح' => 'h', 'خ' => 'kh',
+            'د' => 'd', 'ذ' => 'z', 'ر' => 'r', 'ز' => 'z', 'ژ' => 'zh',
+            'س' => 's', 'ش' => 'sh', 'ص' => 's', 'ض' => 'z', 'ط' => 't',
+            'ظ' => 'z', 'ع' => 'a', 'غ' => 'gh', 'ف' => 'f', 'ق' => 'gh',
+            'ک' => 'k', 'گ' => 'g', 'ل' => 'l', 'م' => 'm', 'ن' => 'n',
+            'و' => 'v', 'ه' => 'h', 'ی' => 'y', 'ئ' => 'y', 'ء' => '',
+            ' ' => '-', '‌' => '-', '‏' => '', '‎' => '',
+        ];
+
+        return strtr($text, $map);
     }
 
     /**
