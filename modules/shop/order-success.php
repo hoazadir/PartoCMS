@@ -156,6 +156,14 @@ $pageTitle = 'سفارش موفق | ' . $siteName;
                         </div>
                     <?php endif; ?>
 
+                    <a href="order-invoice.php?id=<?= (int) $orderData['id'] ?>&mode=download"
+                       class="btn btn-success w-100 mb-2">
+                        <i class="bi bi-file-earmark-pdf"></i> دانلود فاکتور PDF
+                    </a>
+                    <a href="order-invoice.php?id=<?= (int) $orderData['id'] ?>&mode=preview"
+                       target="_blank" class="btn btn-outline-info w-100 mb-2">
+                        <i class="bi bi-eye"></i> پیش‌نمایش فاکتور
+                    </a>
                     <a href="<?= $shop->getUrl('index.php') ?>" class="btn btn-primary w-100">
                         <i class="bi bi-shop-window"></i> ادامه خرید
                     </a>
