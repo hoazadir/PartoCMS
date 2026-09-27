@@ -81,6 +81,12 @@ $statusMap = [
             سفارش <code><?= htmlspecialchars($order['order_number']) ?></code>
         </h1>
         <div>
+            <a href="order-invoice.php?id=<?= (int) $order['id'] ?>&mode=preview" target="_blank" class="btn btn-info">
+                <i class="bi bi-eye"></i> پیش‌نمایش فاکتور
+            </a>
+            <a href="order-invoice.php?id=<?= (int) $order['id'] ?>&mode=download" class="btn btn-success">
+                <i class="bi bi-file-earmark-pdf"></i> دانلود فاکتور PDF
+            </a>
             <button class="btn btn-secondary" onclick="window.print()">
                 <i class="bi bi-printer"></i> چاپ
             </button>

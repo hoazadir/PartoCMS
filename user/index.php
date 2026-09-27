@@ -90,6 +90,8 @@ $pageTitle = 'پنل کاربری';
     <a href="posts.php"><i class="bi bi-file-text"></i> <span><?= __t('fe_my_posts', [], 'مقالات من') ?></span></a>
     <a href="comments.php"><i class="bi bi-chat-dots"></i> <span><?= __t('fe_my_comments', [], 'دیدگاه‌های من') ?></span></a>
     <hr style="border-color:#34495e;margin:5px 0;">
+    <a href="../modules/shop/my-orders.php"><i class="bi bi-bag-check"></i> <span>سفارش‌های من</span></a>
+    <a href="../modules/shop/index.php"><i class="bi bi-shop"></i> <span>فروشگاه</span></a>
     <a href="../index.php"><i class="bi bi-house"></i> <span>صفحه اصلی</span></a>
     <?php if (in_array($_SESSION['role'] ?? '', ['admin', 'editor', 'author'])): ?>
         <a href="../admin/index.php"><i class="bi bi-speedometer"></i> <span><?= __t('fe_admin_panel', [], 'پنل مدیریت') ?></span></a>
