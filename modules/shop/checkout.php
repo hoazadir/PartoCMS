@@ -11,6 +11,8 @@ require_once __DIR__ . '/../../config.php';
 require_once __DIR__ . '/includes/ShopManager.php';
 require_once __DIR__ . '/includes/CartManager.php';
 require_once __DIR__ . '/includes/OrderManager.php';
+require_once __DIR__ . '/includes/CouponManager.php';
+require_once __DIR__ . '/includes/ShippingManager.php';
 
 $pdo = getDB();
 $shop = new ShopManager($pdo);
@@ -29,12 +31,34 @@ if ($cart->isEmpty()) {
 
 // محاسبات
 $taxRate = (float) $shop->getSetting('tax_rate', '9');
-$shippingCost = (float) $shop->getSetting('shipping_cost', '50000');
-$freeShippingOver = (float) $shop->getSetting('free_shipping_over', '1000000');
+$couponManager = new CouponManager($pdo);
+$shippingManager = new ShippingManager($pdo);
 
-$tax = ($subtotal * $taxRate) / 100;
-$shipping = ($subtotal >= $freeShippingOver) ? 0 : $shippingCost;
-$total = $subtotal + $tax + $shipping;
+// کوپن
+$appliedCoupon = $_SESSION['applied_coupon'] ?? null;
+$discount = 0;
+if ($appliedCoupon) {
+    $recheck = $couponManager->validate($appliedCoupon['code'], $subtotal);
+    if ($recheck['ok']) {
+        $discount = $recheck['discount'];
+    } else {
+        unset($_SESSION['applied_coupon']);
+        $appliedCoupon = null;
+    }
+}
+
+// روش‌های ارسال
+$shippingMethods = $shippingManager->getAll();
+$selectedShippingId = (int) ($_POST['shipping_method_id'] ?? $_SESSION['selected_shipping_id'] ?? 0);
+if (!$selectedShippingId && !empty($shippingMethods)) {
+    $selectedShippingId = (int) $shippingMethods[0]['id'];
+}
+$_SESSION['selected_shipping_id'] = $selectedShippingId;
+
+$shipping = $shippingManager->calculateCost($selectedShippingId, $subtotal);
+$taxable = max(0, $subtotal - $discount);
+$tax = ($taxable * $taxRate) / 100;
+$total = $taxable + $tax + $shipping;
 
 $errors = [];
 $success = false;
@@ -70,6 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'tax' => $tax,
                 'shipping' => $shipping,
                 'total' => $total,
+                'coupon_code' => $appliedCoupon['code'] ?? null,
+                'discount' => $discount,
+                'shipping_method' => (string) $selectedShippingId,
                 'shipping_address' => "{$firstName} {$lastName}\n{$phone}\n{$address}\n{$city}، {$state}، {$postalCode}",
                 'customer_notes' => $notes,
                 'items' => array_map(function ($item) {
@@ -87,6 +114,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($result['ok']) {
                 // خالی کردن سبد
                 $cart->clear();
+
+                // ثبت استفاده از کوپن
+                if ($appliedCoupon) {
+                    $couponManager->recordUsage(
+                        (int) $appliedCoupon['id'],
+                        $_SESSION['user_id'] ?? null,
+                        (int) $result['order_id'],
+                        $discount
+                    );
+                    unset($_SESSION['applied_coupon']);
+                }
 
                 // ذخیره اطلاعات در session برای صفحه موفقیت
                 $_SESSION['last_order'] = [
@@ -208,6 +246,41 @@ $pageTitle = 'تکمیل خرید | ' . $siteName;
                 </div>
 
                 <div class="card mb-3">
+                    <div class="card-header"><i class="bi bi-truck"></i> روش ارسال</div>
+                    <div class="card-body">
+                        <?php if (empty($shippingMethods)): ?>
+                            <p class="text-muted mb-0">هیچ روش ارسالی تعریف نشده است</p>
+                        <?php else: ?>
+                            <?php foreach ($shippingMethods as $sm): ?>
+                                <?php
+                                $cost = $sm['free_over'] && $subtotal >= $sm['free_over'] ? 0 : (float) $sm['cost'];
+                                ?>
+                                <div class="form-check mb-2">
+                                    <input type="radio" name="shipping_method_id" 
+                                           value="<?= (int) $sm['id'] ?>"
+                                           class="form-check-input" 
+                                           id="ship_<?= (int) $sm['id'] ?>"
+                                           onchange="this.form.submit()"
+                                           <?= $selectedShippingId == $sm['id'] ? 'checked' : '' ?>>
+                                    <label class="form-check-label w-100" for="ship_<?= (int) $sm['id'] ?>">
+                                        <div class="d-flex justify-content-between">
+                                            <strong><?= htmlspecialchars($sm['name']) ?></strong>
+                                            <span>
+                                                <?= $cost == 0 ? '<span class="text-success">رایگان</span>' : $shop->formatPrice($cost) ?>
+                                            </span>
+                                        </div>
+                                        <?php if (!empty($sm['description'])): ?>
+                                            <small class="text-muted"><?= htmlspecialchars($sm['description']) ?></small>
+                                        <?php endif; ?>
+                                        <small class="text-muted d-block">زمان تحویل: <?= (int) $sm['min_days'] ?>-<?= (int) $sm['max_days'] ?> روز</small>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <div class="card mb-3">
                     <div class="card-header"><i class="bi bi-credit-card"></i> روش پرداخت</div>
                     <div class="card-body">
                         <div class="form-check mb-2">
@@ -259,6 +332,12 @@ $pageTitle = 'تکمیل خرید | ' . $siteName;
                             <span>جمع کالاها:</span>
                             <span><?= $shop->formatPrice($subtotal) ?></span>
                         </div>
+                        <?php if ($discount > 0): ?>
+                        <div class="d-flex justify-content-between mb-2 text-success">
+                            <span>تخفیف (<?= htmlspecialchars($appliedCoupon['code']) ?>):</span>
+                            <span>− <?= $shop->formatPrice($discount) ?></span>
+                        </div>
+                        <?php endif; ?>
                         <div class="d-flex justify-content-between mb-2">
                             <span>مالیات:</span>
                             <span><?= $shop->formatPrice($tax) ?></span>
