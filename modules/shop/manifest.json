@@ -1,0 +1,110 @@
+{
+    "name": "فروشگاه",
+    "slug": "shop",
+    "version": "1.0.0",
+    "description": "ماژول فروشگاه حرفه‌ای با درگاه‌های پرداخت ایرانی و بین‌المللی",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "shop.view",
+        "shop.manage",
+        "shop.products.view",
+        "shop.products.create",
+        "shop.products.edit",
+        "shop.products.delete",
+        "shop.orders.view",
+        "shop.orders.edit",
+        "shop.payments.manage",
+        "shop.coupons.manage"
+    ],
+    "menu": {
+        "title": "فروشگاه",
+        "icon": "bi-shop",
+        "url": "/modules/shop/admin/index.php",
+        "order": 30,
+        "parent": "commerce",
+        "submenu": [
+            {
+                "title": "محصولات",
+                "url": "/modules/shop/admin/products.php",
+                "icon": "bi-box"
+            },
+            {
+                "title": "دسته‌بندی‌ها",
+                "url": "/modules/shop/admin/categories.php",
+                "icon": "bi-tags"
+            },
+            {
+                "title": "سفارشات",
+                "url": "/modules/shop/admin/orders.php",
+                "icon": "bi-bag-check"
+            },
+            {
+                "title": "مشتریان",
+                "url": "/modules/shop/admin/customers.php",
+                "icon": "bi-people"
+            },
+            {
+                "title": "کوپن‌ها",
+                "url": "/modules/shop/admin/coupons.php",
+                "icon": "bi-ticket-perforated"
+            },
+            {
+                "title": "درگاه‌های پرداخت",
+                "url": "/modules/shop/admin/gateways.php",
+                "icon": "bi-credit-card"
+            },
+            {
+                "title": "گزارش فروش",
+                "url": "/modules/shop/admin/reports.php",
+                "icon": "bi-graph-up"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/shop/admin/settings.php",
+                "icon": "bi-gear"
+            }
+        ]
+    },
+    "routes": {
+        "/shop": "index.php",
+        "/shop/product/:id": "product.php",
+        "/shop/category/:slug": "category.php",
+        "/shop/cart": "cart.php",
+        "/shop/checkout": "checkout.php"
+    },
+    "database": {
+        "tables": [
+            "shop_products",
+            "shop_categories",
+            "shop_product_images",
+            "shop_product_variants",
+            "shop_product_attributes",
+            "shop_carts",
+            "shop_cart_items",
+            "shop_orders",
+            "shop_order_items",
+            "shop_order_status_history",
+            "shop_customers",
+            "shop_coupons",
+            "shop_coupon_usage",
+            "shop_payment_gateways",
+            "shop_transactions",
+            "shop_shipping_methods",
+            "shop_tax_rates",
+            "shop_settings"
+        ],
+        "migrations": "database/migrations/"
+    },
+    "settings": {
+        "enabled": true,
+        "auto_update": false,
+        "currency": "IRR",
+        "currency_symbol": "تومان"
+    }
+}
