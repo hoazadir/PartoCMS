@@ -1,21 +1,405 @@
-MIT License
+═══════════════════════════════════════════════════════════════════════════════
+                    PARTOCMS PROPRIETARY LICENSE
+                         Version 1.0
+                  Last Updated: September 28, 2026
+═══════════════════════════════════════════════════════════════════════════════
 
-Copyright (c) 2026 hoazadir
+Copyright © 2026 Hooman Oliaei (هومان اولیایی). All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This Proprietary License ("License") is a legal agreement between you
+(either an individual or a single entity, "Licensee") and Hooman Oliaei
+("Licensor", "Author", "Owner") for the software product identified as
+"PartoCMS" (the "Software"), which includes computer software, associated
+media, printed materials, and any online or electronic documentation.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+By installing, copying, downloading, accessing, or otherwise using the
+Software, you agree to be bound by the terms of this License. If you do
+not agree to the terms of this License, you must not install, copy, or
+use the Software and must destroy all copies in your possession.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+═══════════════════════════════════════════════════════════════════════════════
+1. DEFINITIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+1.1 "Software" refers to PartoCMS, including but not limited to:
+    - Source code files (PHP, JavaScript, CSS, HTML, SQL)
+    - Compiled binaries
+    - Documentation (technical, user manuals, help files)
+    - Configuration files
+    - Database schemas and migration files
+    - Assets (images, icons, fonts, media files)
+    - APIs, plugins, modules, and extensions
+    - Any updates, patches, or derivative works provided by Licensor
+
+1.2 "Licensor" refers to Hooman Oliaei (هومان اولیایی), the author and
+    owner of the Software, including any successors or assigns.
+
+1.3 "Licensee" refers to the individual or legal entity that has acquired
+    the Software and agrees to be bound by this License.
+
+1.4 "Commercial Use" means any use of the Software intended for commercial
+    advantage or monetary compensation, including but not limited to:
+    - Selling or reselling the Software
+    - Using the Software to provide paid services
+    - Integrating the Software into a commercial product
+    - Using the Software to generate revenue (directly or indirectly)
+
+1.5 "Non-Commercial Use" means use of the Software solely for personal,
+    educational, or non-profit purposes without any commercial benefit.
+
+1.6 "Derivative Work" means any work that is based on, derived from, or
+    incorporates the Software, including modifications, enhancements,
+    translations, or adaptations.
+
+1.7 "Site License" refers to a license granted for use of the Software on
+    a single production website (domain/subdomain) owned or operated by
+    the Licensee.
+
+1.8 "Multi-Site License" refers to a license granted for use of the
+    Software on multiple production websites owned or operated by the
+    Licensee, up to the number of sites specified in the license.
+
+═══════════════════════════════════════════════════════════════════════════════
+2. GRANT OF LICENSE
+═══════════════════════════════════════════════════════════════════════════════
+
+2.1 Subject to the terms and conditions of this License, the Licensor
+    grants to the Licensee a limited, non-exclusive, non-transferable,
+    non-sublicensable, revocable license to:
+
+    a) Install and use the Software for personal evaluation purposes
+       for a period not exceeding thirty (30) days without payment.
+
+    b) Upon obtaining a valid Commercial License from the Licensor:
+       - Install the Software on the number of production sites
+         specified in the license agreement.
+       - Modify the Software for your own internal business purposes.
+       - Create backup copies for archival purposes.
+       - Use the Software to provide services to your own customers.
+
+2.2 The Licensee may NOT:
+
+    a) Distribute, sublicense, sell, rent, lease, or transfer the
+       Software or any portion thereof to any third party.
+
+    b) Remove, alter, or obscure any copyright notices, trademark
+       notices, or other proprietary notices from the Software.
+
+    c) Use the Software to develop a competing product or service.
+
+    d) Publish, share, or make the source code publicly available
+       on any platform, repository, or website without written
+       permission from the Licensor.
+
+    e) Reverse engineer, decompile, or disassemble the Software,
+       except to the extent permitted by applicable law.
+
+    f) Use the Software for any illegal, harmful, or unethical
+       purposes, including but not limited to:
+       - Distributing malware, viruses, or harmful code
+       - Violating any applicable laws or regulations
+       - Infringing on the intellectual property of others
+       - Conducting fraudulent or deceptive activities
+
+    g) Use the Software to provide hosting services, SaaS platforms,
+       or any other service that allows third parties to access the
+       Software's functionality without obtaining their own license.
+
+═══════════════════════════════════════════════════════════════════════════════
+3. INTELLECTUAL PROPERTY RIGHTS
+═══════════════════════════════════════════════════════════════════════════════
+
+3.1 All right, title, and interest in and to the Software, including
+    all intellectual property rights, are and shall remain the sole
+    and exclusive property of the Licensor.
+
+3.2 This License does not grant the Licensee any ownership interest
+    in the Software or any intellectual property rights therein.
+
+3.3 The Software is protected by:
+    - Iranian copyright law
+    - International copyright treaties
+    - International intellectual property conventions
+    - Other applicable national and international laws
+
+3.4 The "PartoCMS" name, logo, and associated trademarks are the
+    exclusive property of the Licensor. No right or license to use
+    these marks is granted under this License, except for the purpose
+    of attribution when permitted.
+
+═══════════════════════════════════════════════════════════════════════════════
+4. PERMITTED USES
+═══════════════════════════════════════════════════════════════════════════════
+
+4.1 With a valid license, the Licensee is permitted to:
+
+    a) Install and configure the Software on authorized sites.
+    b) Customize the appearance, content, and functionality.
+    c) Create and manage content, users, and data within the Software.
+    d) Extend the Software with custom modules, themes, or plugins,
+       provided such extensions do not violate this License.
+    e) Use the Software's APIs to build complementary applications.
+    f) Make backups and use them for disaster recovery.
+    g) Receive updates and support as specified in the purchase agreement.
+
+4.2 The Licensee may also:
+
+    a) Use the Software in a staging or development environment to
+       test changes before deploying to production.
+    b) Translate the user interface into other languages for personal
+       use within the licensed site(s).
+    c) Grant access to sub-users (employees, contractors) within the
+       licensed organization, provided they comply with this License.
+
+═══════════════════════════════════════════════════════════════════════════════
+5. PROHIBITED USES
+═══════════════════════════════════════════════════════════════════════════════
+
+5.1 The Licensee shall NOT:
+
+    a) Resell, redistribute, or sublicense the Software to any third
+       party, whether for profit or not, without prior written consent
+       from the Licensor.
+
+    b) Publish the Software or any part of it on any public repository,
+       forum, or platform (including GitHub, GitLab, Bitbucket, etc.).
+
+    c) Include the Software in a bundle, package, or product offered
+       for sale without obtaining a specific distribution license.
+
+    d) Use the Software to build a SaaS (Software-as-a-Service)
+       offering without a special SaaS license from the Licensor.
+
+    e) Claim authorship or ownership of the Software or any of its
+       components.
+
+    f) Circumvent, disable, or interfere with any license validation,
+       licensing mechanisms, or security features of the Software.
+
+    g) Use the Software in a manner that violates:
+       - International sanctions or export controls
+       - Local laws of the Licensee's jurisdiction
+       - Privacy rights of third parties
+       - Applicable data protection regulations (GDPR, CCPA, etc.)
+
+═══════════════════════════════════════════════════════════════════════════════
+6. DATA PROTECTION AND PRIVACY
+═══════════════════════════════════════════════════════════════════════════════
+
+6.1 The Software may process personal data of users, customers, and
+    visitors. The Licensee is solely responsible for:
+
+    a) Compliance with all applicable data protection laws, including
+       but not limited to GDPR, CCPA, and local privacy regulations.
+
+    b) Obtaining proper consent from data subjects where required.
+
+    c) Implementing appropriate technical and organizational measures
+       to protect personal data.
+
+    d) Responding to data subject requests (access, deletion, etc.).
+
+    e) Reporting data breaches as required by applicable law.
+
+6.2 The Licensor shall not be held liable for any data protection
+    violations caused by the Licensee's use or misconfiguration of
+    the Software.
+
+6.3 The Licensor does not collect, transmit, or store any data from
+    installations of the Software unless explicitly enabled by the
+    Licensee (e.g., optional telemetry).
+
+═══════════════════════════════════════════════════════════════════════════════
+7. UPDATES AND SUPPORT
+═══════════════════════════════════════════════════════════════════════════════
+
+7.1 Updates and support are provided based on the license tier
+    purchased by the Licensee:
+
+    a) Standard License: Updates and email support for 12 months
+       from the date of purchase.
+
+    b) Extended License: Updates and priority support for 24 months.
+
+    c) Enterprise License: Updates and dedicated support as per the
+       enterprise agreement.
+
+7.2 After the support period expires, the Licensee may renew support
+    for a renewal fee as determined by the Licensor.
+
+7.3 The Licensor reserves the right to modify, suspend, or discontinue
+    the Software or any of its features at any time without notice.
+
+7.4 The Licensor shall not be obligated to provide any updates, but
+    any updates provided shall be subject to this License.
+
+═══════════════════════════════════════════════════════════════════════════════
+8. DISCLAIMER OF WARRANTY
+═══════════════════════════════════════════════════════════════════════════════
+
+8.1 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+    EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+    OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+    NON-INFRINGEMENT.
+
+8.2 THE LICENSOR DOES NOT WARRANT THAT:
+
+    a) The Software will meet the Licensee's requirements.
+    b) The Software will be uninterrupted, timely, secure, or error-free.
+    c) The results obtained from the use of the Software will be
+       accurate or reliable.
+    d) Any errors in the Software will be corrected.
+    e) The Software will be compatible with all systems, platforms,
+       or third-party services.
+
+8.3 The Licensee assumes all responsibility and risk for the
+    installation, use, and results obtained from the Software.
+
+8.4 No oral or written information or advice given by the Licensor
+    shall create a warranty unless explicitly stated in this License.
+
+═══════════════════════════════════════════════════════════════════════════════
+9. LIMITATION OF LIABILITY
+═══════════════════════════════════════════════════════════════════════════════
+
+9.1 TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE LICENSOR
+    SHALL NOT BE LIABLE FOR ANY:
+
+    a) Direct, indirect, incidental, special, or consequential damages.
+    b) Loss of profits, revenue, data, or use.
+    c) Business interruption or loss of business opportunities.
+    d) Cost of procurement of substitute goods or services.
+    e) Damages arising from unauthorized access or use of the Software.
+    f) Damages arising from third-party claims or actions.
+
+9.2 IN NO EVENT SHALL THE LICENSOR'S TOTAL LIABILITY TO THE LICENSEE
+    EXCEED THE AMOUNT ACTUALLY PAID BY THE LICENSEE FOR THE SOFTWARE
+    IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
+
+9.3 Some jurisdictions do not allow the exclusion of certain warranties
+    or the limitation of certain liabilities. In such cases, the above
+    limitations may not apply to the Licensee.
+
+═══════════════════════════════════════════════════════════════════════════════
+10. INDEMNIFICATION
+═══════════════════════════════════════════════════════════════════════════════
+
+10.1 The Licensee agrees to indemnify, defend, and hold harmless the
+     Licensor from and against any and all claims, damages, losses,
+     liabilities, costs, and expenses (including reasonable legal fees)
+     arising from:
+
+     a) The Licensee's use or misuse of the Software.
+     b) Any violation of this License by the Licensee.
+     c) Any violation of applicable laws or third-party rights.
+     d) Any content or data processed by the Software at the
+        Licensee's direction.
+
+═══════════════════════════════════════════════════════════════════════════════
+11. TERM AND TERMINATION
+═══════════════════════════════════════════════════════════════════════════════
+
+11.1 This License is effective until terminated.
+
+11.2 The Licensee may terminate this License at any time by:
+
+     a) Destroying all copies of the Software in their possession.
+     b) Uninstalling the Software from all systems.
+     c) Ceasing all use of the Software.
+
+11.3 The Licensor may terminate this License immediately, without
+     notice, if the Licensee:
+
+     a) Breaches any term of this License.
+     b) Fails to pay applicable license fees.
+     c) Uses the Software in a manner that violates applicable laws.
+
+11.4 Upon termination:
+
+     a) All rights granted to the Licensee under this License
+        immediately cease.
+     b) The Licensee must destroy all copies of the Software.
+     c) Sections 3 (Intellectual Property), 8 (Disclaimer),
+        9 (Limitation of Liability), 10 (Indemnification),
+        and 12 (Governing Law) shall survive termination.
+
+═══════════════════════════════════════════════════════════════════════════════
+12. GOVERNING LAW AND DISPUTE RESOLUTION
+═══════════════════════════════════════════════════════════════════════════════
+
+12.1 This License shall be governed by and construed in accordance
+     with the laws of the Islamic Republic of Iran, without regard
+     to its conflict of law provisions.
+
+12.2 Any dispute arising from or relating to this License shall be
+     subject to the exclusive jurisdiction of the courts of Tehran,
+     Iran.
+
+12.3 The parties shall first attempt to resolve any dispute through
+     good-faith negotiation before pursuing legal action.
+
+12.4 If negotiation fails, the dispute shall be resolved through
+     binding arbitration in accordance with the rules of the
+     relevant arbitration institution in Iran.
+
+═══════════════════════════════════════════════════════════════════════════════
+13. GENERAL PROVISIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+13.1 Entire Agreement: This License constitutes the entire agreement
+     between the parties concerning the Software and supersedes all
+     prior or contemporaneous understandings.
+
+13.2 Amendments: The Licensor reserves the right to modify this
+     License at any time. Continued use of the Software after such
+     modifications constitutes acceptance of the modified terms.
+
+13.3 Severability: If any provision of this License is held invalid
+     or unenforceable, the remaining provisions shall remain in full
+     force and effect.
+
+13.4 Waiver: No waiver of any term of this License shall be deemed
+     a further or continuing waiver of such term or any other term.
+
+13.5 Assignment: The Licensee may not assign or transfer this License
+     without the prior written consent of the Licensor.
+
+13.6 Notices: All notices under this License shall be in writing and
+     sent to the Licensor's contact address provided below.
+
+13.7 Force Majeure: The Licensor shall not be liable for any failure
+     to perform due to causes beyond its reasonable control.
+
+═══════════════════════════════════════════════════════════════════════════════
+14. CONTACT INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+For questions, licensing inquiries, or support:
+
+    Owner & Developer:  Hooman Oliaei (هومان اولیایی)
+    Email:  hoazadir@gmail.com
+    Website:  Negasht.xyz
+    GitHub:             https://github.com/hoazadir/PartoCMS
+    Location:           Tehran, Iran
+
+═══════════════════════════════════════════════════════════════════════════════
+15. ACKNOWLEDGMENT
+═══════════════════════════════════════════════════════════════════════════════
+
+BY USING THE SOFTWARE, THE LICENSEE ACKNOWLEDGES THAT:
+
+    ✓ They have read and understood this License.
+    ✓ They agree to be bound by its terms and conditions.
+    ✓ They have the legal authority to enter into this agreement.
+    ✓ They understand the restrictions and obligations herein.
+
+═══════════════════════════════════════════════════════════════════════════════
+                    END OF LICENSE
+═══════════════════════════════════════════════════════════════════════════════
+
+For a Persian translation, see LICENSE-fa file.
+
+For third-party licenses and attributions, see NOTICE file.
+
+For more information about PartoCMS, visit:
+https://github.com/hoazadir/PartoCMS
