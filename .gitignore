@@ -97,3 +97,19 @@ key.pem
 mkcert
 ngrok-v3-*.tgz
 ngrok
+
+# ==================== mPDF/dompdf font cache ====================
+# این فایل‌ها خودکار ساخته می‌شوند — نباید در Git باشند
+assets/fonts/*.afm
+assets/fonts/*.afm.json
+assets/fonts/*.ufm
+assets/fonts/*.ufm.json
+assets/fonts/installed-fonts.json
+assets/fonts/vazirmatn_*
+
+# ==================== mPDF temp files ====================
+logs/mpdf/
+
+# ==================== استثنا: فونت‌های اصلی باید کامیت شوند ====================
+!assets/fonts/Vazirmatn-Regular.ttf
+!assets/fonts/Vazirmatn-Bold.ttf
