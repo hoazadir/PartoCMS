@@ -1,7 +1,7 @@
 # 📋 PartoCMS Development Roadmap
 
 > آخرین بروزرسانی: 2026-09-28
-> مالک و توسعه‌دهنده اصلی: **Hooman Oliaei (هومان اولیایی)**
+> طراحی و برنامه‌نویسی و مالک: **Hooman Oliaei (هومان اولیایی)**
 > مخزن: https://github.com/hoazadir/PartoCMS
 
 ---
