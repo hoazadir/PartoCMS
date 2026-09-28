@@ -9,7 +9,7 @@
 [![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
 [![GitHub](https://img.shields.io/badge/GitHub-hoazadir%2FPartoCMS-blue?logo=github)](https://github.com/hoazadir/PartoCMS)
 
-**توسعه‌دهنده و مالک:** Hooman Oliaei (هومان اولیایی)
+**طراحی و برنامه‌نویسی و مالک:** Hooman Oliaei (هومان اولیایی)
 
 </div>
 
