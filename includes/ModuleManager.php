@@ -253,6 +253,41 @@ class ModuleManager {
     /**
      * بررسی دسترسی کاربر به صفحه (توسط فایل PHP)
      */
+    /**
+     * دریافت آیتم‌های منو گروه‌بندی‌شده از menu.php ماژول‌ها
+     */
+    public function getGroupedMenuItems(): array
+    {
+        $groups = [];
+        $modules = $this->getCurrentUserModules();
+
+        foreach ($modules as $mod) {
+            $slug = $mod['slug'] ?? null;
+            if (!$slug) continue;
+
+            $menuFile = __DIR__ . "/../modules/{$slug}/menu.php";
+            if (!file_exists($menuFile)) continue;
+
+            $item = include $menuFile;
+            if (empty($item) || !is_array($item)) continue;
+
+            $group = $item['menu_group'] ?? 'other';
+            $sort = $item['sort_order'] ?? 999;
+
+            $item['slug'] = $slug;
+            $item['icon'] = $item['icon'] ?? ($mod['icon'] ?? '📄');
+            $item['_sort'] = $sort;
+
+            $groups[$group][] = $item;
+        }
+
+        foreach ($groups as &$items) {
+            usort($items, fn($a, $b) => ($a['_sort'] ?? 999) <=> ($b['_sort'] ?? 999));
+        }
+
+        return $groups;
+    }
+
     public function checkPageAccess() {
         // صفحات عمومی که نیازی به چک ندارن
         $publicPages = ['index.php', 'login.php', 'logout.php', 'register.php', 'post.php', 'category.php', 'search.php', 'form.php', 'sitemap.php', 'robots.php'];

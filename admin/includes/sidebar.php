@@ -696,6 +696,34 @@ $baseSite  = SITE_URL;
     </a>
     <?php endif; ?>
 
+    <!-- ==================== فروشگاه (ماژول) ==================== -->
+    <?php
+    $shopMenuFile = dirname(__DIR__, 2) . '/modules/shop/menu.php';
+    if (file_exists($shopMenuFile)):
+        $shopMenu = include $shopMenuFile;
+        if (!empty($shopMenu)):
+            $isShopGroup = strpos($currentPath, 'modules/shop') !== false;
+    ?>
+    <div class="menu-group <?= $isShopGroup ? 'open has-active' : '' ?>" data-group="shop">
+        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
+            <span class="group-icon"><?= $shopMenu['icon'] ?? '🛒' ?></span>
+            <span class="group-title"><?= htmlspecialchars($shopMenu['title'] ?? 'فروشگاه') ?></span>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="menu-group-items">
+            <?php foreach ($shopMenu['submenu'] as $sub): ?>
+                <a href="<?= htmlspecialchars($sub['url']) ?>" class="<?= strpos($currentPath, basename($sub['url'], '.php')) !== false ? 'active' : '' ?>" onclick="closeMobileSidebar()">
+                    <span class="item-icon"><?= $sub['icon'] ?? '•' ?></span>
+                    <span><?= htmlspecialchars($sub['title']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+        endif;
+    endif;
+    ?>
+
     <!-- ==================== SEO ==================== -->
     <?php if ($canSeo): ?>
     <a href="<?= $baseAdmin ?>/seo.php" class="menu-single <?= $currentFile === 'seo.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">
