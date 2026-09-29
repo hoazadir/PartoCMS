@@ -14,12 +14,46 @@ class AdRenderer
     private AdManager $manager;
     private string $baseUrl;
     private bool $trackingEnabled;
+    private array $context = [];
 
     public function __construct(AdManager $manager, bool $tracking = true)
     {
         $this->manager = $manager;
         $this->baseUrl = SITE_URL;
         $this->trackingEnabled = $tracking;
+        $this->context = $this->manager->getTargeting()->buildEmptyContext();
+    }
+
+    /**
+     * تعیین context صفحه فعلی
+     */
+    public function setContext(array $context): void
+    {
+        $this->context = $context;
+    }
+
+    /**
+     * تعیین context از یک محتوا (post/page)
+     */
+    public function setContextFromContent(int $contentId, string $type = 'post'): void
+    {
+        $this->context = $this->manager->getTargeting()->buildContextFromContent($contentId, $type);
+    }
+
+    /**
+     * تعیین context از یک دسته‌بندی
+     */
+    public function setContextFromCategory(int $categoryId): void
+    {
+        $this->context = $this->manager->getTargeting()->buildContextFromCategory($categoryId);
+    }
+
+    /**
+     * دریافت context فعلی
+     */
+    public function getContext(): array
+    {
+        return $this->context;
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -33,6 +67,10 @@ class AdRenderer
 
         $html = '';
         foreach ($ads as $ad) {
+            // فیلتر هدف‌گیری محتوا
+            if (!$this->manager->getTargeting()->shouldShow($ad, $this->context)) {
+                continue;
+            }
             $html .= $this->renderAd($ad, $options);
         }
         return $html;
@@ -42,6 +80,9 @@ class AdRenderer
     {
         if (!$this->manager->isValidAd($ad)) return '';
         if (!$this->shouldDisplayOnDevice($ad)) return '';
+
+        // فیلتر هدف‌گیری محتوا
+        if (!$this->manager->getTargeting()->shouldShow($ad, $this->context)) return '';
 
         $displayMode = $ad['display_mode'] ?? 'single';
 
@@ -277,11 +318,15 @@ class AdRenderer
         $targetUrl = $banner['target_url'] ?? $ad['target_url'] ?? '';
         $targetBlank = !empty($ad['target_blank']);
 
-        $imgStyle = 'display:block;max-width:100%;height:auto;';
+        $imgStyle = 'display:block;max-width:100%;';
         $w = (int) ($ad['width'] ?? 0);
         $h = (int) ($ad['height'] ?? 0);
         if ($w > 0) $imgStyle .= 'width:' . $w . 'px;';
-        if ($h > 0) $imgStyle .= 'height:' . $h . 'px;object-fit:cover;';
+        if ($h > 0) {
+            $imgStyle .= 'height:' . $h . 'px;object-fit:cover;';
+        } else {
+            $imgStyle .= 'height:auto;';
+        }
 
         $alt = htmlspecialchars($banner['alt_text'] ?? ($banner['title'] ?? $ad['title'] ?? ''));
 
@@ -293,7 +338,7 @@ class AdRenderer
             ? $this->baseUrl . '/modules/ads/ajax/track-click.php?id=' . $adId
             : '';
 
-        $imgTag = '<img src="' . $imgUrl . '" alt="' . $alt . '" loading="lazy" style="' . $imgStyle . '">';
+        $imgTag = '<img src="' . $imgUrl . '" alt="' . $alt . '" style="' . $imgStyle . '">';
 
         if (!empty($targetUrl)) {
             $target = $targetBlank ? ' target="_blank" rel="noopener"' : '';
