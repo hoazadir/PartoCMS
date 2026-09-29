@@ -1,6 +1,18 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// ═══ AdWidget v3 برای نمایش تبلیغات ═══
+$adsAvailable = false;
+$adsWidgetFile = __DIR__ . '/modules/ads/includes/AdWidget.php';
+if (file_exists($adsWidgetFile)) {
+    try {
+        require_once $adsWidgetFile;
+        $adsAvailable = true;
+    } catch (Throwable $e) {
+        error_log('Ads init error: ' . $e->getMessage());
+    }
+}
+
 $id = $_GET['id'] ?? null;
 $slug = $_GET['slug'] ?? null;
 
@@ -219,6 +231,10 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
 
 </style>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::css() ?>
+<?php endif; ?>
 </head>
 <body>
 
@@ -238,6 +254,10 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::header() ?>
+<?php endif; ?>
 
 <div class="article">
     <div style="font-size: 42px; margin-bottom: 10px;"><?= $post['type_icon'] ?: '📄' ?></div>
@@ -468,6 +488,11 @@ document.getElementById('commentForm').addEventListener('submit', async function
     btn.innerHTML = '<i class="bi bi-send"></i> ارسال دیدگاه';
 });
 </script>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::footer() ?>
+    <?= AdWidget::js() ?>
+<?php endif; ?>
 
 </body>
 </html>
