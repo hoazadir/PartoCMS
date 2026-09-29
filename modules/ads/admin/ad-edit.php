@@ -135,10 +135,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // ═══ ذخیره قواعد هدف‌گیری محتوا ═══
-        $postedRules = $_POST['target_rules'] ?? [];
-        if (is_array($postedRules)) {
+        $postedRules  = $_POST['target_rules'] ?? [];
+        $targetMode   = $_POST['target_mode'] ?? 'all';
+        $autoSwitched = false;
+
+        if (is_array($postedRules) && !empty($postedRules)) {
+            // Auto-switch: اگر mode=all ولی rules هست → rules
+            if ($targetMode === 'all') {
+                $targetMode   = 'rules';
+                $autoSwitched = true;
+
+                $pdo->prepare("UPDATE ads SET target_mode = 'rules' WHERE id = ?")
+                    ->execute([$targetId]);
+            }
+
             $targeting = $adm->getTargeting();
             $targeting->replaceRules($targetId, $postedRules);
+        }
+
+        // ذخیره پیام برای نمایش بعد از redirect
+        if ($autoSwitched) {
+            $_SESSION['flash_notice'] = '⚠️ حالت هدف‌گیری به‌طور خودکار روی «قواعد پیشرفته» تنظیم شد چون قواعدی وارد کرده بودید.';
         }
 
         if (!$isEdit) {
@@ -347,6 +364,12 @@ try {
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     <?php endif; ?>
+    <?php if (!empty($_SESSION['flash_notice'])): ?>
+        <div class="alert alert-warning alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill"></i> <?= htmlspecialchars($_SESSION['flash_notice']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php unset($_SESSION['flash_notice']); endif; ?>
 
     <form method="post" id="adForm" enctype="multipart/form-data">
         <div class="row g-3">
