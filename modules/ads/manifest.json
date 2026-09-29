@@ -1,0 +1,78 @@
+{
+    "name": "تبلیغات",
+    "slug": "ads",
+    "version": "1.0.0",
+    "description": "ماژول تبلیغات حرفه‌ای با پشتیبانی از بنر، اسلایدشو، پاپ‌آپ و AdSense",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "ads.view",
+        "ads.manage",
+        "ads.create",
+        "ads.edit",
+        "ads.delete",
+        "ads.positions.manage",
+        "ads.campaigns.manage",
+        "ads.reports.view"
+    ],
+    "menu": {
+        "title": "تبلیغات",
+        "icon": "📢",
+        "url": "/modules/ads/admin/index.php",
+        "order": 40,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "داشبورد",
+                "url": "/modules/ads/admin/index.php",
+                "icon": "📊"
+            },
+            {
+                "title": "تبلیغات",
+                "url": "/modules/ads/admin/ads.php",
+                "icon": "🖼️"
+            },
+            {
+                "title": "موقعیت‌ها",
+                "url": "/modules/ads/admin/ad-positions.php",
+                "icon": "📐"
+            },
+            {
+                "title": "کمپین‌ها",
+                "url": "/modules/ads/admin/ad-campaigns.php",
+                "icon": "🎯"
+            },
+            {
+                "title": "گزارش‌ها",
+                "url": "/modules/ads/admin/ad-reports.php",
+                "icon": "📈"
+            }
+        ]
+    },
+    "routes": {
+        "/ads/track/impression": "ajax/track-impression.php",
+        "/ads/track/click": "ajax/track-click.php"
+    },
+    "database": {
+        "tables": [
+            "ads",
+            "ad_positions",
+            "ad_campaigns",
+            "ad_clicks",
+            "ad_impressions"
+        ],
+        "migrations": "database/migrations/"
+    },
+    "settings": {
+        "enabled": true,
+        "default_position": "sidebar",
+        "tracking_enabled": true
+    },
+    "icon": "📢",
+    "menu_group": "marketing"
+}
