@@ -1,0 +1,14 @@
+{
+    "slug": "table_builder",
+    "name": "جدول‌ساز",
+    "version": "1.0.0",
+    "description": "ساخت جدول‌های پویا بدون SQL",
+    "icon": "📊",
+    "menu_group": "tools_pro",
+    "sort_order": 104,
+    "menu": {
+        "title": "جدول‌ساز",
+        "url": "/modules/table_builder/admin.php",
+        "submenu": []
+    }
+}

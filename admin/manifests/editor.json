@@ -1,0 +1,14 @@
+{
+    "slug": "editor",
+    "name": "طراح قالب",
+    "version": "1.0.0",
+    "description": "طراح گرافیکی GrapesJS",
+    "icon": "✏️",
+    "menu_group": "appearance",
+    "sort_order": 8,
+    "menu": {
+        "title": "طراح قالب",
+        "url": "/admin/editor.php",
+        "submenu": []
+    }
+}

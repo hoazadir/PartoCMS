@@ -1,0 +1,21 @@
+{
+    "slug": "security",
+    "name": "امنیت",
+    "version": "1.0.0",
+    "description": "امنیت و حفاظت",
+    "icon": "🛡️",
+    "menu_group": "security",
+    "sort_order": 102,
+    "menu": {
+        "title": "امنیت",
+        "url": "/admin/security_dashboard.php",
+        "submenu": [
+            {"title": "داشبورد امنیتی", "url": "/admin/security_dashboard.php", "icon": "📊"},
+            {"title": "تست جامع", "url": "/admin/security_audit.php", "icon": "🔍"},
+            {"title": "نمودارها", "url": "/admin/security_graphs.php", "icon": "📈"},
+            {"title": "راه‌اندازی تلگرام", "url": "/admin/telegram_setup.php", "icon": "📱"},
+            {"title": "VirusTotal", "url": "/admin/virustotal_setup.php", "icon": "🦠"},
+            {"title": "احراز هویت ۲FA", "url": "/admin/2fa_setup.php", "icon": "🔐"}
+        ]
+    }
+}

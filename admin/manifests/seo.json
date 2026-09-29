@@ -1,0 +1,14 @@
+{
+    "slug": "seo",
+    "name": "تنظیمات SEO",
+    "version": "1.0.0",
+    "description": "بهینه‌سازی موتور جستجو",
+    "icon": "🔍",
+    "menu_group": "seo",
+    "sort_order": 10,
+    "menu": {
+        "title": "تنظیمات SEO",
+        "url": "/admin/seo.php",
+        "submenu": []
+    }
+}

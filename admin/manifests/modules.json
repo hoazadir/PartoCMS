@@ -1,0 +1,15 @@
+{
+    "slug": "modules",
+    "name": "ماژول‌ها",
+    "version": "1.0.0",
+    "description": "مدیریت ماژول‌های سیستم",
+    "icon": "🧩",
+    "menu_group": "admin",
+    "sort_order": 13,
+    "is_core": true,
+    "menu": {
+        "title": "ماژول‌ها",
+        "url": "/admin/modules.php",
+        "submenu": []
+    }
+}

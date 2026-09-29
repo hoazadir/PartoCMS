@@ -1,0 +1,19 @@
+{
+    "slug": "i18n",
+    "name": "چند زبانی",
+    "version": "1.0.0",
+    "description": "مدیریت زبان‌ها و ترجمه‌های رابط کاربری",
+    "icon": "🌍",
+    "menu_group": "i18n",
+    "sort_order": 100,
+    "menu": {
+        "title": "چند زبانی",
+        "url": "/admin/languages.php",
+        "submenu": [
+            {"title": "زبان‌ها", "url": "/admin/languages.php", "icon": "🌍"},
+            {"title": "ترجمه‌ها", "url": "/admin/translations.php", "icon": "📚"},
+            {"title": "ورود ترجمه", "url": "/admin/import_translations.php", "icon": "📥"}
+        ]
+    },
+    "permissions": ["i18n.view", "i18n.manage"]
+}

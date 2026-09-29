@@ -24,50 +24,53 @@
     ],
     "menu": {
         "title": "فروشگاه",
-        "icon": "bi-shop",
+        "icon": "🛒",
         "url": "/modules/shop/admin/index.php",
-        "order": 30,
-        "parent": "commerce",
         "submenu": [
+            {
+                "title": "داشبورد",
+                "url": "/modules/shop/admin/index.php",
+                "icon": "📊"
+            },
             {
                 "title": "محصولات",
                 "url": "/modules/shop/admin/products.php",
-                "icon": "bi-box"
+                "icon": "📦"
             },
             {
                 "title": "دسته‌بندی‌ها",
                 "url": "/modules/shop/admin/categories.php",
-                "icon": "bi-tags"
+                "icon": "🏷️"
             },
             {
                 "title": "سفارشات",
                 "url": "/modules/shop/admin/orders.php",
-                "icon": "bi-bag-check"
+                "icon": "🧾"
             },
             {
                 "title": "مشتریان",
                 "url": "/modules/shop/admin/customers.php",
-                "icon": "bi-people"
+                "icon": "👥"
             },
             {
                 "title": "کوپن‌ها",
                 "url": "/modules/shop/admin/coupons.php",
-                "icon": "bi-ticket-perforated"
+                "icon": "🎟️"
             },
             {
-                "title": "درگاه‌های پرداخت",
-                "url": "/modules/shop/admin/gateways.php",
-                "icon": "bi-credit-card"
+                "title": "روش‌های ارسال",
+                "url": "/modules/shop/admin/shipping.php",
+                "icon": "🚚"
             },
             {
                 "title": "گزارش فروش",
                 "url": "/modules/shop/admin/reports.php",
-                "icon": "bi-graph-up"
+                "icon": "📈"
             },
             {
                 "title": "تنظیمات",
                 "url": "/modules/shop/admin/settings.php",
-                "icon": "bi-gear"
+                "icon": "⚙️"
             }
         ]
     },
@@ -106,5 +109,8 @@
         "auto_update": false,
         "currency": "IRR",
         "currency_symbol": "تومان"
-    }
+    },
+    "icon": "🛒",
+    "menu_group": "commerce",
+    "sort_order": 30
 }

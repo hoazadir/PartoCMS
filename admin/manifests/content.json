@@ -1,0 +1,14 @@
+{
+    "slug": "content",
+    "name": "مدیریت محتوا",
+    "version": "1.0.0",
+    "description": "مدیریت مقالات، صفحات و محتوا",
+    "icon": "📝",
+    "menu_group": "content",
+    "sort_order": 1,
+    "menu": {
+        "title": "مدیریت محتوا",
+        "url": "/admin/admin.php",
+        "submenu": []
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "slug": "roles",
+    "name": "نقش‌ها",
+    "version": "1.0.0",
+    "description": "نقش‌ها و دسترسی‌ها",
+    "icon": "🛡",
+    "menu_group": "admin",
+    "sort_order": 12,
+    "is_core": true,
+    "menu": {
+        "title": "نقش‌ها",
+        "url": "/admin/roles.php",
+        "submenu": []
+    }
+}

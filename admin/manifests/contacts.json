@@ -1,0 +1,14 @@
+{
+    "slug": "contacts",
+    "name": "مخاطبین",
+    "version": "1.0.0",
+    "description": "مدیریت مخاطبین و دفترچه تلفن",
+    "icon": "📇",
+    "menu_group": "generated",
+    "sort_order": 500,
+    "menu": {
+        "title": "مخاطبین",
+        "url": "/modules/generated/contacts.php",
+        "submenu": []
+    }
+}

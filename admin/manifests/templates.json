@@ -1,0 +1,14 @@
+{
+    "slug": "templates",
+    "name": "مدیریت قالب‌ها",
+    "version": "1.0.0",
+    "description": "قالب‌های سایت",
+    "icon": "📦",
+    "menu_group": "appearance",
+    "sort_order": 7,
+    "menu": {
+        "title": "مدیریت قالب‌ها",
+        "url": "/admin/templates.php",
+        "submenu": []
+    }
+}
