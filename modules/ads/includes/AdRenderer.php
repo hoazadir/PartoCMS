@@ -84,6 +84,20 @@ class AdRenderer
         // فیلتر هدف‌گیری محتوا
         if (!$this->manager->getTargeting()->shouldShow($ad, $this->context)) return '';
 
+        // ═══ چک type قبل از display_mode ═══
+        $type = $ad['type'] ?? 'image';
+
+        switch ($type) {
+            case 'adsense':
+                return $this->renderAdsense($ad, $options);
+            case 'html':
+                return $this->renderHtmlAd($ad, $options);
+            case 'text':
+                return $this->renderTextAd($ad, $options);
+            // 'image' و 'slider' → برو به display_mode
+        }
+
+        // ═══ display_mode برای image/slider ═══
         $displayMode = $ad['display_mode'] ?? 'single';
 
         switch ($displayMode) {
@@ -111,6 +125,69 @@ class AdRenderer
 
         return '<div class="ad-slot ad-slot-single ' . $animClass . '"' . $attrs . '>'
              . $this->renderBanner($banners[0], $ad)
+             . '</div>';
+    }
+
+    /**
+     * رندر تبلیغ AdSense
+     */
+    private function renderAdsense(array $ad, array $options = []): string
+    {
+        $code = trim($ad['adsense_code'] ?? '');
+        if ($code === '') return '';
+
+        $animClass = $this->getAnimationClass($ad);
+        $attrs = $this->getContainerAttributes($ad);
+
+        return '<div class="ad-slot ad-slot-adsense ' . $animClass . '"' . $attrs . '>'
+             . $code
+             . '</div>';
+    }
+
+    /**
+     * رندر تبلیغ HTML خام
+     */
+    private function renderHtmlAd(array $ad, array $options = []): string
+    {
+        $html = $ad['html_content'] ?? '';
+        if (trim($html) === '') return '';
+
+        $animClass = $this->getAnimationClass($ad);
+        $attrs = $this->getContainerAttributes($ad);
+
+        return '<div class="ad-slot ad-slot-html ' . $animClass . '"' . $attrs . '>'
+             . $html
+             . '</div>';
+    }
+
+    /**
+     * رندر تبلیغ متنی
+     */
+    private function renderTextAd(array $ad, array $options = []): string
+    {
+        $title = trim($ad['title'] ?? '');
+        $text  = trim($ad['description'] ?? '');
+        $link  = trim($ad['target_url'] ?? '');
+
+        if ($title === '' && $text === '') return '';
+
+        $animClass = $this->getAnimationClass($ad);
+        $attrs = $this->getContainerAttributes($ad);
+
+        $inner = '';
+        if ($title !== '') {
+            $inner .= '<strong class="ad-text-title">' . htmlspecialchars($title) . '</strong>';
+        }
+        if ($text !== '') {
+            $inner .= '<p class="ad-text-desc">' . htmlspecialchars($text) . '</p>';
+        }
+
+        if ($link !== '') {
+            $inner = '<a href="' . htmlspecialchars($link) . '" target="_blank" rel="noopener">' . $inner . '</a>';
+        }
+
+        return '<div class="ad-slot ad-slot-text ' . $animClass . '"' . $attrs . '>'
+             . $inner
              . '</div>';
     }
 
