@@ -113,3 +113,24 @@ logs/mpdf/
 # ==================== استثنا: فونت‌های اصلی باید کامیت شوند ====================
 !assets/fonts/Vazirmatn-Regular.ttf
 !assets/fonts/Vazirmatn-Bold.ttf
+
+# ==================== فایل‌های آپلودی کاربران ====================
+# این‌ها خودکار ساخته می‌شوند و نباید در Git باشند
+assets/uploads/ads/
+assets/uploads/shop/
+assets/uploads/products/
+assets/uploads/images/
+assets/uploads/thumbnails/
+assets/uploads/editor/
+
+# استثنا: پوشه ریشه آپلود (نگه‌داشتن ساختار)
+!assets/uploads/.gitkeep
+
+# ==================== فایل‌های debug ====================
+admin/sidebar-debug.php
+admin/*-debug.php
+*-debug.php
+!debug_lang.php
+
+# ==================== فایل خالی main ====================
+/main
