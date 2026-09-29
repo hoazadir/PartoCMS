@@ -1,11 +1,13 @@
 <?php
 /**
- * PartoCMS - Ads Module - AdManager v2.0
+ * PartoCMS - Ads Module - AdManager v3.0
  * کلاس اصلی مدیریت تبلیغات — حرفه‌ای
  *
  * @author Hooman Oliaei
- * @version 2.0.0
+ * @version 3.0.0
  */
+
+require_once __DIR__ . '/AdEffects.php';
 
 class AdManager
 {
@@ -168,13 +170,27 @@ class AdManager
                 image_url, target_url, html_content, adsense_code, alt_text,
                 width, height, target_blank,
                 start_date, end_date, priority, status, language,
-                target_audience, max_impressions, max_clicks, created_by
+                target_audience, max_impressions, max_clicks, created_by,
+                display_mode, animation_type, animation_duration, animation_delay,
+                animation_easing, animation_loop,
+                autoplay, autoplay_interval, pause_on_hover, loop,
+                show_nav, show_dots, show_progress,
+                grid_columns, grid_gap,
+                container_type, container_selector,
+                hide_on_mobile, hide_on_desktop
             ) VALUES (
                 :title, :description, :type, :position_id, :campaign_id,
                 :image_url, :target_url, :html_content, :adsense_code, :alt_text,
                 :width, :height, :target_blank,
                 :start_date, :end_date, :priority, :status, :language,
-                :target_audience, :max_impressions, :max_clicks, :created_by
+                :target_audience, :max_impressions, :max_clicks, :created_by,
+                :display_mode, :animation_type, :animation_duration, :animation_delay,
+                :animation_easing, :animation_loop,
+                :autoplay, :autoplay_interval, :pause_on_hover, :loop,
+                :show_nav, :show_dots, :show_progress,
+                :grid_columns, :grid_gap,
+                :container_type, :container_selector,
+                :hide_on_mobile, :hide_on_desktop
             )
         ");
         $stmt->execute($this->prepareData($data, true));
@@ -206,7 +222,26 @@ class AdManager
                 language = :language,
                 target_audience = :target_audience,
                 max_impressions = :max_impressions,
-                max_clicks = :max_clicks
+                max_clicks = :max_clicks,
+                display_mode = :display_mode,
+                animation_type = :animation_type,
+                animation_duration = :animation_duration,
+                animation_delay = :animation_delay,
+                animation_easing = :animation_easing,
+                animation_loop = :animation_loop,
+                autoplay = :autoplay,
+                autoplay_interval = :autoplay_interval,
+                pause_on_hover = :pause_on_hover,
+                loop = :loop,
+                show_nav = :show_nav,
+                show_dots = :show_dots,
+                show_progress = :show_progress,
+                grid_columns = :grid_columns,
+                grid_gap = :grid_gap,
+                container_type = :container_type,
+                container_selector = :container_selector,
+                hide_on_mobile = :hide_on_mobile,
+                hide_on_desktop = :hide_on_desktop
             WHERE id = :id
         ");
         $params = $this->prepareData($data, false);
@@ -307,6 +342,12 @@ class AdManager
         // فیلتر تبلیغات خالی
         $ads = array_values(array_filter($ads, [$this, 'isValidAd']));
 
+        // ═══ لود بنرها برای هر تبلیغ ═══
+        foreach ($ads as &$ad) {
+            $ad['banners'] = $this->getBannersByAdId((int) $ad['id'], true);
+        }
+        unset($ad);
+
         $this->cacheSet($cacheKey, $ads, 300); // ۵ دقیقه
         return $ads;
     }
@@ -320,6 +361,13 @@ class AdManager
         switch ($type) {
             case 'image':
             case 'slider':
+                // اگر بنر دارد → معتبر
+                if (!empty($ad['banners'])) {
+                    foreach ($ad['banners'] as $b) {
+                        if (!empty($b['image_url'])) return true;
+                    }
+                }
+                // fallback به image_url ساده
                 return !empty($ad['image_url']);
             case 'html':
                 return !empty(trim($ad['html_content'] ?? ''));
@@ -482,12 +530,190 @@ class AdManager
     }
 
     // ═══════════════════════════════════════════════════════════
+    // بنرها (Ad Banners) — جدید در v3
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * دریافت بنرهای یک تبلیغ
+     */
+    public function getBannersByAdId(int $adId, bool $activeOnly = false): array
+    {
+        $sql = "SELECT * FROM ad_banners WHERE ad_id = ?";
+        if ($activeOnly) $sql .= " AND is_active = 1";
+        $sql .= " ORDER BY sort_order ASC, id ASC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$adId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * دریافت یک بنر
+     */
+    public function getBannerById(int $id): ?array
+    {
+        $stmt = $this->pdo->prepare("SELECT * FROM ad_banners WHERE id = ? LIMIT 1");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
+    }
+
+    /**
+     * ایجاد بنر جدید
+     */
+    public function createBanner(int $adId, array $data): int
+    {
+        // اگر sort_order نداد، آخرین + ۱
+        if (!isset($data['sort_order']) || $data['sort_order'] === '') {
+            $max = (int) $this->pdo->query("SELECT COALESCE(MAX(sort_order), -1) FROM ad_banners WHERE ad_id = $adId")->fetchColumn();
+            $data['sort_order'] = $max + 1;
+        }
+
+        $stmt = $this->pdo->prepare("
+            INSERT INTO ad_banners 
+            (ad_id, image_url, target_url, alt_text, title, description, sort_order, is_active)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->execute([
+            $adId,
+            $data['image_url'] ?? null,
+            $data['target_url'] ?? null,
+            $data['alt_text'] ?? null,
+            $data['title'] ?? null,
+            $data['description'] ?? null,
+            (int) $data['sort_order'],
+            !empty($data['is_active']) ? 1 : 0,
+        ]);
+
+        $this->cacheClear();
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * به‌روزرسانی بنر
+     */
+    public function updateBanner(int $id, array $data): bool
+    {
+        $stmt = $this->pdo->prepare("
+            UPDATE ad_banners SET
+                image_url = ?,
+                target_url = ?,
+                alt_text = ?,
+                title = ?,
+                description = ?,
+                sort_order = ?,
+                is_active = ?
+            WHERE id = ?
+        ");
+        $result = $stmt->execute([
+            $data['image_url'] ?? null,
+            $data['target_url'] ?? null,
+            $data['alt_text'] ?? null,
+            $data['title'] ?? null,
+            $data['description'] ?? null,
+            (int) ($data['sort_order'] ?? 0),
+            !empty($data['is_active']) ? 1 : 0,
+            $id,
+        ]);
+
+        $this->cacheClear();
+        return $result;
+    }
+
+    /**
+     * حذف بنر
+     */
+    public function deleteBanner(int $id): bool
+    {
+        $result = $this->pdo->prepare("DELETE FROM ad_banners WHERE id = ?")->execute([$id]);
+        $this->cacheClear();
+        return $result;
+    }
+
+    /**
+     * حذف همه بنرهای یک تبلیغ
+     */
+    public function deleteBannersByAdId(int $adId): int
+    {
+        $count = (int) $this->pdo->query("SELECT COUNT(*) FROM ad_banners WHERE ad_id = $adId")->fetchColumn();
+        $this->pdo->prepare("DELETE FROM ad_banners WHERE ad_id = ?")->execute([$adId]);
+        $this->cacheClear();
+        return $count;
+    }
+
+    /**
+     * تغییر ترتیب بنرها
+     */
+    public function reorderBanners(int $adId, array $order): bool
+    {
+        try {
+            $this->pdo->beginTransaction();
+            $stmt = $this->pdo->prepare("UPDATE ad_banners SET sort_order = ? WHERE id = ? AND ad_id = ?");
+            foreach ($order as $sortOrder => $bannerId) {
+                $stmt->execute([(int) $sortOrder, (int) $bannerId, $adId]);
+            }
+            $this->pdo->commit();
+            $this->cacheClear();
+            return true;
+        } catch (Throwable $e) {
+            $this->pdo->rollBack();
+            return false;
+        }
+    }
+
+    /**
+     * تکثیر بنر
+     */
+    public function duplicateBanner(int $id): ?int
+    {
+        $banner = $this->getBannerById($id);
+        if (!$banner) return null;
+
+        $adId = (int) $banner['ad_id'];
+        unset($banner['id']);
+        unset($banner['created_at']);
+        unset($banner['updated_at']);
+        $banner['title'] = ($banner['title'] ?? '') . ' (کپی)';
+        unset($banner['sort_order']);
+
+        return $this->createBanner($adId, $banner);
+    }
+
+    /**
+     * شمارش بنرهای یک تبلیغ
+     */
+    public function countBanners(int $adId, bool $activeOnly = false): int
+    {
+        $sql = "SELECT COUNT(*) FROM ad_banners WHERE ad_id = ?";
+        if ($activeOnly) $sql .= " AND is_active = 1";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$adId]);
+        return (int) $stmt->fetchColumn();
+    }
+
+    // ═══════════════════════════════════════════════════════════
     // توابع کمکی
     // ═══════════════════════════════════════════════════════════
 
     private function prepareData(array $data, bool $includeCreatedBy = false): array
     {
+        // اعتبارسنجی افکت‌ها
+        $animationType = $data['animation_type'] ?? 'fade';
+        if (!AdEffects::isValidAnimation($animationType)) {
+            $animationType = 'fade';
+        }
+
+        $displayMode = $data['display_mode'] ?? 'single';
+        if (!AdEffects::isValidDisplayMode($displayMode)) {
+            $displayMode = 'single';
+        }
+
+        $easing = $data['animation_easing'] ?? 'ease-in-out';
+        if (!AdEffects::isValidEasing($easing)) {
+            $easing = 'ease-in-out';
+        }
+
         $params = [
+            // پایه
             ':title'          => $data['title'] ?? '',
             ':description'    => $data['description'] ?? null,
             ':type'           => $data['type'] ?? 'image',
@@ -509,6 +735,35 @@ class AdManager
             ':target_audience'=> $data['target_audience'] ?? null,
             ':max_impressions'=> !empty($data['max_impressions']) ? (int) $data['max_impressions'] : null,
             ':max_clicks'     => !empty($data['max_clicks']) ? (int) $data['max_clicks'] : null,
+
+            // نمایش — جدید
+            ':display_mode'      => $displayMode,
+            ':animation_type'    => $animationType,
+            ':animation_duration'=> (int) ($data['animation_duration'] ?? 600),
+            ':animation_delay'   => (int) ($data['animation_delay'] ?? 0),
+            ':animation_easing'  => $easing,
+            ':animation_loop'    => !empty($data['animation_loop']) ? 1 : 0,
+
+            // اسلایدر — جدید
+            ':autoplay'          => !empty($data['autoplay']) ? 1 : 0,
+            ':autoplay_interval' => (int) ($data['autoplay_interval'] ?? 5000),
+            ':pause_on_hover'    => !empty($data['pause_on_hover']) ? 1 : 0,
+            ':loop'              => !empty($data['loop']) ? 1 : 0,
+            ':show_nav'          => !empty($data['show_nav']) ? 1 : 0,
+            ':show_dots'         => !empty($data['show_dots']) ? 1 : 0,
+            ':show_progress'     => !empty($data['show_progress']) ? 1 : 0,
+
+            // Grid / Stack — جدید
+            ':grid_columns'      => max(1, min(6, (int) ($data['grid_columns'] ?? 2))),
+            ':grid_gap'          => max(0, (int) ($data['grid_gap'] ?? 10)),
+
+            // Container — جدید
+            ':container_type'    => in_array($data['container_type'] ?? '', ['position', 'selector']) ? $data['container_type'] : 'position',
+            ':container_selector'=> !empty($data['container_selector']) ? trim($data['container_selector']) : null,
+
+            // Responsive — جدید
+            ':hide_on_mobile'    => !empty($data['hide_on_mobile']) ? 1 : 0,
+            ':hide_on_desktop'   => !empty($data['hide_on_desktop']) ? 1 : 0,
         ];
 
         if ($includeCreatedBy) {
