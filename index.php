@@ -1,23 +1,15 @@
 <?php
 require_once __DIR__ . '/config.php';
 
-// ═══ AdRenderer برای نمایش تبلیغات ═══
+// ═══ AdWidget v3 برای نمایش تبلیغات ═══
 $adsAvailable = false;
-$adRenderer = null;
-$adCss = '';
 
-$adsManagerFile = __DIR__ . '/modules/ads/includes/AdManager.php';
-$adsRendererFile = __DIR__ . '/modules/ads/includes/AdRenderer.php';
+$adsWidgetFile = __DIR__ . '/modules/ads/includes/AdWidget.php';
 
-if (file_exists($adsManagerFile) && file_exists($adsRendererFile)) {
+if (file_exists($adsWidgetFile)) {
     try {
-        require_once $adsManagerFile;
-        require_once $adsRendererFile;
-
-        $pdo = getDB();
-        $adManager = new AdManager($pdo);
-        $adRenderer = new AdRenderer($adManager);
-        $adCss = AdRenderer::getDefaultCss();
+        require_once $adsWidgetFile;
+        // AdWidget خودش AdManager و AdRenderer را load می‌کند
         $adsAvailable = true;
     } catch (Throwable $e) {
         error_log('Ads init error: ' . $e->getMessage());
@@ -149,35 +141,11 @@ $siteDescription = getSetting('site_description', 'ساخته شده با سیس
     html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
 
     /* ═══════════════════════════════════════════════════════════ */
-    /* تبلیغات */
+    /* تبلیغات — AdWidget v3 (۴۵ افکت + ۷ حالت) */
     /* ═══════════════════════════════════════════════════════════ */
-    <?= $adCss ?>
-
-    .ad-slot {
-        margin: 20px auto;
-        max-width: 100%;
-        text-align: center;
-        padding: 10px;
-    }
-    .ad-slot img {
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .ad-slot-header {
-        max-width: 728px;
-        margin: 20px auto;
-    }
-    .ad-slot-footer {
-        max-width: 728px;
-        margin: 40px auto;
-    }
-    .ad-slot-sidebar {
-        max-width: 300px;
-    }
-    .ad-slot-in-content {
-        max-width: 468px;
-        margin: 20px auto;
-    }
+    <?php if ($adsAvailable): ?>
+        <?= AdWidget::css() ?>
+    <?php endif; ?>
 
 </style>
 </head>
@@ -228,21 +196,8 @@ if ($menuHtml):
     </div>
 </section>
 
-<?php if ($adsAvailable && $adRenderer): ?>
-    <?php
-    // ═══ تبلیغ هدر (اسلایدر) — AdRenderer خودش فیلتر می‌کند ═══
-    $headerAds = $adManager->getActiveAdsForPosition('header');
-    
-    if (count($headerAds) === 1):
-        echo '<div class="ad-slot ad-slot-header">';
-        echo $adRenderer->renderAd($headerAds[0]);
-        echo '</div>';
-    elseif (count($headerAds) > 1):
-        echo '<div class="ad-slot ad-slot-header">';
-        echo $adRenderer->renderSlider($headerAds, ['autoplay' => true, 'interval' => 5000]);
-        echo '</div>';
-    endif;
-    ?>
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::header() ?>
 <?php endif; ?>
 
 <!-- دسته‌ها -->
@@ -339,6 +294,11 @@ if ($menuHtml):
 <footer style="background: #2c3e50; color: #bdc3c7; padding: 25px; text-align: center; font-size: 13px; margin-top: 50px;">
     © ۲۰۲۶ - <?= htmlspecialchars($siteName) ?>
 </footer>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::footer() ?>
+    <?= AdWidget::js() ?>
+<?php endif; ?>
 
 </body>
 </html>

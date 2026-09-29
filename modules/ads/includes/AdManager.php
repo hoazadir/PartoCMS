@@ -8,10 +8,12 @@
  */
 
 require_once __DIR__ . '/AdEffects.php';
+require_once __DIR__ . '/AdTargeting.php';
 
 class AdManager
 {
     private PDO $pdo;
+    private AdTargeting $targeting;
 
     /**
      * اندازه‌های استاندارد IAB
@@ -34,6 +36,15 @@ class AdManager
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
+        $this->targeting = new AdTargeting($pdo);
+    }
+
+    /**
+     * دسترسی به AdTargeting
+     */
+    public function getTargeting(): AdTargeting
+    {
+        return $this->targeting;
     }
 
     // ═══════════════════════════════════════════════════════════
@@ -173,11 +184,12 @@ class AdManager
                 target_audience, max_impressions, max_clicks, created_by,
                 display_mode, animation_type, animation_duration, animation_delay,
                 animation_easing, animation_loop,
-                autoplay, autoplay_interval, pause_on_hover, loop,
+                autoplay, autoplay_interval, pause_on_hover, `loop`,
                 show_nav, show_dots, show_progress,
                 grid_columns, grid_gap,
                 container_type, container_selector,
-                hide_on_mobile, hide_on_desktop
+                hide_on_mobile, hide_on_desktop,
+                target_mode, target_logic
             ) VALUES (
                 :title, :description, :type, :position_id, :campaign_id,
                 :image_url, :target_url, :html_content, :adsense_code, :alt_text,
@@ -190,7 +202,8 @@ class AdManager
                 :show_nav, :show_dots, :show_progress,
                 :grid_columns, :grid_gap,
                 :container_type, :container_selector,
-                :hide_on_mobile, :hide_on_desktop
+                :hide_on_mobile, :hide_on_desktop,
+                :target_mode, :target_logic
             )
         ");
         $stmt->execute($this->prepareData($data, true));
@@ -232,7 +245,7 @@ class AdManager
                 autoplay = :autoplay,
                 autoplay_interval = :autoplay_interval,
                 pause_on_hover = :pause_on_hover,
-                loop = :loop,
+                `loop` = :loop,
                 show_nav = :show_nav,
                 show_dots = :show_dots,
                 show_progress = :show_progress,
@@ -241,7 +254,9 @@ class AdManager
                 container_type = :container_type,
                 container_selector = :container_selector,
                 hide_on_mobile = :hide_on_mobile,
-                hide_on_desktop = :hide_on_desktop
+                hide_on_desktop = :hide_on_desktop,
+                target_mode = :target_mode,
+                target_logic = :target_logic
             WHERE id = :id
         ");
         $params = $this->prepareData($data, false);
@@ -342,9 +357,10 @@ class AdManager
         // فیلتر تبلیغات خالی
         $ads = array_values(array_filter($ads, [$this, 'isValidAd']));
 
-        // ═══ لود بنرها برای هر تبلیغ ═══
+        // ═══ لود بنرها و قواعد هدف‌گیری برای هر تبلیغ ═══
         foreach ($ads as &$ad) {
             $ad['banners'] = $this->getBannersByAdId((int) $ad['id'], true);
+            $ad['target_rules'] = $this->targeting->getRulesByAdId((int) $ad['id']);
         }
         unset($ad);
 
@@ -764,6 +780,12 @@ class AdManager
             // Responsive — جدید
             ':hide_on_mobile'    => !empty($data['hide_on_mobile']) ? 1 : 0,
             ':hide_on_desktop'   => !empty($data['hide_on_desktop']) ? 1 : 0,
+
+            // Target — جدید
+            ':target_mode'       => in_array($data['target_mode'] ?? 'all', ['all', 'manual', 'rules']) 
+                                     ? $data['target_mode'] : 'all',
+            ':target_logic'      => in_array($data['target_logic'] ?? 'AND', ['AND', 'OR']) 
+                                     ? $data['target_logic'] : 'AND',
         ];
 
         if ($includeCreatedBy) {
