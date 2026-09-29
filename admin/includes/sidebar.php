@@ -724,6 +724,34 @@ $baseSite  = SITE_URL;
     endif;
     ?>
 
+    <!-- ==================== تبلیغات (ماژول) ==================== -->
+    <?php
+    $adsMenuFile = dirname(__DIR__, 2) . '/modules/ads/menu.php';
+    if (file_exists($adsMenuFile)):
+        $adsMenu = include $adsMenuFile;
+        if (!empty($adsMenu)):
+            $isAdsGroup = strpos($currentPath, 'modules/ads') !== false;
+    ?>
+    <div class="menu-group <?= $isAdsGroup ? 'open has-active' : '' ?>" data-group="ads">
+        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
+            <span class="group-icon"><?= $adsMenu['icon'] ?? '📢' ?></span>
+            <span class="group-title"><?= htmlspecialchars($adsMenu['title'] ?? 'تبلیغات') ?></span>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="menu-group-items">
+            <?php foreach ($adsMenu['submenu'] as $sub): ?>
+                <a href="<?= htmlspecialchars($sub['url']) ?>" class="<?= strpos($currentPath, basename($sub['url'], '.php')) !== false ? 'active' : '' ?>" onclick="closeMobileSidebar()">
+                    <span class="item-icon"><?= $sub['icon'] ?? '•' ?></span>
+                    <span><?= htmlspecialchars($sub['title']) ?></span>
+                </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php
+        endif;
+    endif;
+    ?>
+
     <!-- ==================== SEO ==================== -->
     <?php if ($canSeo): ?>
     <a href="<?= $baseAdmin ?>/seo.php" class="menu-single <?= $currentFile === 'seo.php' ? 'active' : '' ?>" onclick="closeMobileSidebar()">

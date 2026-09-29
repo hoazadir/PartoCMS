@@ -1,0 +1,14 @@
+{
+    "slug": "forms",
+    "name": "فرم‌ساز",
+    "version": "1.0.0",
+    "description": "ساخت فرم‌های پویا",
+    "icon": "📋",
+    "menu_group": "tools",
+    "sort_order": 5,
+    "menu": {
+        "title": "فرم‌ساز",
+        "url": "/admin/forms.php",
+        "submenu": []
+    }
+}

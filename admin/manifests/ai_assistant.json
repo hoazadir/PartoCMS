@@ -1,0 +1,16 @@
+{
+    "slug": "ai_assistant",
+    "name": "دستیار هوشمند",
+    "version": "1.0.0",
+    "description": "دستیار هوشمند مبتنی بر Ollama",
+    "icon": "🤖",
+    "menu_group": "ai",
+    "sort_order": 150,
+    "menu": {
+        "title": "دستیار هوشمند",
+        "url": "/admin/ai_settings.php",
+        "submenu": [
+            {"title": "تنظیمات دستیار", "url": "/admin/ai_settings.php", "icon": "⚙️"}
+        ]
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "slug": "settings",
+    "name": "تنظیمات سایت",
+    "version": "1.0.0",
+    "description": "پیکربندی کلی سایت",
+    "icon": "⚙️",
+    "menu_group": "admin",
+    "sort_order": 14,
+    "is_core": true,
+    "menu": {
+        "title": "تنظیمات سایت",
+        "url": "/admin/settings.php",
+        "submenu": []
+    }
+}

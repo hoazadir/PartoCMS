@@ -1,0 +1,14 @@
+{
+    "slug": "comments",
+    "name": "دیدگاه‌ها",
+    "version": "1.0.0",
+    "description": "مدیریت نظرات کاربران",
+    "icon": "💬",
+    "menu_group": "content",
+    "sort_order": 4,
+    "menu": {
+        "title": "دیدگاه‌ها",
+        "url": "/admin/comments.php",
+        "submenu": []
+    }
+}

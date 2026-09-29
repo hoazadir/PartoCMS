@@ -1,0 +1,15 @@
+{
+    "slug": "backups",
+    "name": "پشتیبان‌گیری",
+    "version": "1.0.0",
+    "description": "بکاپ و بازیابی",
+    "icon": "💾",
+    "menu_group": "admin",
+    "sort_order": 15,
+    "is_core": true,
+    "menu": {
+        "title": "پشتیبان‌گیری",
+        "url": "/admin/backups.php",
+        "submenu": []
+    }
+}

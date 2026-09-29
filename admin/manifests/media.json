@@ -1,0 +1,14 @@
+{
+    "slug": "media",
+    "name": "رسانه‌ها",
+    "version": "1.0.0",
+    "description": "گالری تصاویر و فایل‌ها",
+    "icon": "🖼",
+    "menu_group": "content",
+    "sort_order": 3,
+    "menu": {
+        "title": "رسانه‌ها",
+        "url": "/admin/media.php",
+        "submenu": []
+    }
+}

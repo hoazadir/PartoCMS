@@ -1,0 +1,14 @@
+{
+    "slug": "backup",
+    "name": "بکاپ خودکار",
+    "version": "1.0.0",
+    "description": "پشتیبان‌گیری خودکار",
+    "icon": "💾",
+    "menu_group": "backup_auto",
+    "sort_order": 103,
+    "menu": {
+        "title": "بکاپ خودکار",
+        "url": "/admin/backup_manager.php",
+        "submenu": []
+    }
+}

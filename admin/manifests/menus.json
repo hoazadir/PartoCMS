@@ -1,0 +1,14 @@
+{
+    "slug": "menus",
+    "name": "منوساز",
+    "version": "1.0.0",
+    "description": "ساخت منوهای سایت",
+    "icon": "🔗",
+    "menu_group": "tools",
+    "sort_order": 6,
+    "menu": {
+        "title": "منوساز",
+        "url": "/admin/menus.php",
+        "submenu": []
+    }
+}

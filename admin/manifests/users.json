@@ -1,0 +1,15 @@
+{
+    "slug": "users",
+    "name": "کاربران",
+    "version": "1.0.0",
+    "description": "مدیریت کاربران",
+    "icon": "👥",
+    "menu_group": "admin",
+    "sort_order": 11,
+    "is_core": true,
+    "menu": {
+        "title": "کاربران",
+        "url": "/admin/users.php",
+        "submenu": []
+    }
+}

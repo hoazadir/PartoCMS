@@ -1,0 +1,14 @@
+{
+    "slug": "reports",
+    "name": "گزارش‌ها",
+    "version": "1.0.0",
+    "description": "آمار و نمودارها",
+    "icon": "📈",
+    "menu_group": "reports",
+    "sort_order": 9,
+    "menu": {
+        "title": "گزارش‌ها",
+        "url": "/admin/reports.php",
+        "submenu": []
+    }
+}

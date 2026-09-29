@@ -1,0 +1,14 @@
+{
+    "slug": "categories",
+    "name": "دسته‌بندی‌ها",
+    "version": "1.0.0",
+    "description": "مدیریت دسته‌بندی محتوا",
+    "icon": "🏷",
+    "menu_group": "content",
+    "sort_order": 2,
+    "menu": {
+        "title": "دسته‌بندی‌ها",
+        "url": "/admin/categories.php",
+        "submenu": []
+    }
+}

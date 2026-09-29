@@ -1,0 +1,20 @@
+{
+    "slug": "translation",
+    "name": "ترجمه محتوا",
+    "version": "1.0.0",
+    "description": "ترجمه خودکار محتوا",
+    "icon": "🔄",
+    "menu_group": "translation",
+    "sort_order": 101,
+    "menu": {
+        "title": "ترجمه محتوا",
+        "url": "/admin/content_translate.php",
+        "submenu": [
+            {"title": "ترجمه محتوا", "url": "/admin/content_translate.php", "icon": "🌐"},
+            {"title": "بازنگری", "url": "/admin/content_review.php", "icon": "👁️"},
+            {"title": "تنظیمات ترجمه", "url": "/admin/translator_settings.php", "icon": "⚙️"},
+            {"title": "صف ترجمه", "url": "/admin/queue.php", "icon": "📋"},
+            {"title": "راه‌اندازی Cron", "url": "/admin/cron_setup.php", "icon": "⏰"}
+        ]
+    }
+}
