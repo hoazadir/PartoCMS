@@ -26,6 +26,7 @@ class AdWidget
     private static ?AdRenderer $renderer = null;
     private static bool $cssRendered = false;
     private static bool $jsRendered = false;
+    private static bool $contextDetected = false;
 
     /**
      * راه‌اندازی renderer
@@ -40,10 +41,74 @@ class AdWidget
             $pdo = getDB();
             $manager = new AdManager($pdo);
             self::$renderer = new AdRenderer($manager, true);
+
+            // تشخیص خودکار context صفحه فعلی (بدون تغییر در index/post/category)
+            self::detectContext(self::$renderer, $pdo);
+
             return self::$renderer;
         } catch (Throwable $e) {
             error_log('AdWidget init error: ' . $e->getMessage());
             return null;
+        }
+    }
+
+    /**
+     * تشخیص خودکار context صفحه فعلی
+     *
+     * بر اساس SCRIPT_NAME و پارامترهای URL، context مناسب را
+     * روی AdRenderer ست می‌کند. این متد ساختار index/post/category
+     * را دست‌نخورده نگه می‌دارد و فقط AdWidget را مسئول تشخیص می‌کند.
+     *
+     * @param AdRenderer $renderer
+     * @param PDO        $pdo
+     */
+    private static function detectContext(AdRenderer $renderer, PDO $pdo): void
+    {
+        if (self::$contextDetected) {
+            return;
+        }
+        self::$contextDetected = true;
+
+        try {
+            $script = basename($_SERVER['SCRIPT_NAME'] ?? '');
+
+            // ─── post.php → context از محتوا ───
+            if ($script === 'post.php') {
+                $id   = (int) ($_GET['id']   ?? 0);
+                $slug = trim($_GET['slug'] ?? '');
+
+                if ($id < 1 && $slug !== '') {
+                    $stmt = $pdo->prepare("SELECT id FROM content_items WHERE slug = ? LIMIT 1");
+                    $stmt->execute([$slug]);
+                    $id = (int) ($stmt->fetchColumn() ?: 0);
+                }
+
+                if ($id > 0) {
+                    $renderer->setContextFromContent($id, 'post');
+                }
+                return;
+            }
+
+            // ─── category.php → context از دسته ───
+            if ($script === 'category.php') {
+                $slug = trim($_GET['slug'] ?? '');
+
+                if ($slug !== '') {
+                    $stmt = $pdo->prepare("SELECT id FROM categories WHERE slug = ? AND is_active = 1 LIMIT 1");
+                    $stmt->execute([$slug]);
+                    $catId = (int) ($stmt->fetchColumn() ?: 0);
+
+                    if ($catId > 0) {
+                        $renderer->setContextFromCategory($catId);
+                    }
+                }
+                return;
+            }
+
+            // ─── index.php و بقیه → context خالی (پیش‌فرض) ───
+            // AdRenderer از قبل empty context دارد، کاری لازم نیست
+        } catch (Throwable $e) {
+            error_log('AdWidget detectContext error: ' . $e->getMessage());
         }
     }
 

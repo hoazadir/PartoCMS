@@ -1,6 +1,18 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// ═══ AdWidget v3 برای نمایش تبلیغات ═══
+$adsAvailable = false;
+$adsWidgetFile = __DIR__ . '/modules/ads/includes/AdWidget.php';
+if (file_exists($adsWidgetFile)) {
+    try {
+        require_once $adsWidgetFile;
+        $adsAvailable = true;
+    } catch (Throwable $e) {
+        error_log('Ads init error: ' . $e->getMessage());
+    }
+}
+
 $slug = $_GET['slug'] ?? '';
 if (!$slug) {
     header('Location: index.php');
@@ -163,6 +175,10 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     html[dir="ltr"] .article .content blockquote { border-right: none; border-left: 4px solid #3498db; border-radius: 8px 0 0 8px; }
 
 </style>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::css() ?>
+<?php endif; ?>
 </head>
 <body>
 
@@ -176,6 +192,10 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::header() ?>
+<?php endif; ?>
 
 <!-- هدر دسته -->
 <div class="category-header">
@@ -252,6 +272,11 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 <footer style="background: #2c3e50; color: #bdc3c7; padding: 25px; text-align: center; font-size: 13px;">
     © ۲۰۲۶ - <?= htmlspecialchars($siteName) ?>
 </footer>
+
+<?php if ($adsAvailable): ?>
+    <?= AdWidget::footer() ?>
+    <?= AdWidget::js() ?>
+<?php endif; ?>
 
 </body>
 </html>
