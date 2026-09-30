@@ -394,6 +394,25 @@ body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
                     مدل مورد نظر خود را دانلود کنید. <strong>مدل‌های پیشنهادی:</strong>
                 </div>
 
+                <div style="margin-bottom:8px;font-size:12px;color:#64748b;font-weight:bold;">
+                    🇮🇷 مدل‌های فارسی تخصصی (کیفیت بالا):
+                </div>
+                <div style="margin-bottom:15px">
+                    <span class="suggestion-tag" style="background:#dcfce7;border-color:#16a34a;color:#166534;" onclick="setNewLlmModel('partai/dorna-llama3:8b-instruct-q8_0')">
+                        ⭐ dorna-llama3:8b (8.5GB) — 🇮🇷 فارسی تخصصی
+                    </span>
+                    <span class="suggestion-tag" style="background:#dbeafe;border-color:#2563eb;color:#1e40af;" onclick="setNewLlmModel('aya-expanse:8b')">
+                        ⭐ aya-expanse:8b (4.7GB) — 🌍 چندزبانه ۲۳ زبان
+                    </span>
+                </div>
+
+                <div style="margin-bottom:15px;font-size:11.5px;color:#64748b;line-height:1.8;background:#f1f5f9;padding:10px;border-radius:6px;border-right:3px solid #16a34a;">
+                    <strong>💡 نکته:</strong> مدل <code>dorna-llama3:8b-instruct-q8_0</code> تنها فرمت موجود در رجیستری Ollama است. این مدل به فضای ~۸.۵GB نیاز دارد.
+                </div>
+
+                <div style="margin-bottom:8px;font-size:12px;color:#64748b;font-weight:bold;">
+                    🌍 مدل‌های عمومی:
+                </div>
                 <div style="margin-bottom:15px">
                     <span class="suggestion-tag" onclick="setNewLlmModel('qwen2.5:1.5b')">⭐ qwen2.5:1.5b (1GB)</span>
                     <span class="suggestion-tag" onclick="setNewLlmModel('qwen2.5:3b')">qwen2.5:3b (2GB)</span>
@@ -577,16 +596,21 @@ body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
         <div class="header">📖 راهنمای انتخاب مدل</div>
         <div class="body">
             <div class="guide-box">
+                <strong>🇮🇷 مدل‌های فارسی تخصصی (توصیه شده برای محتوای فارسی):</strong><br>
+                <code>partai/dorna-llama3:8b-instruct-q8_0</code> — قدرتمندترین LLM فارسی زیر ۱۰B (توسط Part AI، ۸.۵GB، نیازمند ۱۶GB+ RAM) ⭐<br>
+                <code>aya-expanse:8b</code> — چندزبانه با پشتیبانی ۲۳ زبان از جمله فارسی (توسط Cohere، ۴.۷GB)<br>
+                <span style="color:#16a34a;font-size:11px;">✅ برای تولید متن تبلیغاتی و محتوای فارسی، این مدل‌ها بهترین کیفیت را می‌دهند</span><br><br>
+
                 <strong>📱 برای Termux (موبایل):</strong><br>
                 <code>qwen2.5:1.5b</code> یا <code>llama3.2:1b</code> یا <code>tinyllama</code> — سبک و سریع<br><br>
 
                 <strong>💻 برای VPS با 4GB RAM:</strong><br>
-                <code>qwen2.5:3b</code> یا <code>llama3.2:3b</code> — متعادل<br><br>
+                <code>qwen2.5:3b</code> یا <code>llama3.2:3b</code> یا <code>gemma2:2b</code> — متعادل<br><br>
 
                 <strong>🖥 برای سرور با 8GB+ RAM:</strong><br>
-                <code>llama3.1:latest</code> یا <code>qwen2.5:7b</code> — دقیق و کامل<br><br>
+                <code>llama3.1:latest</code> یا <code>qwen2.5:7b</code> یا <code>partai/dorna-llama3:8b-instruct-q8_0</code> — دقیق و کامل (نیازمند ۱۶GB+ RAM)<br><br>
 
-                <strong>💡 نکته:</strong> مدل‌های کوچک‌تر سریع‌تر هستند اما تحلیل کم‌دقت‌تری دارند.
+                <strong>💡 نکته:</strong> مدل‌های کوچک‌تر سریع‌تر هستند اما تحلیل کم‌دقت‌تری دارند. برای زبان فارسی، مدل‌های تخصصی (dorna، aya) انتخاب بهتری هستند.
             </div>
         </div>
     </div>
