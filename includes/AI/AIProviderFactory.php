@@ -6,9 +6,14 @@
 class AIProviderFactory {
 
     private static $llmProviders = [
+        // ─── Local ───
         'ollama' => 'OllamaProvider',
-        'openai' => 'OpenAIProvider',
-        'gemini' => 'GeminiProvider',
+
+        // ─── Cloud (🆕 2026-10-01) ───
+        'groq'       => 'GroqProvider',
+        'openai'     => 'OpenAIProvider',
+        'gemini'     => 'GeminiProvider',
+        'openrouter' => 'OpenRouterProvider',
     ];
 
     private static $sttProviders = [
@@ -99,6 +104,29 @@ class AIProviderFactory {
                     'api_key' => getSetting('ai_openai_key', ''),
                     'model' => getSetting('ai_openai_model', 'gpt-4o-mini'),
                 ];
+
+            // ═══ 🆕 Cloud Providers ═══
+            case 'groq':
+                return [
+                    'api_key' => getSetting('ai_groq_api_key', ''),
+                    'model'   => getSetting('ai_groq_model', 'llama-3.3-70b-versatile'),
+                    'timeout' => (int) getSetting('ai_groq_timeout', '60'),
+                ];
+
+            case 'gemini':
+                return [
+                    'api_key' => getSetting('ai_gemini_api_key', ''),
+                    'model'   => getSetting('ai_gemini_model', 'gemini-2.5-flash'),
+                    'timeout' => (int) getSetting('ai_gemini_timeout', '60'),
+                ];
+
+            case 'openrouter':
+                return [
+                    'api_key' => getSetting('ai_openrouter_api_key', ''),
+                    'model'   => getSetting('ai_openrouter_model', 'meta-llama/llama-3.3-70b-instruct:free'),
+                    'timeout' => (int) getSetting('ai_openrouter_timeout', '60'),
+                ];
+
             default:
                 return [];
         }
