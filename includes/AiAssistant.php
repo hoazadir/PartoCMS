@@ -305,6 +305,75 @@ class AiAssistant {
     }
 
     /**
+     * چت با خروجی JSON تضمینی
+     * مناسب برای مواردی که خروجی ساختاریافته لازم است
+     */
+    public function chatJson(array $messages, array $options = []): array {
+        if (!$this->enabled) {
+            return ['ok' => false, 'error' => 'دستیار هوشمند غیرفعال است'];
+        }
+
+        try {
+            $prompt = $this->buildChatPrompt($messages);
+
+            $payload = [
+                'model' => $this->model,
+                'prompt' => $prompt,
+                'stream' => false,
+                'keep_alive' => '30m',
+                'format' => 'json',
+                'options' => [
+                    'temperature' => $options['temperature'] ?? 0.7,
+                    'num_predict' => $options['num_predict'] ?? 1500,
+                ],
+            ];
+
+            $ch = curl_init("{$this->endpoint}/api/generate");
+            curl_setopt_array($ch, [
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($payload),
+                CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => $this->timeout,
+                CURLOPT_CONNECTTIMEOUT => 5,
+            ]);
+
+            $resp = curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $err = curl_error($ch);
+
+            if ($code !== 200) {
+                return ['ok' => false, 'error' => "خطا در ارتباط (HTTP {$code}): {$err}"];
+            }
+
+            $data = json_decode($resp, true);
+            if (!isset($data['response'])) {
+                return ['ok' => false, 'error' => 'پاسخ نامعتبر از Ollama'];
+            }
+
+            $responseText = trim($data['response']);
+            $parsed = json_decode($responseText, true);
+
+            if (!is_array($parsed)) {
+                return [
+                    'ok' => false,
+                    'error' => 'پاسخ JSON قابل پارس نبود',
+                    'raw' => $responseText,
+                ];
+            }
+
+            return [
+                'ok' => true,
+                'data' => $parsed,
+                'raw' => $responseText,
+                'model' => $this->model,
+            ];
+        } catch (Throwable $e) {
+            return ['ok' => false, 'error' => $e->getMessage()];
+        }
+    }
+
+    /**
      * ساخت پرامپت از تاریخچه پیام‌ها
      */
     private function buildChatPrompt(array $messages): string {
