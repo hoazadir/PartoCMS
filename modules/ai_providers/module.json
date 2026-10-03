@@ -1,0 +1,12 @@
+{
+    "slug": "ai_providers",
+    "name": "ارائه‌دهندگان AI",
+    "icon": "☁️",
+    "menu_group": "ai",
+    "sort_order": 151,
+    "is_core": 0,
+    "pages": {
+        "providers": "admin/ai_providers.php"
+    },
+    "description": "مدیریت ارائه‌دهندگان هوش مصنوعی ابری (Groq, Gemini, OpenRouter) با Fallback خودکار"
+}

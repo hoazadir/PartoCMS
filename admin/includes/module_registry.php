@@ -13,6 +13,23 @@ class ModuleRegistry {
     private $registry = null;
 
     private static $defaultMap = [
+        // 🆕 AI Providers (2026-10-03)
+        'ai_providers' => [
+            'name' => 'ارائه‌دهندگان AI',
+            'icon' => '☁️',
+            'menu_group' => 'ai',
+            'sort_order' => 151,
+            'is_core' => 0,
+            'pages' => [
+                'providers' => 'admin/ai_providers.php',
+            ],
+            'includes' => [
+                'ai_gateway'      => 'includes/AI/AIGateway.php',
+                'ai_environment'  => 'includes/AI/AIEnvironment.php',
+                'ai_proxy'        => 'includes/AI/AIProxyManager.php',
+                'ai_circuit'      => 'includes/AI/AICircuitBreaker.php',
+            ],
+        ],
         'i18n' => [
             'name' => 'چند زبانی',
             'icon' => '🌍',
