@@ -8,6 +8,7 @@
  */
 
 require_once __DIR__ . '/AdEffects.php';
+require_once __DIR__ . '/AdObfuscator.php';
 
 class AdRenderer
 {
@@ -84,6 +85,22 @@ class AdRenderer
         // فیلتر هدف‌گیری محتوا
         if (!$this->manager->getTargeting()->shouldShow($ad, $this->context)) return '';
 
+        // ═══ تولید HTML اصلی ═══
+        $html = $this->buildAdHtml($ad, $options);
+
+        // 🆕 Anti-AdBlock: تزریق پویا با Base64
+        if (AdObfuscator::isEnabled() && $html !== '') {
+            return AdObfuscator::obfuscateHtml($html);
+        }
+
+        return $html;
+    }
+
+    /**
+     * 🆕 ساخت HTML اصلی تبلیغ (بدون obfuscation)
+     */
+    private function buildAdHtml(array $ad, array $options = []): string
+    {
         // ═══ چک type قبل از display_mode ═══
         $type = $ad['type'] ?? 'image';
 
@@ -123,7 +140,7 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        return '<div class="ad-slot ad-slot-single ' . $animClass . '"' . $attrs . '>'
+        return '<div class="pcms-slot pcms-slot-single ' . $animClass . '"' . $attrs . '>'
              . $this->renderBanner($banners[0], $ad)
              . '</div>';
     }
@@ -139,7 +156,7 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        return '<div class="ad-slot ad-slot-adsense ' . $animClass . '"' . $attrs . '>'
+        return '<div class="pcms-slot pcms-slot-adsense ' . $animClass . '"' . $attrs . '>'
              . $code
              . '</div>';
     }
@@ -155,7 +172,7 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        return '<div class="ad-slot ad-slot-html ' . $animClass . '"' . $attrs . '>'
+        return '<div class="pcms-slot pcms-slot-html ' . $animClass . '"' . $attrs . '>'
              . $html
              . '</div>';
     }
@@ -176,17 +193,17 @@ class AdRenderer
 
         $inner = '';
         if ($title !== '') {
-            $inner .= '<strong class="ad-text-title">' . htmlspecialchars($title) . '</strong>';
+            $inner .= '<strong class="pcms-text-title">' . htmlspecialchars($title) . '</strong>';
         }
         if ($text !== '') {
-            $inner .= '<p class="ad-text-desc">' . htmlspecialchars($text) . '</p>';
+            $inner .= '<p class="pcms-text-desc">' . htmlspecialchars($text) . '</p>';
         }
 
         if ($link !== '') {
             $inner = '<a href="' . htmlspecialchars($link) . '" target="_blank" rel="noopener">' . $inner . '</a>';
         }
 
-        return '<div class="ad-slot ad-slot-text ' . $animClass . '"' . $attrs . '>'
+        return '<div class="pcms-slot pcms-slot-text ' . $animClass . '"' . $attrs . '>'
              . $inner
              . '</div>';
     }
@@ -197,7 +214,7 @@ class AdRenderer
         if (empty($banners)) return '';
         if (count($banners) === 1) return $this->renderSingle($ad, $options);
 
-        $sliderId = 'ad-slider-' . (int) $ad['id'];
+        $sliderId = 'pcms-slider-' . (int) $ad['id'];
         $settings = [
             'autoplay'     => !empty($ad['autoplay']),
             'interval'     => (int) ($ad['autoplay_interval'] ?? 5000),
@@ -214,35 +231,35 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        $html = '<div class="ad-slot ad-slot-slider ' . $animClass . '"' . $attrs . '>';
-        $html .= '<div class="ad-slider" id="' . $sliderId . '" data-ad-slider=\'' 
+        $html = '<div class="pcms-slot pcms-slot-slider ' . $animClass . '"' . $attrs . '>';
+        $html .= '<div class="pcms-slider" id="' . $sliderId . '" data-pcms-slider=\'' 
                . htmlspecialchars(json_encode($settings, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . '\'>';
         
-        $html .= '<div class="ad-slider-track">';
+        $html .= '<div class="pcms-slider-track">';
         foreach ($banners as $i => $banner) {
             $active = $i === 0 ? ' active' : '';
-            $html .= '<div class="ad-slide' . $active . '" data-slide="' . $i . '">';
+            $html .= '<div class="pcms-slide' . $active . '" data-slide="' . $i . '">';
             $html .= $this->renderBanner($banner, $ad);
             $html .= '</div>';
         }
         $html .= '</div>';
 
         if ($settings['showNav']) {
-            $html .= '<button class="ad-nav ad-nav-prev" type="button" aria-label="قبلی">‹</button>';
-            $html .= '<button class="ad-nav ad-nav-next" type="button" aria-label="بعدی">›</button>';
+            $html .= '<button class="pcms-nav pcms-nav-prev" type="button" aria-label="قبلی">‹</button>';
+            $html .= '<button class="pcms-nav pcms-nav-next" type="button" aria-label="بعدی">›</button>';
         }
 
         if ($settings['showDots']) {
-            $html .= '<div class="ad-dots">';
+            $html .= '<div class="pcms-dots">';
             foreach ($banners as $i => $banner) {
                 $active = $i === 0 ? ' active' : '';
-                $html .= '<button type="button" class="ad-dot' . $active . '" data-slide="' . $i . '"></button>';
+                $html .= '<button type="button" class="pcms-dot' . $active . '" data-slide="' . $i . '"></button>';
             }
             $html .= '</div>';
         }
 
         if ($settings['showProgress'] && $settings['autoplay']) {
-            $html .= '<div class="ad-progress"><div class="ad-progress-bar"></div></div>';
+            $html .= '<div class="pcms-progress"><div class="pcms-progress-bar"></div></div>';
         }
 
         $html .= '</div></div>';
@@ -254,7 +271,7 @@ class AdRenderer
         $banners = $this->getBanners($ad);
         if (empty($banners)) return '';
 
-        $carouselId = 'ad-carousel-' . (int) $ad['id'];
+        $carouselId = 'pcms-carousel-' . (int) $ad['id'];
         $settings = [
             'autoplay'     => !empty($ad['autoplay']),
             'interval'     => (int) ($ad['autoplay_interval'] ?? 5000),
@@ -269,30 +286,30 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        $html = '<div class="ad-slot ad-slot-carousel ' . $animClass . '"' . $attrs . '>';
-        $html .= '<div class="ad-carousel" id="' . $carouselId . '" data-ad-carousel=\'' 
+        $html = '<div class="pcms-slot pcms-slot-carousel ' . $animClass . '"' . $attrs . '>';
+        $html .= '<div class="pcms-carousel" id="' . $carouselId . '" data-pcms-carousel=\'' 
                . htmlspecialchars(json_encode($settings, JSON_UNESCAPED_UNICODE), ENT_QUOTES) . '\'>';
 
-        $html .= '<div class="ad-carousel-main">';
+        $html .= '<div class="pcms-carousel-main">';
         foreach ($banners as $i => $banner) {
             $active = $i === 0 ? ' active' : '';
-            $html .= '<div class="ad-carousel-slide' . $active . '" data-slide="' . $i . '">';
+            $html .= '<div class="pcms-carousel-slide' . $active . '" data-slide="' . $i . '">';
             $html .= $this->renderBanner($banner, $ad);
             $html .= '</div>';
         }
         $html .= '</div>';
 
         if ($settings['showNav']) {
-            $html .= '<button class="ad-nav ad-nav-prev" type="button" aria-label="قبلی">‹</button>';
-            $html .= '<button class="ad-nav ad-nav-next" type="button" aria-label="بعدی">›</button>';
+            $html .= '<button class="pcms-nav pcms-nav-prev" type="button" aria-label="قبلی">‹</button>';
+            $html .= '<button class="pcms-nav pcms-nav-next" type="button" aria-label="بعدی">›</button>';
         }
 
         if (count($banners) > 1) {
-            $html .= '<div class="ad-carousel-thumbs">';
+            $html .= '<div class="pcms-carousel-thumbs">';
             foreach ($banners as $i => $banner) {
                 $active = $i === 0 ? ' active' : '';
                 $img = htmlspecialchars($banner['image_url'] ?? '');
-                $html .= '<button type="button" class="ad-thumb' . $active . '" data-slide="' . $i . '">';
+                $html .= '<button type="button" class="pcms-thumb' . $active . '" data-slide="' . $i . '">';
                 $html .= '<img src="' . $img . '" alt="" loading="lazy">';
                 $html .= '</button>';
             }
@@ -312,7 +329,7 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        return '<div class="ad-slot ad-slot-rotation ' . $animClass . '"' . $attrs . '>'
+        return '<div class="pcms-slot pcms-slot-rotation ' . $animClass . '"' . $attrs . '>'
              . $this->renderBanner($selected, $ad)
              . '</div>';
     }
@@ -328,11 +345,11 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        $html = '<div class="ad-slot ad-slot-grid ' . $animClass . '"' . $attrs . '>';
-        $html .= '<div class="ad-grid" style="display:grid;grid-template-columns:repeat(' 
+        $html = '<div class="pcms-slot pcms-slot-grid ' . $animClass . '"' . $attrs . '>';
+        $html .= '<div class="pcms-grid" style="display:grid;grid-template-columns:repeat(' 
                . $columns . ',1fr);gap:' . $gap . 'px;">';
         foreach ($banners as $banner) {
-            $html .= '<div class="ad-grid-item">' . $this->renderBanner($banner, $ad) . '</div>';
+            $html .= '<div class="pcms-grid-item">' . $this->renderBanner($banner, $ad) . '</div>';
         }
         $html .= '</div></div>';
         return $html;
@@ -347,10 +364,10 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        $html = '<div class="ad-slot ad-slot-stack ' . $animClass . '"' . $attrs . '>';
-        $html .= '<div class="ad-stack" style="display:flex;flex-direction:column;gap:' . $gap . 'px;">';
+        $html = '<div class="pcms-slot pcms-slot-stack ' . $animClass . '"' . $attrs . '>';
+        $html .= '<div class="pcms-stack" style="display:flex;flex-direction:column;gap:' . $gap . 'px;">';
         foreach ($banners as $banner) {
-            $html .= '<div class="ad-stack-item">' . $this->renderBanner($banner, $ad) . '</div>';
+            $html .= '<div class="pcms-stack-item">' . $this->renderBanner($banner, $ad) . '</div>';
         }
         $html .= '</div></div>';
         return $html;
@@ -367,13 +384,13 @@ class AdRenderer
         $animClass = $this->getAnimationClass($ad);
         $attrs = $this->getContainerAttributes($ad);
 
-        $html = '<div class="ad-slot ad-slot-marquee ' . $animClass . '"' . $attrs . '>';
-        $html .= '<div class="ad-marquee" data-duration="' . $duration . 's">';
-        $html .= '<div class="ad-marquee-track" style="animation-duration:' . $duration . 's;">';
+        $html = '<div class="pcms-slot pcms-slot-marquee ' . $animClass . '"' . $attrs . '>';
+        $html .= '<div class="pcms-marquee" data-duration="' . $duration . 's">';
+        $html .= '<div class="pcms-marquee-track" style="animation-duration:' . $duration . 's;">';
 
         foreach ([1, 2] as $repeat) {
             foreach ($banners as $banner) {
-                $html .= '<div class="ad-marquee-item">' . $this->renderBanner($banner, $ad) . '</div>';
+                $html .= '<div class="pcms-marquee-item">' . $this->renderBanner($banner, $ad) . '</div>';
             }
         }
 
@@ -408,11 +425,11 @@ class AdRenderer
         $alt = htmlspecialchars($banner['alt_text'] ?? ($banner['title'] ?? $ad['title'] ?? ''));
 
         $impUrl = $this->trackingEnabled
-            ? $this->baseUrl . '/modules/ads/ajax/track-impression.php?id=' . $adId
+            ? $this->baseUrl . '/modules/ads/ajax/pcms-tr.php?id=' . $adId
             : '';
 
         $clickUrl = $this->trackingEnabled
-            ? $this->baseUrl . '/modules/ads/ajax/track-click.php?id=' . $adId
+            ? $this->baseUrl . '/modules/ads/ajax/pcms-cl.php?id=' . $adId
             : '';
 
         $imgTag = '<img src="' . $imgUrl . '" alt="' . $alt . '" style="' . $imgStyle . '">';
@@ -424,14 +441,14 @@ class AdRenderer
                 : htmlspecialchars($targetUrl);
 
             $imgTag = '<a href="' . $href . '"' . $target 
-                    . ' data-ad-click="' . $adId . '"'
+                    . ' data-pcms-click="' . $adId . '"'
                     . ' style="display:inline-block;max-width:100%;">' 
                     . $imgTag . '</a>';
         }
 
-        $wrapperAttrs = 'class="ad-banner" data-ad-id="' . $adId . '"';
-        if ($bannerId > 0) $wrapperAttrs .= ' data-banner-id="' . $bannerId . '"';
-        if ($impUrl) $wrapperAttrs .= ' data-impression-url="' . htmlspecialchars($impUrl) . '"';
+        $wrapperAttrs = 'class="pcms-banner" data-pcms-id="' . $adId . '"';
+        if ($bannerId > 0) $wrapperAttrs .= ' data-pcms-banner="' . $bannerId . '"';
+        if ($impUrl) $wrapperAttrs .= ' data-pcms-track="' . htmlspecialchars($impUrl) . '"';
 
         return '<div ' . $wrapperAttrs . '>' . $imgTag . '</div>';
     }
@@ -473,7 +490,7 @@ class AdRenderer
     private function getAnimationClass(array $ad): string
     {
         $anim = $ad['animation_type'] ?? 'fade';
-        return 'ad-anim-' . $anim;
+        return 'pcms-anim-' . $anim;
     }
 
     private function getContainerAttributes(array $ad): string
@@ -510,57 +527,57 @@ class AdRenderer
     {
         return <<<'CSS'
 /* Ad Slot Base */
-.ad-slot { margin: 20px auto; text-align: center; position: relative; }
-.ad-slot img { border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: block; max-width: 100%; }
+.pcms-slot { margin: 20px auto; text-align: center; position: relative; }
+.pcms-slot img { border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); display: block; max-width: 100%; }
 
-.ad-slot-header     { max-width: 970px; }
-.ad-slot-footer     { max-width: 970px; margin: 40px auto; }
-.ad-slot-sidebar    { max-width: 320px; }
-.ad-slot-in-content { max-width: 468px; margin: 24px auto; }
-.ad-slot-popup      { max-width: 600px; }
-.ad-slot-sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 8px; box-shadow: 0 -2px 20px rgba(0,0,0,.1); z-index: 9998; margin: 0; }
+.pcms-slot-header     { max-width: 970px; }
+.pcms-slot-footer     { max-width: 970px; margin: 40px auto; }
+.pcms-slot-sidebar    { max-width: 320px; }
+.pcms-slot-in-content { max-width: 468px; margin: 24px auto; }
+.pcms-slot-popup      { max-width: 600px; }
+.pcms-slot-sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; padding: 8px; box-shadow: 0 -2px 20px rgba(0,0,0,.1); z-index: 9998; margin: 0; }
 
 /* Slider */
-.ad-slider { position: relative; overflow: hidden; border-radius: 8px; background: #f1f5f9; }
-.ad-slider-track { position: relative; }
-.ad-slide { display: none; width: 100%; }
-.ad-slide.active { display: block; }
+.pcms-slider { position: relative; overflow: hidden; border-radius: 8px; background: #f1f5f9; }
+.pcms-slider-track { position: relative; }
+.pcms-slide { display: none; width: 100%; }
+.pcms-slide.active { display: block; }
 
-.ad-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); color: #fff; border: 0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 5; opacity: 0; transition: opacity .2s, background .2s; }
-.ad-slider:hover .ad-nav { opacity: 1; }
-.ad-nav:hover { background: rgba(0,0,0,.8); }
-.ad-nav-prev { right: 10px; }
-.ad-nav-next { left: 10px; }
-html[dir="rtl"] .ad-nav-prev { right: auto; left: 10px; }
-html[dir="rtl"] .ad-nav-next { left: auto; right: 10px; }
+.pcms-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,.5); color: #fff; border: 0; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 24px; z-index: 5; opacity: 0; transition: opacity .2s, background .2s; }
+.pcms-slider:hover .pcms-nav { opacity: 1; }
+.pcms-nav:hover { background: rgba(0,0,0,.8); }
+.pcms-nav-prev { right: 10px; }
+.pcms-nav-next { left: 10px; }
+html[dir="rtl"] .pcms-nav-prev { right: auto; left: 10px; }
+html[dir="rtl"] .pcms-nav-next { left: auto; right: 10px; }
 
-.ad-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; background: rgba(0,0,0,.3); padding: 5px 10px; border-radius: 12px; }
-.ad-dot { width: 8px; height: 8px; border-radius: 50%; border: 0; background: rgba(255,255,255,.5); cursor: pointer; padding: 0; transition: all .2s; }
-.ad-dot.active { background: #fff; transform: scale(1.3); }
+.pcms-dots { position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 5; background: rgba(0,0,0,.3); padding: 5px 10px; border-radius: 12px; }
+.pcms-dot { width: 8px; height: 8px; border-radius: 50%; border: 0; background: rgba(255,255,255,.5); cursor: pointer; padding: 0; transition: all .2s; }
+.pcms-dot.active { background: #fff; transform: scale(1.3); }
 
-.ad-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(0,0,0,.1); z-index: 5; }
-.ad-progress-bar { height: 100%; background: #06b6d4; width: 0; }
+.pcms-progress { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: rgba(0,0,0,.1); z-index: 5; }
+.pcms-progress-bar { height: 100%; background: #06b6d4; width: 0; }
 
 /* Carousel */
-.ad-carousel { position: relative; }
-.ad-carousel-main { position: relative; overflow: hidden; border-radius: 8px; }
-.ad-carousel-slide { display: none; }
-.ad-carousel-slide.active { display: block; }
-.ad-carousel-thumbs { display: flex; gap: 8px; margin-top: 10px; justify-content: center; flex-wrap: wrap; }
-.ad-thumb { width: 80px; height: 50px; border: 2px solid #e2e8f0; border-radius: 6px; overflow: hidden; cursor: pointer; padding: 0; background: #fff; transition: all .2s; }
-.ad-thumb.active { border-color: #06b6d4; transform: scale(1.05); }
-.ad-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pcms-carousel { position: relative; }
+.pcms-carousel-main { position: relative; overflow: hidden; border-radius: 8px; }
+.pcms-carousel-slide { display: none; }
+.pcms-carousel-slide.active { display: block; }
+.pcms-carousel-thumbs { display: flex; gap: 8px; margin-top: 10px; justify-content: center; flex-wrap: wrap; }
+.pcms-thumb { width: 80px; height: 50px; border: 2px solid #e2e8f0; border-radius: 6px; overflow: hidden; cursor: pointer; padding: 0; background: #fff; transition: all .2s; }
+.pcms-thumb.active { border-color: #06b6d4; transform: scale(1.05); }
+.pcms-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
 /* Marquee */
-.ad-marquee { overflow: hidden; position: relative; }
-.ad-marquee-track { display: flex; gap: 20px; animation: adMarqueeScroll linear infinite; width: max-content; }
-.ad-marquee-item { flex-shrink: 0; }
+.pcms-marquee { overflow: hidden; position: relative; }
+.pcms-marquee-track { display: flex; gap: 20px; animation: adMarqueeScroll linear infinite; width: max-content; }
+.pcms-marquee-item { flex-shrink: 0; }
 @keyframes adMarqueeScroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-html[dir="rtl"] .ad-marquee-track { animation-name: adMarqueeScrollRtl; }
+html[dir="rtl"] .pcms-marquee-track { animation-name: adMarqueeScrollRtl; }
 @keyframes adMarqueeScrollRtl { from { transform: translateX(0); } to { transform: translateX(50%); } }
 
 /* Animation Base */
-.ad-slot[data-anim-duration] {
+.pcms-slot[data-anim-duration] {
     animation-duration: var(--anim-duration, 600ms);
     animation-delay: var(--anim-delay, 0ms);
     animation-timing-function: var(--anim-easing, ease-in-out);
@@ -568,144 +585,144 @@ html[dir="rtl"] .ad-marquee-track { animation-name: adMarqueeScrollRtl; }
 }
 
 /* 45 Effects */
-.ad-anim-none { animation: none !important; }
+.pcms-anim-none { animation: none !important; }
 
-.ad-anim-fade { animation-name: adFadeIn; }
+.pcms-anim-fade { animation-name: adFadeIn; }
 @keyframes adFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-.ad-anim-slide-left { animation-name: adSlideLeft; }
+.pcms-anim-slide-left { animation-name: adSlideLeft; }
 @keyframes adSlideLeft { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-.ad-anim-slide-right { animation-name: adSlideRight; }
+.pcms-anim-slide-right { animation-name: adSlideRight; }
 @keyframes adSlideRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
-.ad-anim-slide-up { animation-name: adSlideUp; }
+.pcms-anim-slide-up { animation-name: adSlideUp; }
 @keyframes adSlideUp { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.ad-anim-slide-down { animation-name: adSlideDown; }
+.pcms-anim-slide-down { animation-name: adSlideDown; }
 @keyframes adSlideDown { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.ad-anim-zoom-in { animation-name: adZoomIn; }
+.pcms-anim-zoom-in { animation-name: adZoomIn; }
 @keyframes adZoomIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.ad-anim-zoom-out { animation-name: adZoomOut; }
+.pcms-anim-zoom-out { animation-name: adZoomOut; }
 @keyframes adZoomOut { from { transform: scale(2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.ad-anim-zoom-rotate { animation-name: adZoomRotate; }
+.pcms-anim-zoom-rotate { animation-name: adZoomRotate; }
 @keyframes adZoomRotate { from { transform: scale(0) rotate(-180deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
 
-.ad-anim-ken-burns { animation-name: adKenBurns; animation-duration: 10s !important; }
+.pcms-anim-ken-burns { animation-name: adKenBurns; animation-duration: 10s !important; }
 @keyframes adKenBurns { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
 
-.ad-anim-flip-x { animation-name: adFlipX; backface-visibility: hidden; }
+.pcms-anim-flip-x { animation-name: adFlipX; backface-visibility: hidden; }
 @keyframes adFlipX { from { transform: perspective(800px) rotateY(90deg); opacity: 0; } to { transform: perspective(800px) rotateY(0); opacity: 1; } }
 
-.ad-anim-flip-y { animation-name: adFlipY; backface-visibility: hidden; }
+.pcms-anim-flip-y { animation-name: adFlipY; backface-visibility: hidden; }
 @keyframes adFlipY { from { transform: perspective(800px) rotateX(90deg); opacity: 0; } to { transform: perspective(800px) rotateX(0); opacity: 1; } }
 
-.ad-anim-flip-3d { animation-name: adFlip3D; backface-visibility: hidden; }
+.pcms-anim-flip-3d { animation-name: adFlip3D; backface-visibility: hidden; }
 @keyframes adFlip3D { from { transform: perspective(1000px) rotate3d(1,1,0,180deg); opacity: 0; } to { transform: perspective(1000px) rotate3d(0,0,0,0); opacity: 1; } }
 
-.ad-anim-cube { animation-name: adCube; backface-visibility: hidden; }
+.pcms-anim-cube { animation-name: adCube; backface-visibility: hidden; }
 @keyframes adCube { from { transform: perspective(1000px) rotateY(-90deg) translateZ(-200px); opacity: 0; } to { transform: perspective(1000px) rotateY(0) translateZ(0); opacity: 1; } }
 
-.ad-anim-fold { animation-name: adFold; }
+.pcms-anim-fold { animation-name: adFold; }
 @keyframes adFold { from { transform: perspective(1000px) rotateX(-90deg); transform-origin: top; opacity: 0; } to { transform: perspective(1000px) rotateX(0); transform-origin: top; opacity: 1; } }
 
-.ad-anim-rotate-cw { animation-name: adRotateCW; }
+.pcms-anim-rotate-cw { animation-name: adRotateCW; }
 @keyframes adRotateCW { from { transform: rotate(-360deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-.ad-anim-rotate-ccw { animation-name: adRotateCCW; }
+.pcms-anim-rotate-ccw { animation-name: adRotateCCW; }
 @keyframes adRotateCCW { from { transform: rotate(360deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-.ad-anim-rotate-spin { animation-name: adRotateSpin; animation-duration: 1.5s !important; }
+.pcms-anim-rotate-spin { animation-name: adRotateSpin; animation-duration: 1.5s !important; }
 @keyframes adRotateSpin { from { transform: scale(0) rotate(0); } to { transform: scale(1) rotate(720deg); } }
 
-.ad-anim-rotate-swing { animation-name: adRotateSwing; transform-origin: top; }
+.pcms-anim-rotate-swing { animation-name: adRotateSwing; transform-origin: top; }
 @keyframes adRotateSwing { from { transform: rotate(-90deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-.ad-anim-bounce { animation-name: adBounce; animation-duration: 1s !important; }
+.pcms-anim-bounce { animation-name: adBounce; animation-duration: 1s !important; }
 @keyframes adBounce { 0%, 20%, 53%, 80%, 100% { transform: translateY(0); } 40%, 43% { transform: translateY(-30px); } 70% { transform: translateY(-15px); } 90% { transform: translateY(-4px); } }
 
-.ad-anim-bounce-in { animation-name: adBounceIn; }
+.pcms-anim-bounce-in { animation-name: adBounceIn; }
 @keyframes adBounceIn { 0% { transform: scale(0); opacity: 0; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(1); } }
 
-.ad-anim-elastic { animation-name: adElastic; animation-duration: 1.2s !important; }
+.pcms-anim-elastic { animation-name: adElastic; animation-duration: 1.2s !important; }
 @keyframes adElastic { 0% { transform: scale(0); } 55% { transform: scale(1.15); } 70% { transform: scale(0.95); } 100% { transform: scale(1); } }
 
-.ad-anim-rubber-band { animation-name: adRubberBand; animation-duration: 1s !important; }
+.pcms-anim-rubber-band { animation-name: adRubberBand; animation-duration: 1s !important; }
 @keyframes adRubberBand { 0% { transform: scale(1,1); } 30% { transform: scale(1.25,0.75); } 40% { transform: scale(0.75,1.25); } 50% { transform: scale(1.15,0.85); } 65% { transform: scale(0.95,1.05); } 100% { transform: scale(1,1); } }
 
-.ad-anim-slide-diagonal { animation-name: adSlideDiagonal; }
+.pcms-anim-slide-diagonal { animation-name: adSlideDiagonal; }
 @keyframes adSlideDiagonal { from { transform: translate(-100%, -100%); opacity: 0; } to { transform: translate(0,0); opacity: 1; } }
 
-.ad-anim-slide-rotate { animation-name: adSlideRotate; }
+.pcms-anim-slide-rotate { animation-name: adSlideRotate; }
 @keyframes adSlideRotate { from { transform: translateX(-100%) rotate(-30deg); opacity: 0; } to { transform: translateX(0) rotate(0); opacity: 1; } }
 
-.ad-anim-slide-blur { animation-name: adSlideBlur; }
+.pcms-anim-slide-blur { animation-name: adSlideBlur; }
 @keyframes adSlideBlur { from { filter: blur(20px); transform: translateX(-50%); opacity: 0; } to { filter: blur(0); transform: translateX(0); opacity: 1; } }
 
-.ad-anim-slide-reveal { animation-name: adSlideReveal; }
+.pcms-anim-slide-reveal { animation-name: adSlideReveal; }
 @keyframes adSlideReveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 
-.ad-anim-slide-curtain { animation-name: adSlideCurtain; }
+.pcms-anim-slide-curtain { animation-name: adSlideCurtain; }
 @keyframes adSlideCurtain { from { clip-path: inset(0 50% 0 50%); } to { clip-path: inset(0 0 0 0); } }
 
-.ad-anim-slide-split { animation-name: adSlideSplit; }
+.pcms-anim-slide-split { animation-name: adSlideSplit; }
 @keyframes adSlideSplit { from { clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%); } to { clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); } }
 
-.ad-anim-fade-blur { animation-name: adFadeBlur; }
+.pcms-anim-fade-blur { animation-name: adFadeBlur; }
 @keyframes adFadeBlur { from { filter: blur(20px); opacity: 0; } to { filter: blur(0); opacity: 1; } }
 
-.ad-anim-fade-scale { animation-name: adFadeScale; }
+.pcms-anim-fade-scale { animation-name: adFadeScale; }
 @keyframes adFadeScale { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-.ad-anim-fade-rotate { animation-name: adFadeRotate; }
+.pcms-anim-fade-rotate { animation-name: adFadeRotate; }
 @keyframes adFadeRotate { from { transform: rotate(45deg); opacity: 0; } to { transform: rotate(0); opacity: 1; } }
 
-.ad-anim-fade-up { animation-name: adFadeUp; }
+.pcms-anim-fade-up { animation-name: adFadeUp; }
 @keyframes adFadeUp { from { transform: translateY(50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.ad-anim-fade-down { animation-name: adFadeDown; }
+.pcms-anim-fade-down { animation-name: adFadeDown; }
 @keyframes adFadeDown { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-.ad-anim-glitch { animation-name: adGlitch; animation-duration: 800ms !important; }
+.pcms-anim-glitch { animation-name: adGlitch; animation-duration: 800ms !important; }
 @keyframes adGlitch { 0% { transform: translate(0); } 20% { transform: translate(-5px, 5px); } 40% { transform: translate(-5px, -5px); } 60% { transform: translate(5px, 5px); } 80% { transform: translate(5px, -5px); } 100% { transform: translate(0); } }
 
-.ad-anim-pixelate { animation-name: adPixelate; }
+.pcms-anim-pixelate { animation-name: adPixelate; }
 @keyframes adPixelate { 0% { filter: blur(20px) contrast(20); opacity: 0; } 100% { filter: blur(0) contrast(1); opacity: 1; } }
 
-.ad-anim-wipe-horizontal { animation-name: adWipeHorizontal; }
+.pcms-anim-wipe-horizontal { animation-name: adWipeHorizontal; }
 @keyframes adWipeHorizontal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 
-.ad-anim-wipe-vertical { animation-name: adWipeVertical; }
+.pcms-anim-wipe-vertical { animation-name: adWipeVertical; }
 @keyframes adWipeVertical { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
 
-.ad-anim-iris-open { animation-name: adIrisOpen; }
+.pcms-anim-iris-open { animation-name: adIrisOpen; }
 @keyframes adIrisOpen { from { clip-path: circle(0% at 50% 50%); } to { clip-path: circle(150% at 50% 50%); } }
 
-.ad-anim-iris-close { animation-name: adIrisClose; }
+.pcms-anim-iris-close { animation-name: adIrisClose; }
 @keyframes adIrisClose { from { clip-path: circle(150% at 50% 50%); } to { clip-path: circle(0% at 50% 50%); } }
 
-.ad-anim-morph { animation-name: adMorph; }
+.pcms-anim-morph { animation-name: adMorph; }
 @keyframes adMorph { 0% { border-radius: 50% 50% 50% 50%; transform: scale(0); } 50% { border-radius: 0% 50% 0% 50%; transform: scale(1.1); } 100% { border-radius: 0%; transform: scale(1); } }
 
-.ad-anim-liquid { animation-name: adLiquid; }
+.pcms-anim-liquid { animation-name: adLiquid; }
 @keyframes adLiquid { 0% { border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%; transform: scale(0.8); opacity: 0; } 100% { border-radius: 0%; transform: scale(1); opacity: 1; } }
 
-.ad-anim-wave { animation-name: adWave; }
+.pcms-anim-wave { animation-name: adWave; }
 @keyframes adWave { 0% { transform: translateY(-20px); opacity: 0; } 50% { transform: translateY(10px); opacity: 1; } 100% { transform: translateY(0); } }
 
-.ad-anim-random { animation-name: adRandom; }
+.pcms-anim-random { animation-name: adRandom; }
 @keyframes adRandom { 0% { transform: rotate(0) scale(0); opacity: 0; } 50% { transform: rotate(180deg) scale(1.2); opacity: 0.7; } 100% { transform: rotate(360deg) scale(1); opacity: 1; } }
 
-.ad-anim-typewriter { animation-name: adTypewriter; overflow: hidden; white-space: nowrap; }
+.pcms-anim-typewriter { animation-name: adTypewriter; overflow: hidden; white-space: nowrap; }
 @keyframes adTypewriter { from { width: 0; } to { width: 100%; } }
 
 @media (max-width: 768px) {
-    .ad-nav { opacity: 1; width: 32px; height: 32px; font-size: 18px; }
-    .ad-slot { margin: 15px auto; }
-    .ad-thumb { width: 60px; height: 40px; }
+    .pcms-nav { opacity: 1; width: 32px; height: 32px; font-size: 18px; }
+    .pcms-slot { margin: 15px auto; }
+    .pcms-thumb { width: 60px; height: 40px; }
 }
 CSS;
     }
@@ -727,10 +744,10 @@ CSS;
         slider.dataset.sliderInit = '1';
 
         const settings = JSON.parse(slider.dataset.adSlider || '{}');
-        const slides = slider.querySelectorAll('.ad-slide');
-        const dots = slider.querySelectorAll('.ad-dot');
-        const prev = slider.querySelector('.ad-nav-prev');
-        const next = slider.querySelector('.ad-nav-next');
+        const slides = slider.querySelectorAll('.pcms-slide');
+        const dots = slider.querySelectorAll('.pcms-dot');
+        const prev = slider.querySelector('.pcms-nav-prev');
+        const next = slider.querySelector('.pcms-nav-next');
 
         if (slides.length < 2) return;
 
@@ -783,10 +800,10 @@ CSS;
     // ═══ Ad Carousel ═══
     function initCarousel(carousel) {
         const settings = JSON.parse(carousel.dataset.adCarousel || '{}');
-        const slides = carousel.querySelectorAll('.ad-carousel-slide');
-        const thumbs = carousel.querySelectorAll('.ad-thumb');
-        const prev = carousel.querySelector('.ad-nav-prev');
-        const next = carousel.querySelector('.ad-nav-next');
+        const slides = carousel.querySelectorAll('.pcms-carousel-slide');
+        const thumbs = carousel.querySelectorAll('.pcms-thumb');
+        const prev = carousel.querySelector('.pcms-nav-prev');
+        const next = carousel.querySelector('.pcms-nav-next');
 
         if (slides.length < 2) return;
 
@@ -827,7 +844,7 @@ CSS;
 
     // ═══ Tracking Impressions ═══
     function trackImpressions() {
-        const items = document.querySelectorAll('[data-impression-url]');
+        const items = document.querySelectorAll('[data-pcms-track]');
         if (!items.length) return;
 
         if ('IntersectionObserver' in window) {
@@ -847,12 +864,12 @@ CSS;
 
     // ═══ Init ═══
     function init() {
-        document.querySelectorAll('.ad-slider').forEach(initSlider);
-        document.querySelectorAll('.ad-carousel').forEach(initCarousel);
+        document.querySelectorAll('.pcms-slider').forEach(initSlider);
+        document.querySelectorAll('.pcms-carousel').forEach(initCarousel);
         trackImpressions();
 
         // اعمال CSS Variable برای انیمیشن‌ها
-        document.querySelectorAll('.ad-slot[data-anim-duration]').forEach(el => {
+        document.querySelectorAll('.pcms-slot[data-anim-duration]').forEach(el => {
             el.style.setProperty('--anim-duration', el.dataset.animDuration + 'ms');
             el.style.setProperty('--anim-delay', el.dataset.animDelay + 'ms');
             el.style.setProperty('--anim-easing', el.dataset.animEasing);
@@ -862,13 +879,13 @@ CSS;
     // 🆕 Robust init for all browsers (Chrome, Edge, Firefox, Safari)
     function safeInit() {
         try {
-            const sliderCount = document.querySelectorAll('.ad-slider').length;
+            const sliderCount = document.querySelectorAll('.pcms-slider').length;
             console.log('[AdWidget] safeInit — sliders found:', sliderCount);
 
             init();
 
             // علامت‌گذاری به‌عنوان initialized
-            document.querySelectorAll('.ad-slider').forEach(function(s) {
+            document.querySelectorAll('.pcms-slider').forEach(function(s) {
                 s.dataset.initialized = '1';
             });
         } catch (e) {
@@ -885,7 +902,7 @@ CSS;
 
     // ۲. Fallback: بعد از window.load (اطمینان کامل)
     window.addEventListener('load', function() {
-        if (!document.querySelector('.ad-slider[data-initialized="1"]')) {
+        if (!document.querySelector('.pcms-slider[data-initialized="1"]')) {
             console.log('[AdWidget] load fallback triggered');
             safeInit();
         }
@@ -893,7 +910,7 @@ CSS;
 
     // ۳. Fallback: setTimeout برای موارد نادر
     setTimeout(function() {
-        if (!document.querySelector('.ad-slider[data-initialized="1"]')) {
+        if (!document.querySelector('.pcms-slider[data-initialized="1"]')) {
             console.log('[AdWidget] setTimeout fallback triggered');
             safeInit();
         }
@@ -903,7 +920,7 @@ CSS;
     if (typeof MutationObserver !== 'undefined') {
         try {
             const observer = new MutationObserver(function() {
-                if (document.querySelector('.ad-slider:not([data-initialized="1"])')) {
+                if (document.querySelector('.pcms-slider:not([data-initialized="1"])')) {
                     console.log('[AdWidget] MutationObserver triggered');
                     safeInit();
                 }
