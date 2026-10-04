@@ -58,15 +58,15 @@ try {
     $settings = [];
 }
 
-// ═══ نام فایل جاری برای sidebar ═══
-$currentFile = 'ai_providers.php';
-
 // ═══ Helper تابع ترجمه ═══
 if (!function_exists('__t')) {
     function __t($key, $params = [], $default = '') {
         return $default;
     }
 }
+
+// ═══ مسیر sidebar (مطابق الگوی ai_settings.php) ═══
+$sidebarFile = __DIR__ . '/includes/sidebar.php';
 ?>
 <!DOCTYPE html>
 <html <?= function_exists('__html_attrs') ? __html_attrs() : 'lang="fa" dir="rtl"' ?>>
@@ -99,10 +99,25 @@ if (!function_exists('__t')) {
             padding: 0;
         }
 
+        /* 🆕 چیدمان با sidebar */
+        .main-content {
+            margin-right: 260px;
+            padding: 20px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                margin-right: 0 !important;
+                padding: 70px 15px 15px !important;
+            }
+        }
+
         .container-main {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 0 15px;
+            margin: 0 auto;
+            padding: 0;
         }
 
         .page-header {
@@ -451,6 +466,8 @@ if (!function_exists('__t')) {
     </style>
 </head>
 <body>
+<?php require_once $sidebarFile; ?>
+<div class="main-content">
 
 <div class="container-main">
 
@@ -501,6 +518,8 @@ if (!function_exists('__t')) {
 
 </div>
 
+</div><!-- /.main-content -->
+
 <script>
 // ═══ Helper Functions ═══
 function togglePasswordVisibility(inputId, btn) {
@@ -515,19 +534,50 @@ function togglePasswordVisibility(inputId, btn) {
 }
 
 function showAlert(type, message) {
+    // 🆕 پشتیبانی از ۴ نوع: success, error, info, warning
+    const icons = {
+        success: 'check-circle-fill',
+        error:   'x-circle-fill',
+        info:    'info-circle-fill',
+        warning: 'exclamation-triangle-fill',
+    };
+    const icon = icons[type] || 'info-circle';
+
     const alertDiv = document.createElement('div');
     alertDiv.className = 'alert alert-' + type;
-    alertDiv.innerHTML = '<i class="bi bi-' + (type === 'success' ? 'check-circle' : type === 'error' ? 'x-circle' : 'info-circle') + '"></i> ' + message;
+    alertDiv.style.cssText = 'padding: 12px 18px; border-radius: 8px; margin-bottom: 15px; font-size: 14px; display: flex; align-items: center; gap: 10px;';
+    
+    // رنگ‌بندی
+    const colors = {
+        success: 'background:#dcfce7; color:#166534; border-right:4px solid #16a34a;',
+        error:   'background:#fee2e2; color:#991b1b; border-right:4px solid #dc2626;',
+        info:    'background:#dbeafe; color:#1e40af; border-right:4px solid #2563eb;',
+        warning: 'background:#fef3c7; color:#92400e; border-right:4px solid #f59e0b;',
+    };
+    alertDiv.style.cssText += ' ' + (colors[type] || colors.info);
+    
+    alertDiv.innerHTML = '<i class="bi bi-' + icon + '"></i> <span>' + message + '</span>';
 
-    const container = document.querySelector('.tab-content');
+    // 🆕 پیدا کردن container
+    let container = document.querySelector('.tab-content') 
+                 || document.querySelector('.main-content') 
+                 || document.querySelector('.container-main')
+                 || document.body;
+    
     if (container) {
         container.insertBefore(alertDiv, container.firstChild);
+        
+        // اسکرول به بالا
+        alertDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
         setTimeout(() => {
             alertDiv.style.transition = 'opacity 0.3s';
             alertDiv.style.opacity = '0';
             setTimeout(() => alertDiv.remove(), 300);
         }, 5000);
+    } else {
+        // fallback: alert مرورگر
+        alert('[' + type + '] ' + message);
     }
 }
 
@@ -559,15 +609,55 @@ function saveProviderSettings(provider, fields) {
 }
 
 // ═══ Test Connection ═══
-function testProvider(provider) {
-    const btn = event.target.closest('button');
-    const original = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="bi bi-hourglass-split"></i> تست...';
+// 🆕 پشتیبانی از دو روش فراخوانی:
+//   testProvider('openrouter')           ← روش قدیمی
+//   testProvider(event, 'openrouter')    ← روش جدید
+function testProvider(arg1, arg2) {
+    let event = null;
+    let provider = '';
 
-    fetch('<?= $baseAdmin ?>/../ajax/ai_provider_test.php?provider=' + provider)
-    .then(r => r.json())
+    // تشخیص آرگومان‌ها
+    if (typeof arg1 === 'string') {
+        provider = arg1;
+    } else if (arg1 && typeof arg1 === 'object') {
+        event = arg1;
+        provider = arg2 || '';
+    }
+
+    if (!provider) {
+        showAlert('error', '❌ provider نامعتبر');
+        return;
+    }
+
+    // پیدا کردن button
+    const btn = event?.target?.closest?.('button') 
+              || document.querySelector(`[onclick*="'${provider}'"]`);
+
+    const original = btn ? btn.innerHTML : '';
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> تست...';
+    }
+
+    // نمایش فوری وضعیت
+    showAlert('info', '⏳ در حال تست ' + provider + '...');
+
+    // مسیر کامل
+    const baseUrl = window.location.origin;
+    const url = baseUrl + '/ajax/ai_provider_test.php?provider=' + encodeURIComponent(provider);
+
+    console.log('[testProvider] URL:', url);
+
+    fetch(url)
+    .then(r => {
+        console.log('[testProvider] Status:', r.status);
+        if (!r.ok) {
+            throw new Error('HTTP ' + r.status);
+        }
+        return r.json();
+    })
     .then(data => {
+        console.log('[testProvider] Data:', data);
         if (data.ok) {
             showAlert('success', '✅ ' + (data.message || 'اتصال موفق'));
         } else {
@@ -575,11 +665,14 @@ function testProvider(provider) {
         }
     })
     .catch(err => {
-        showAlert('error', 'خطای شبکه: ' + err.message);
+        console.error('[testProvider] Error:', err);
+        showAlert('error', 'خطا: ' + err.message);
     })
     .finally(() => {
-        btn.disabled = false;
-        btn.innerHTML = original;
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = original;
+        }
     });
 }
 </script>

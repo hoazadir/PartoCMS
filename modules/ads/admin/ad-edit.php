@@ -11,6 +11,7 @@ require_once __DIR__ . '/../../../config.php';
 require_once __DIR__ . '/../../../admin/auth_check.php';
 require_once __DIR__ . '/../includes/AdManager.php';
 require_once __DIR__ . '/../includes/AdTargeting.php';
+require_once __DIR__ . '/../includes/AdAiAssistant.php';   // 🆕 AI Copywriting
 
 if (!isLoggedIn() || !isAdmin()) {
     header('Location: ' . ADMIN_URL . '/login.php');
@@ -19,6 +20,11 @@ if (!isLoggedIn() || !isAdmin()) {
 
 $pdo = getDB();
 $adm = new AdManager($pdo);
+
+// 🆕 چک فعال بودن AI
+$aiAssistant = new AdAiAssistant();
+$aiAvailable = $aiAssistant->isAvailable();
+$aiLanguages = $aiAvailable ? $aiAssistant->getAvailableLanguages() : [];
 
 $id = (int) ($_GET['id'] ?? 0);
 $ad = $id > 0 ? $adm->getById($id) : null;
@@ -374,6 +380,69 @@ try {
     <form method="post" id="adForm" enctype="multipart/form-data">
         <div class="row g-3">
             <div class="col-lg-8">
+
+                <?php if ($aiAvailable): ?>
+                <!-- ═══ 🆕 کمک AI ═══ -->
+                <div class="form-card" style="border: 2px solid #8b5cf6; background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%);">
+                    <div class="form-card-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); color: #fff; border-bottom: none;">
+                        <span><i class="bi bi-stars icon" style="color: #fbbf24;"></i> کمک هوش مصنوعی</span>
+                        <span style="font-size: 11px; opacity: 0.9;">✨ با یک کلیک، ۳ پیشنهاد بگیرید</span>
+                    </div>
+                    <div class="form-card-body">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label small">نام محصول/خدمت <span class="required-mark">*</span></label>
+                                <input type="text" id="aiProduct" class="form-control form-control-sm"
+                                       placeholder="مثلاً: هدفون بی‌سیم سونی">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small">مخاطب هدف</label>
+                                <input type="text" id="aiAudience" class="form-control form-control-sm"
+                                       placeholder="مثلاً: جوانان علاقه‌مند موسیقی">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">لحن</label>
+                                <select id="aiTone" class="form-select form-select-sm">
+                                    <option value="professional">🎯 حرفه‌ای</option>
+                                    <option value="exciting">🔥 هیجان‌انگیز</option>
+                                    <option value="friendly">😊 دوستانه</option>
+                                    <option value="formal">📋 رسمی</option>
+                                    <option value="humorous">😄 طنزآمیز</option>
+                                    <option value="luxury">💎 لوکس</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">تعداد پیشنهاد</label>
+                                <select id="aiCount" class="form-select form-select-sm">
+                                    <option value="2">۲ نسخه</option>
+                                    <option value="3" selected>۳ نسخه</option>
+                                    <option value="4">۴ نسخه</option>
+                                    <option value="5">۵ نسخه</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small">زبان</label>
+                                <select id="aiLanguage" class="form-select form-select-sm">
+                                    <?php foreach ($aiLanguages as $lang): ?>
+                                        <option value="<?= htmlspecialchars($lang['code']) ?>"
+                                                <?= ($lang['is_default'] ?? 0) ? 'selected' : '' ?>>
+                                            <?= $lang['flag'] ?? '' ?> <?= htmlspecialchars($lang['native_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100 mt-3"
+                                style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); border: none; font-weight: bold;"
+                                onclick="generateAIVariants()">
+                            <i class="bi bi-magic"></i> ✨ تولید پیشنهادهای AI
+                        </button>
+
+                        <div id="aiStatus" class="mt-2 small text-muted text-center" style="display: none;"></div>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- ═══ اطلاعات پایه ═══ -->
                 <div class="form-card">
@@ -1946,8 +2015,195 @@ document.addEventListener('DOMContentLoaded', function() {
         updateBannerNumbers();
     }, 100);
 });
+
+// ═══════════════════════════════════════════════════════════
+// 🆕 AI Copywriting (2026-10-03)
+// ═══════════════════════════════════════════════════════════
+
+function generateAIVariants() {
+    const product  = document.getElementById('aiProduct')?.value.trim() || '';
+    const audience = document.getElementById('aiAudience')?.value.trim() || '';
+    const tone     = document.getElementById('aiTone')?.value || 'professional';
+    const count    = document.getElementById('aiCount')?.value || 3;
+    const language = document.getElementById('aiLanguage')?.value || '';
+
+    if (!product) {
+        alert('لطفاً نام محصول/خدمت را وارد کنید');
+        document.getElementById('aiProduct')?.focus();
+        return;
+    }
+
+    // نمایش Modal
+    const modal = new bootstrap.Modal(document.getElementById('aiVariantsModal'));
+    modal.show();
+
+    // نمایش وضعیت loading
+    const body = document.getElementById('aiVariantsBody');
+    body.innerHTML = `
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-3 text-muted">در حال تولید ${count} پیشنهاد...</p>
+            <small class="text-muted">این عملیات ممکن است ۳۰ تا ۹۰ ثانیه طول بکشد ⏱</small>
+        </div>
+    `;
+
+    // درخواست AJAX
+    const formData = new FormData();
+    formData.append('action', 'variants');
+    formData.append('product', product);
+    formData.append('audience', audience);
+    formData.append('tone', tone);
+    formData.append('count', count);
+    formData.append('language', language);
+
+    fetch('<?= SITE_URL ?>/modules/ads/ajax/ad-ai-generate.php', {
+        method: 'POST',
+        body: formData,
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (!data.ok) {
+            body.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="bi bi-exclamation-triangle"></i>
+                    <strong>خطا:</strong> ${data.error || 'خطای نامشخص'}
+                </div>
+            `;
+            return;
+        }
+
+        // ساخت کارت‌های پیشنهاد
+        const variants = data.data?.variants || [];
+        if (variants.length === 0) {
+            body.innerHTML = `<div class="alert alert-warning">هیچ پیشنهادی دریافت نشد</div>`;
+            return;
+        }
+
+        let html = `<div class="mb-3 text-muted small">
+            <i class="bi bi-info-circle"></i>
+            ${variants.length} پیشنهاد دریافت شد. روی هر کدام کلیک کنید تا در فرم قرار بگیرد.
+        </div>`;
+
+        variants.forEach((v, i) => {
+            html += `
+                <div class="card mb-3" style="border: 2px solid #e9d5ff; transition: all 0.2s;"
+                     onmouseover="this.style.borderColor='#a855f7'; this.style.boxShadow='0 4px 12px rgba(168,85,247,0.2)'"
+                     onmouseout="this.style.borderColor='#e9d5ff'; this.style.boxShadow='none'">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge" style="background: #8b5cf6;">پیشنهاد ${i + 1}</span>
+                            <button type="button" class="btn btn-sm btn-success"
+                                    onclick='applyAIVariant(${JSON.stringify(v).replace(/'/g, "&apos;")})'>
+                                <i class="bi bi-check2"></i> استفاده
+                            </button>
+                        </div>
+                        <div class="mb-2">
+                            <strong class="text-primary">عنوان:</strong>
+                            <div>${escapeHtml(v.title || '')}</div>
+                        </div>
+                        ${v.description ? `
+                        <div class="mb-2">
+                            <strong class="text-primary">توضیح:</strong>
+                            <div>${escapeHtml(v.description)}</div>
+                        </div>
+                        ` : ''}
+                        ${v.cta ? `
+                        <div class="mb-2">
+                            <strong class="text-primary">دعوت به اقدام:</strong>
+                            <div>${escapeHtml(v.cta)}</div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        });
+
+        body.innerHTML = html;
+    })
+    .catch(err => {
+        body.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle"></i>
+                <strong>خطای شبکه:</strong> ${err.message}
+            </div>
+        `;
+    });
+}
+
+function applyAIVariant(variant) {
+    if (!variant) return;
+
+    // پر کردن فیلدها
+    const titleField = document.querySelector('input[name="title"]');
+    const descField  = document.querySelector('textarea[name="description"]');
+
+    if (titleField && variant.title) {
+        titleField.value = variant.title;
+        titleField.style.transition = 'all 0.5s';
+        titleField.style.background = '#d1fae5';
+        setTimeout(() => titleField.style.background = '', 1500);
+    }
+
+    if (descField && variant.description) {
+        descField.value = variant.description;
+        descField.style.transition = 'all 0.5s';
+        descField.style.background = '#d1fae5';
+        setTimeout(() => descField.style.background = '', 1500);
+    }
+
+    // بستن Modal
+    const modalEl = document.getElementById('aiVariantsModal');
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+
+    // اسکرول به فیلد عنوان
+    setTimeout(() => {
+        titleField?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 300);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<?php if ($aiAvailable): ?>
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- 🆕 Modal نمایش پیشنهادهای AI                                -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div class="modal fade" id="aiVariantsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%); color: #fff;">
+                <h5 class="modal-title">
+                    <i class="bi bi-stars"></i> پیشنهادهای هوش مصنوعی
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="بستن"></button>
+            </div>
+            <div class="modal-body" id="aiVariantsBody">
+                <div class="text-center py-5">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">در حال تولید...</span>
+                    </div>
+                    <p class="mt-3 text-muted">در حال تولید پیشنهادها...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x"></i> بستن
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="generateAIVariants()">
+                    <i class="bi bi-arrow-clockwise"></i> تولید مجدد
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 </body>
 </html>

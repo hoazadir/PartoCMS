@@ -224,7 +224,7 @@ if (empty($chain)) $chain = ['ollama', 'groq', 'gemini', 'openrouter'];
         <div style="display:flex;gap:10px;margin-top:15px;">
             <button type="button"
                     class="btn btn-success"
-                    onclick="testProvider('proxy')">
+                    onclick="testProvider(event, 'proxy')">
                 <i class="bi bi-lightning"></i>
                 تست مجدد
             </button>

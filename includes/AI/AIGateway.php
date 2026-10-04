@@ -45,7 +45,7 @@ class AIGateway
     /**
      * Provider Chain پیش‌فرض (اگر در تنظیمات نبود)
      */
-    private const DEFAULT_CHAIN = ['ollama', 'groq', 'gemini', 'openrouter'];
+    private const DEFAULT_CHAIN = ['openrouter', 'groq', 'gemini', 'ollama'];
 
     public function __construct(?array $customChain = null)
     {
@@ -170,7 +170,34 @@ class AIGateway
     public function chatJson(array $messages, array $options = []): array
     {
         $options['format'] = 'json';
-        return $this->chat($messages, $options);
+        $result = $this->chat($messages, $options);
+
+        // اگر پاسخ موفق بود، JSON را پارس کن
+        if (!empty($result['ok']) && !empty($result['response'])) {
+            $responseText = trim($result['response']);
+
+            // حذف markdown fences اگر بود
+            $responseText = preg_replace('/^```(?:json)?\s*/i', '', $responseText);
+            $responseText = preg_replace('/\s*```$/i', '', $responseText);
+            $responseText = trim($responseText);
+
+            // پارس
+            $parsed = json_decode($responseText, true);
+
+            if (is_array($parsed)) {
+                $result['data'] = $parsed;
+                $result['raw']  = $responseText;
+            } else {
+                return [
+                    'ok'    => false,
+                    'error' => 'پاسخ JSON قابل پارس نبود',
+                    'raw'   => $responseText,
+                    'provider_used' => $result['provider_used'] ?? '?',
+                ];
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -320,7 +347,7 @@ class AIGateway
             case 'openrouter':
                 return [
                     'api_key' => getSetting('ai_openrouter_api_key', ''),
-                    'model'   => getSetting('ai_openrouter_model', 'meta-llama/llama-3.3-70b-instruct:free'),
+                    'model'   => getSetting('ai_openrouter_model', 'nvidia/nemotron-3-ultra-550b-a55b:free'),
                     'timeout' => (int) getSetting('ai_openrouter_timeout', '60'),
                 ];
 

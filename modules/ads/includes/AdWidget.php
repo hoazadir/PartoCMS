@@ -225,7 +225,10 @@ class AdWidget
 
         $base = AdRenderer::getDefaultJs();
 
-        return "<script>\n" . $base . "\n" . self::getWidgetJs() . "\n</script>";
+        // 🆕 Version برای cache busting
+        $version = 'v2.' . date('YmdHis');
+
+        return "<!-- AdWidget {$version} -->\n<script>\n" . $base . "\n" . self::getWidgetJs() . "\n</script>";
     }
 
     // ═══════════════════════════════════════════════════════════

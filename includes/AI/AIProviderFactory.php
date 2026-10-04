@@ -123,7 +123,7 @@ class AIProviderFactory {
             case 'openrouter':
                 return [
                     'api_key' => getSetting('ai_openrouter_api_key', ''),
-                    'model'   => getSetting('ai_openrouter_model', 'meta-llama/llama-3.3-70b-instruct:free'),
+                    'model'   => getSetting('ai_openrouter_model', 'nvidia/nemotron-3-ultra-550b-a55b:free'),
                     'timeout' => (int) getSetting('ai_openrouter_timeout', '60'),
                 ];
 

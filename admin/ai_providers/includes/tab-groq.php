@@ -203,7 +203,7 @@ $isConfigured = !empty($groqKey);
 
         <button type="button"
                 class="btn btn-success"
-                onclick="testProvider('groq')">
+                onclick="testProvider(event, 'groq')">
             <i class="bi bi-lightning"></i>
             🔍 تست اتصال
         </button>
