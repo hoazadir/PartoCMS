@@ -131,7 +131,7 @@ class AdWidget
      */
     public static function header(): string
     {
-        return self::show('header', ['class' => 'ad-slot ad-slot-header']);
+        return self::show('header', ['class' => 'pcms-slot pcms-slot-header']);
     }
 
     /**
@@ -139,7 +139,7 @@ class AdWidget
      */
     public static function footer(): string
     {
-        return self::show('footer', ['class' => 'ad-slot ad-slot-footer']);
+        return self::show('footer', ['class' => 'pcms-slot pcms-slot-footer']);
     }
 
     /**
@@ -147,7 +147,7 @@ class AdWidget
      */
     public static function sidebar(): string
     {
-        return self::show('sidebar', ['class' => 'ad-slot ad-slot-sidebar']);
+        return self::show('sidebar', ['class' => 'pcms-slot pcms-slot-sidebar']);
     }
 
     /**
@@ -155,7 +155,7 @@ class AdWidget
      */
     public static function inContent(): string
     {
-        return self::show('in-content', ['class' => 'ad-slot ad-slot-in-content', 'slider' => false]);
+        return self::show('in-content', ['class' => 'pcms-slot pcms-slot-in-content', 'slider' => false]);
     }
 
     /**
@@ -164,7 +164,7 @@ class AdWidget
     public static function slider(string $position = 'slider-home', array $options = []): string
     {
         $defaults = [
-            'class'    => 'ad-slot ad-slot-slider',
+            'class'    => 'pcms-slot pcms-slot-slider',
             'slider'   => true,
             'autoplay' => true,
             'interval' => 5000,
@@ -178,7 +178,7 @@ class AdWidget
     public static function sticky(): string
     {
         return self::show('sticky-footer', [
-            'class'  => 'ad-slot ad-slot-sticky',
+            'class'  => 'pcms-slot pcms-slot-sticky',
             'slider' => false,
         ]);
     }
@@ -188,12 +188,12 @@ class AdWidget
      */
     public static function popup(): string
     {
-        $html = self::show('popup', ['class' => 'ad-popup-content', 'slider' => false]);
+        $html = self::show('popup', ['class' => 'pcms-popup-content', 'slider' => false]);
         if (empty($html)) return '';
 
-        return '<div class="ad-popup-overlay" id="adPopupOverlay" onclick="adPopupClose(event)">'
-             . '<div class="ad-popup-inner" onclick="event.stopPropagation()">'
-             . '<button class="ad-popup-close" onclick="adPopupClose(event)" aria-label="بستن">×</button>'
+        return '<div class="pcms-popup-overlay" id="pcmsPopupOverlay" onclick="pcmsPopupClose(event)">'
+             . '<div class="pcms-popup-inner" onclick="event.stopPropagation()">'
+             . '<button class="pcms-popup-close" onclick="pcmsPopupClose(event)" aria-label="بستن">×</button>'
              . $html
              . '</div></div>';
     }
@@ -239,7 +239,7 @@ class AdWidget
     {
         return <<<CSS
 /* ─── Popup ─── */
-.ad-popup-overlay {
+.pcms-popup-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.6);
@@ -250,10 +250,10 @@ class AdWidget
     padding: 20px;
     animation: adPopupFade .3s ease;
 }
-.ad-popup-overlay.active { display: flex; }
+.pcms-popup-overlay.active { display: flex; }
 @keyframes adPopupFade { from { opacity: 0; } to { opacity: 1; } }
 
-.ad-popup-inner {
+.pcms-popup-inner {
     background: #fff;
     padding: 20px;
     border-radius: 12px;
@@ -269,7 +269,7 @@ class AdWidget
     to   { transform: scale(1); }
 }
 
-.ad-popup-close {
+.pcms-popup-close {
     position: absolute;
     top: 8px;
     left: 8px;
@@ -287,11 +287,11 @@ class AdWidget
     z-index: 10;
     transition: transform 0.2s;
 }
-.ad-popup-close:hover { transform: scale(1.1); }
-html[dir="ltr"] .ad-popup-close { left: auto; right: 8px; }
+.pcms-popup-close:hover { transform: scale(1.1); }
+html[dir="ltr"] .pcms-popup-close { left: auto; right: 8px; }
 
 /* ─── Sticky ─── */
-.ad-slot-sticky {
+.pcms-slot-sticky {
     position: fixed;
     bottom: 0;
     right: 0;
@@ -311,10 +311,10 @@ html[dir="ltr"] .ad-popup-close { left: auto; right: 8px; }
     from { transform: translateY(100%); }
     to   { transform: translateY(0); }
 }
-.ad-slot-sticky .ad-item {
+.pcms-slot-sticky .pcms-item {
     margin: 0;
 }
-.ad-sticky-close {
+.pcms-sticky-close {
     background: #f1f5f9;
     border: 0;
     width: 28px;
@@ -329,11 +329,11 @@ html[dir="ltr"] .ad-popup-close { left: auto; right: 8px; }
     justify-content: center;
     flex-shrink: 0;
 }
-.ad-sticky-close:hover { background: #e2e8f0; color: #334155; }
+.pcms-sticky-close:hover { background: #e2e8f0; color: #334155; }
 
 @media (max-width: 768px) {
-    .ad-slot-sticky { padding: 6px; }
-    .ad-popup-inner { padding: 15px; }
+    .pcms-slot-sticky { padding: 6px; }
+    .pcms-popup-inner { padding: 15px; }
 }
 CSS;
     }
@@ -345,6 +345,70 @@ CSS;
     private static function getWidgetJs(): string
     {
         return <<<JS
+// ═══════════════════════════════════════════════════════════
+// 🆕 Anti-AdBlock: تزریق پویای محتوای Base64
+// ═══════════════════════════════════════════════════════════
+
+function pcmsInjectAds() {
+    const slots = document.querySelectorAll('[data-pcms-slot]');
+    console.log('[Anti-AdBlock] Found', slots.length, 'slots to inject');
+
+    slots.forEach(function(slot) {
+        // چک: قبلاً تزریق شده؟
+        if (slot.dataset.pcmsInjected === '1') return;
+
+        const encoded = slot.dataset.pcmsContent;
+        if (!encoded) {
+            console.warn('[Anti-AdBlock] No content for slot:', slot.dataset.pcmsSlot);
+            return;
+        }
+
+        try {
+            // decode Base64 (با پشتیبانی از UTF-8)
+            let html;
+            try {
+                // روش استاندارد
+                html = decodeURIComponent(escape(atob(encoded)));
+            } catch (e) {
+                // روش جایگزین
+                html = atob(encoded);
+            }
+
+            // تزریق
+            slot.innerHTML = html;
+            slot.dataset.pcmsInjected = '1';
+
+            console.log('[Anti-AdBlock] Injected slot:', slot.dataset.pcmsSlot);
+        } catch (err) {
+            console.error('[Anti-AdBlock] Injection error:', err, slot.dataset.pcmsSlot);
+        }
+    });
+
+    // بعد از تزریق، اسلایدرها و tracking را فعال کن
+    if (typeof initSlider === 'function') {
+        document.querySelectorAll('.pcms-slider').forEach(initSlider);
+    }
+    if (typeof initCarousel === 'function') {
+        document.querySelectorAll('.pcms-carousel').forEach(initCarousel);
+    }
+    if (typeof trackImpressions === 'function') {
+        trackImpressions();
+    }
+}
+
+// اجرا در DOMContentLoaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', pcmsInjectAds);
+} else {
+    pcmsInjectAds();
+}
+
+// Fallback: بعد از window.load
+window.addEventListener('load', pcmsInjectAds);
+
+// Fallback: setTimeout
+setTimeout(pcmsInjectAds, 500);
+
 // ─── Popup ───
 function adPopupShow() {
     const overlay = document.getElementById('adPopupOverlay');
@@ -352,7 +416,7 @@ function adPopupShow() {
         overlay.classList.add('active');
     }
 }
-function adPopupClose(e) {
+function pcmsPopupClose(e) {
     if (e) e.stopPropagation();
     const overlay = document.getElementById('adPopupOverlay');
     if (overlay) {
@@ -367,9 +431,9 @@ if (document.getElementById('adPopupOverlay')) {
 }
 
 // ─── Sticky Close ───
-document.querySelectorAll('.ad-slot-sticky').forEach(sticky => {
+document.querySelectorAll('.pcms-slot-sticky').forEach(sticky => {
     const closeBtn = document.createElement('button');
-    closeBtn.className = 'ad-sticky-close';
+    closeBtn.className = 'pcms-sticky-close';
     closeBtn.innerHTML = '×';
     closeBtn.setAttribute('aria-label', 'بستن');
     closeBtn.addEventListener('click', () => {
@@ -381,12 +445,12 @@ document.querySelectorAll('.ad-slot-sticky').forEach(sticky => {
 
 // ─── اگر کاربر قبلاً بسته بود ───
 if (sessionStorage.getItem('ad_sticky_closed') === '1') {
-    document.querySelectorAll('.ad-slot-sticky').forEach(s => s.style.display = 'none');
+    document.querySelectorAll('.pcms-slot-sticky').forEach(s => s.style.display = 'none');
 }
 
 // ─── Esc برای بستن popup ───
 document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') adPopupClose();
+    if (e.key === 'Escape') pcmsPopupClose();
 });
 JS;
     }
