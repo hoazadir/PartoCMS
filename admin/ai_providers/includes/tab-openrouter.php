@@ -12,7 +12,7 @@ if (!defined('PARTO_CMS') && !isset($activeTab)) {
 
 // ═══ خواندن وضعیت فعلی ═══
 $orKey      = $settings['ai_openrouter_api_key'] ?? '';
-$orModel    = $settings['ai_openrouter_model'] ?? 'meta-llama/llama-3.3-70b-instruct:free';
+$orModel    = $settings['ai_openrouter_model'] ?? 'nvidia/nemotron-3-ultra-550b-a55b:free';
 $orTimeout  = $settings['ai_openrouter_timeout'] ?? '60';
 $isConfigured = !empty($orKey);
 ?>
@@ -171,34 +171,73 @@ $isConfigured = !empty($orKey);
         <label for="orModelInput">🤖 مدل پیش‌فرض</label>
 
         <select id="orModelInput" class="form-control">
-            <option value="meta-llama/llama-3.3-70b-instruct:free" <?= $orModel === 'meta-llama/llama-3.3-70b-instruct:free' ? 'selected' : '' ?>>
-                🏆 Llama 3.3 70B (رایگان — توصیه شده)
-            </option>
-            <option value="meta-llama/llama-3.1-8b-instruct:free" <?= $orModel === 'meta-llama/llama-3.1-8b-instruct:free' ? 'selected' : '' ?>>
-                ⚡ Llama 3.1 8B (رایگان — سریع)
-            </option>
-            <option value="google/gemma-2-9b-it:free" <?= $orModel === 'google/gemma-2-9b-it:free' ? 'selected' : '' ?>>
-                Gemma 2 9B (رایگان)
-            </option>
-            <option value="qwen/qwen-2.5-72b-instruct:free" <?= $orModel === 'qwen/qwen-2.5-72b-instruct:free' ? 'selected' : '' ?>>
-                Qwen 2.5 72B (رایگان)
-            </option>
-            <option value="mistralai/mistral-7b-instruct:free" <?= $orModel === 'mistralai/mistral-7b-instruct:free' ? 'selected' : '' ?>>
-                Mistral 7B (رایگان)
-            </option>
-            <option value="microsoft/phi-3-mini-128k-instruct:free" <?= $orModel === 'microsoft/phi-3-mini-128k-instruct:free' ? 'selected' : '' ?>>
-                Phi-3 Mini (رایگان — Context بزرگ)
-            </option>
-            <option value="openchat/openchat-7b:free" <?= $orModel === 'openchat/openchat-7b:free' ? 'selected' : '' ?>>
-                OpenChat 7B (رایگان)
-            </option>
+            <optgroup label="🥇 NVIDIA Nemotron (توصیه شده)">
+                <option value="nvidia/nemotron-3-ultra-550b-a55b:free" <?= $orModel === 'nvidia/nemotron-3-ultra-550b-a55b:free' ? 'selected' : '' ?>>
+                    🏆 NVIDIA Nemotron 3 Ultra 550B (تست شده ✅)
+                </option>
+                <option value="nvidia/nemotron-3-super-120b-a12b:free" <?= $orModel === 'nvidia/nemotron-3-super-120b-a12b:free' ? 'selected' : '' ?>>
+                    ⚡ NVIDIA Nemotron 3 Super 120B
+                </option>
+                <option value="nvidia/nemotron-3.5-lightning:free" <?= $orModel === 'nvidia/nemotron-3.5-lightning:free' ? 'selected' : '' ?>>
+                    ⚡ NVIDIA Nemotron 3.5 Lightning (سریع)
+                </option>
+                <option value="nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free" <?= $orModel === 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free' ? 'selected' : '' ?>>
+                    🧠 NVIDIA Nemotron 3 Nano Omni
+                </option>
+            </optgroup>
+
+            <optgroup label="🔵 Google">
+                <option value="google/gemma-4-31b-it:free" <?= $orModel === 'google/gemma-4-31b-it:free' ? 'selected' : '' ?>>
+                    🔵 Google Gemma 4 31B
+                </option>
+                <option value="google/gemma-4-26b-a4b-it:free" <?= $orModel === 'google/gemma-4-26b-a4b-it:free' ? 'selected' : '' ?>>
+                    🔵 Google Gemma 4 26B
+                </option>
+            </optgroup>
+
+            <optgroup label="🧠 Context بزرگ">
+                <option value="thinkingmachines/inkling:free" <?= $orModel === 'thinkingmachines/inkling:free' ? 'selected' : '' ?>>
+                    🧠 Inkling (Context 1M)
+                </option>
+                <option value="thinkingmachines/inkling-small:free" <?= $orModel === 'thinkingmachines/inkling-small:free' ? 'selected' : '' ?>>
+                    🧠 Inkling Small
+                </option>
+            </optgroup>
+
+            <optgroup label="⚡ مدل‌های دیگر رایگان">
+                <option value="qwen/qwen3.8-27b:free" <?= $orModel === 'qwen/qwen3.8-27b:free' ? 'selected' : '' ?>>
+                    Qwen 3.8 27B
+                </option>
+                <option value="cohere/north-mini-code:free" <?= $orModel === 'cohere/north-mini-code:free' ? 'selected' : '' ?>>
+                    Cohere North Mini Code
+                </option>
+                <option value="poolside/laguna-s-2.1:free" <?= $orModel === 'poolside/laguna-s-2.1:free' ? 'selected' : '' ?>>
+                    Poolside Laguna S 2.1
+                </option>
+                <option value="poolside/laguna-xs-2.1:free" <?= $orModel === 'poolside/laguna-xs-2.1:free' ? 'selected' : '' ?>>
+                    Poolside Laguna XS 2.1
+                </option>
+                <option value="liquid/lfm-2.5-2.6b:free" <?= $orModel === 'liquid/lfm-2.5-2.6b:free' ? 'selected' : '' ?>>
+                    Liquid LFM 2.5 (سبک)
+                </option>
+                <option value="apodex/apodex-1.1-mini:free" <?= $orModel === 'apodex/apodex-1.1-mini:free' ? 'selected' : '' ?>>
+                    Apodex 1.1 Mini
+                </option>
+                <option value="inclusionai/ling-3.0-flash-sante:free" <?= $orModel === 'inclusionai/ling-3.0-flash-sante:free' ? 'selected' : '' ?>>
+                    Ling 3.0 Flash Sante
+                </option>
+                <option value="dots-studio/dots-3-note-preview:free" <?= $orModel === 'dots-studio/dots-3-note-preview:free' ? 'selected' : '' ?>>
+                    Dots3-Note Preview
+                </option>
+            </optgroup>
         </select>
 
         <small>
-            همه مدل‌های بالا <strong>رایگان</strong> هستند.
-            برای لیست کامل:
+            ✅ همه مدل‌های بالا <strong>رایگان</strong> هستند.
+            مدل پیش‌فرض (NVIDIA Nemotron 3 Ultra) تست شده و کار می‌کند.
+            <br>
             <a href="https://openrouter.ai/models?max_price=0" target="_blank">
-                OpenRouter Free Models
+                📋 لیست کامل مدل‌های رایگان
             </a>
         </small>
     </div>
@@ -229,7 +268,7 @@ $isConfigured = !empty($orKey);
 
         <button type="button"
                 class="btn btn-success"
-                onclick="testProvider('openrouter')">
+                onclick="testProvider(event, 'openrouter')">
             <i class="bi bi-lightning"></i>
             🔍 تست اتصال
         </button>

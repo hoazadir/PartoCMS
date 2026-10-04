@@ -128,6 +128,25 @@ class OpenRouterProvider implements LLMProviderInterface {
             $payload['response_format'] = ['type' => 'json_object'];
         }
 
+        // 🆕 تنظیمات Provider برای دور زدن محدودیت Privacy
+        // درخواست‌ها را به providerهایی هدایت می‌کند که داده جمع‌آوری نمی‌کنند
+        // (configurable از تنظیمات)
+        $allowTraining = getSetting('ai_openrouter_allow_training', '0') === '1';
+
+        if (!$allowTraining) {
+            $payload['provider'] = [
+                'data_collection' => 'deny',
+            ];
+        } else {
+            // اجازه به همه providerها (شامل رایگان‌هایی که ممکن است آموزش ببینند)
+            $payload['provider'] = [
+                'data_collection' => 'allow',
+            ];
+        }
+
+        // 🆕 درخواست fallback خودکار در صورت خطا
+        $payload['route'] = 'fallback';
+
         try {
             $headers = [
                 'Content-Type: application/json',

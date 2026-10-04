@@ -235,7 +235,7 @@ try {
 
         <button type="button"
                 class="btn btn-success"
-                onclick="testProvider('ollama')">
+                onclick="testProvider(event, 'ollama')">
             <i class="bi bi-lightning"></i>
             🔍 تست اتصال
         </button>

@@ -722,6 +722,10 @@ CSS;
 
     // ═══ Ad Slider ═══
     function initSlider(slider) {
+        // 🆕 چک duplicate init
+        if (slider.dataset.sliderInit === '1') return;
+        slider.dataset.sliderInit = '1';
+
         const settings = JSON.parse(slider.dataset.adSlider || '{}');
         const slides = slider.querySelectorAll('.ad-slide');
         const dots = slider.querySelectorAll('.ad-dot');
@@ -855,10 +859,57 @@ CSS;
         });
     }
 
+    // 🆕 Robust init for all browsers (Chrome, Edge, Firefox, Safari)
+    function safeInit() {
+        try {
+            const sliderCount = document.querySelectorAll('.ad-slider').length;
+            console.log('[AdWidget] safeInit — sliders found:', sliderCount);
+
+            init();
+
+            // علامت‌گذاری به‌عنوان initialized
+            document.querySelectorAll('.ad-slider').forEach(function(s) {
+                s.dataset.initialized = '1';
+            });
+        } catch (e) {
+            console.error('[AdWidget] Init error:', e);
+        }
+    }
+
+    // ۱. اگر DOM آماده نیست
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', safeInit);
     } else {
-        init();
+        safeInit();
+    }
+
+    // ۲. Fallback: بعد از window.load (اطمینان کامل)
+    window.addEventListener('load', function() {
+        if (!document.querySelector('.ad-slider[data-initialized="1"]')) {
+            console.log('[AdWidget] load fallback triggered');
+            safeInit();
+        }
+    });
+
+    // ۳. Fallback: setTimeout برای موارد نادر
+    setTimeout(function() {
+        if (!document.querySelector('.ad-slider[data-initialized="1"]')) {
+            console.log('[AdWidget] setTimeout fallback triggered');
+            safeInit();
+        }
+    }, 300);
+
+    // ۴. Fallback: MutationObserver برای محتوای پویا
+    if (typeof MutationObserver !== 'undefined') {
+        try {
+            const observer = new MutationObserver(function() {
+                if (document.querySelector('.ad-slider:not([data-initialized="1"])')) {
+                    console.log('[AdWidget] MutationObserver triggered');
+                    safeInit();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        } catch (e) {}
     }
 })();
 JS;
