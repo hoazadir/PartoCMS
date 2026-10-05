@@ -1,0 +1,7 @@
+# جلوگیری از دسترسی غیرمجاز به فایل‌های داخلی
+<FilesMatch "\.(lock|log|bak)$">
+    Require all denied
+</FilesMatch>
+
+# جلوگیری از لیست شدن پوشه
+Options -Indexes
