@@ -1,0 +1,58 @@
+{
+    "name": "دیدگاه‌ها",
+    "slug": "comments",
+    "version": "1.0.0",
+    "description": "سیستم دیدگاه‌های کاربران با Threading، پاسخ ادمین، و تأیید",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "comments.view",
+        "comments.manage",
+        "comments.approve",
+        "comments.delete",
+        "comments.reply",
+        "comments.settings"
+    ],
+    "menu": {
+        "title": "دیدگاه‌ها",
+        "icon": "💬",
+        "url": "/modules/comments/admin/index.php",
+        "order": 30,
+        "parent": "content",
+        "submenu": [
+            {
+                "title": "همه دیدگاه‌ها",
+                "url": "/modules/comments/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "در انتظار تأیید",
+                "url": "/modules/comments/admin/index.php?status=pending",
+                "icon": "⏳"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "comments"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "auto_approve": false,
+        "allow_guest": true,
+        "require_email": true,
+        "allow_replies": true,
+        "items_per_page": 20,
+        "enable_on_post": true,
+        "enable_on_page": false,
+        "enable_on_product": false
+    },
+    "icon": "💬",
+    "menu_group": "content"
+}
