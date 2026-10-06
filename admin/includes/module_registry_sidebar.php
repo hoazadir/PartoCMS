@@ -65,6 +65,9 @@ class ModuleRegistrySidebar {
         'index'        => '📊',
         // 🆕 AI Providers (2026-10-03)
         'providers'    => '☁️',
+        // 🆕 Reviews (2026-10-05)
+        'list'         => '📋',
+        'pending'      => '⏳',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -76,7 +79,7 @@ class ModuleRegistrySidebar {
         'import'       => 'ایمپورت ترجمه‌ها',
         'translate'    => 'ترجمه محتوا',
         'review'       => 'بازنگری ترجمه‌ها',
-        'settings'     => 'تنظیمات ترجمه',
+        'settings'     => 'تنظیمات',
         'queue'        => 'صف ترجمه',
         'cron_setup'   => 'راه‌اندازی Cron',
         'dashboard'    => 'داشبورد امنیتی',
@@ -91,6 +94,9 @@ class ModuleRegistrySidebar {
         'chat'         => 'چت با دستیار',
         // 🆕 AI Providers (2026-10-03)
         'providers'    => 'ارائه‌دهندگان AI',
+        // 🆕 Reviews (2026-10-05)
+        'list'         => 'همه نظرات',
+        'pending'      => 'در انتظار تأیید',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -104,6 +110,7 @@ class ModuleRegistrySidebar {
         'tools_pro'   => '🔧',
         'generated'   => '📦',
         'ai'          => '🤖',
+        'marketing'   => '💼',
     ];
 
     public function __construct($registry) {
