@@ -434,6 +434,15 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         </div>
     </div>
 
+    <!-- 🆕 نظرات و امتیازدهی (Reviews Module) -->
+    <?php
+    $__revInject = __DIR__ . '/modules/reviews/includes/ReviewAutoInject.php';
+    if (file_exists($__revInject)) {
+        require_once $__revInject;
+        echo ReviewAutoInject::maybeRender('post', $post['id']);
+    }
+    ?>
+
     <hr style="margin: 30px 0;">
     <a href="index.php" class="btn btn-outline-primary">
         <i class="bi bi-arrow-right"></i> بازگشت به خانه

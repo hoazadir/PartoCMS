@@ -1,0 +1,63 @@
+{
+    "name": "نظرات و امتیازدهی",
+    "slug": "reviews",
+    "version": "1.0.0",
+    "description": "سیستم نظرات و امتیازدهی برای محصولات، مقالات، املاک، خودرو و ...",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "reviews.view",
+        "reviews.manage",
+        "reviews.approve",
+        "reviews.delete",
+        "reviews.settings"
+    ],
+    "menu": {
+        "title": "نظرات",
+        "icon": "⭐",
+        "url": "/modules/reviews/admin/index.php",
+        "order": 45,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "همه نظرات",
+                "url": "/modules/reviews/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "در انتظار تأیید",
+                "url": "/modules/reviews/admin/pending.php",
+                "icon": "⏳"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/reviews/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "reviews",
+            "review_votes",
+            "review_reports",
+            "review_settings"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "auto_approve": false,
+        "allow_guest": true,
+        "require_email": true,
+        "max_rating": 5,
+        "allow_helpful_votes": true,
+        "items_per_page": 10
+    },
+    "icon": "⭐",
+    "menu_group": "marketing"
+}
