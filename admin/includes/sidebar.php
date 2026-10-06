@@ -989,20 +989,6 @@ $baseSite  = SITE_URL;
                 <span><?= __t('menu_ai_assistant', [], 'دستیار هوشمند') ?></span>
             </a>
             <?php endif; ?>
-            <?php if ($isAdmin): ?>
-            <!-- 🆕 AI Providers (جدید — 2026-10-01) -->
-            <a href="<?= $baseAdmin ?>/ai_providers.php" class="<?= $currentFile === 'ai_providers.php' ? 'active' : '' ?>">
-                <span class="item-icon">☁️</span>
-                <span><?= __t('menu_ai_providers', [], 'ارائه‌دهندگان AI') ?></span>
-            </a>
-            <?php endif; ?>
-            <?php if ($isAdmin): ?>
-            <!-- 🆕 AI Providers (جدید — 2026-10-01) -->
-            <a href="<?= $baseAdmin ?>/ai_providers.php" class="<?= $currentFile === 'ai_providers.php' ? 'active' : '' ?>">
-                <span class="item-icon">☁️</span>
-                <span><?= __t('menu_ai_providers', [], 'ارائه‌دهندگان AI') ?></span>
-            </a>
-            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
