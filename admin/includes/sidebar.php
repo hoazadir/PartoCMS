@@ -55,7 +55,7 @@ $hasUsersGroup      = $canUsers || $canRoles;
 $hasSettingsGroup   = $canModules || $canSettings || $canBackups;
 
 // ==================== بررسی گروه‌های فعال ====================
-$isContentGroup    = in_array($currentFile, ['categories.php', 'media.php', 'comments.php', 'admin.php']) || strpos($currentPath, 'modules/content') !== false;
+$isContentGroup    = in_array($currentFile, ['categories.php', 'media.php', 'comments.php', 'admin.php']) || strpos($currentPath, 'modules/content') !== false || strpos($currentPath, 'modules/comments') !== false;
 $isModulesGroup    = in_array($currentFile, ['forms.php', 'form-edit.php', 'form-submissions.php', 'menus.php', 'menu-edit.php']);
 $isAppearanceGroup = in_array($currentFile, ['templates.php', 'editor.php']);
 $isUsersGroup      = in_array($currentFile, ['users.php', 'roles.php']);
@@ -878,7 +878,7 @@ $baseSite  = SITE_URL;
             </a>
             <?php endif; ?>
             <?php if ($canComments): ?>
-            <a href="<?= $baseAdmin ?>/comments.php" class="<?= $currentFile === 'comments.php' ? 'active' : '' ?>">
+            <a href="<?= SITE_URL ?>/modules/comments/admin/index.php" class="<?= strpos($currentPath, 'modules/comments') !== false ? 'active' : '' ?>">
                 <span class="item-icon">💬</span>
                 <span><?= __t('menu_comments', [], 'دیدگاه‌ها') ?></span>
             </a>
