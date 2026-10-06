@@ -14,6 +14,22 @@ class ModuleRegistry {
 
     private static $defaultMap = [
         // 🆕 AI Providers (2026-10-03)
+        'reviews' => [
+            'name' => 'نظرات و امتیازدهی',
+            'icon' => '⭐',
+            'menu_group' => 'marketing',
+            'sort_order' => 45,
+            'is_core' => 0,
+            'pages' => [
+                'list'    => 'modules/reviews/admin/index.php',
+                'pending' => 'modules/reviews/admin/pending.php',
+                'settings' => 'modules/reviews/admin/settings.php',
+            ],
+            'includes' => [
+                'review_manager'  => 'modules/reviews/includes/ReviewManager.php',
+                'review_renderer' => 'modules/reviews/includes/ReviewRenderer.php',
+            ],
+        ],
         'ai_providers' => [
             'name' => 'ارائه‌دهندگان AI',
             'icon' => '☁️',
@@ -126,7 +142,7 @@ class ModuleRegistry {
         ],
     ];
 
-    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai'];
+    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing'];
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
@@ -202,6 +218,11 @@ class ModuleRegistry {
                         // از defaultMap
                         $map[$slug] = self::$defaultMap[$slug];
                     } else {
+                        // چک وجود فایل — اگر نبود، skip
+                        $generatedFile = dirname(__DIR__, 2) . '/modules/generated/' . $slug . '/admin.php';
+                        if (!file_exists($generatedFile)) {
+                            continue;
+                        }
                         // ماژول Generated — مسیر پیش‌فرض
                         $map[$slug] = [
                             'name'       => $m['name'],
@@ -299,6 +320,7 @@ class ModuleRegistry {
             'tools_pro'    => '🔧 ابزارهای حرفه‌ای',
             'ai'           => 'هوش مصنوعی',
             'generated'    => 'ماژول‌های ساخته شده',
+            'marketing'    => 'بازاریابی',
             default        => '📦 ' . $slug,
         };
     }
