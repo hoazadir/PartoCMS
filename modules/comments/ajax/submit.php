@@ -49,10 +49,26 @@ try {
     $result = $manager->create($data);
 
     if ($result['ok']) {
+        // 🆕 پیام داینامیک بر اساس تنظیم تأیید خودکار
+        $autoApprove = false;
+        try {
+            $__rvPath = __DIR__ . '/../../reviews/includes/ReviewManager.php';
+            if (file_exists($__rvPath)) {
+                require_once $__rvPath;
+                $__settings = (new ReviewManager(getDB()))->getSettings('global');
+                $autoApprove = !empty($__settings['comments_auto_approve']);
+            }
+        } catch (Throwable $e) {}
+
+        $message = $autoApprove
+            ? '✅ دیدگاه شما با موفقیت ثبت و منتشر شد'
+            : '✅ دیدگاه شما ثبت شد و در انتظار تأیید است';
+
         echo json_encode([
             'ok'      => true,
             'id'      => $result['id'],
-            'message' => '✅ دیدگاه شما ثبت شد و در انتظار تأیید است',
+            'message' => $message,
+            'status'  => $autoApprove ? 'approved' : 'pending',
         ]);
     } else {
         echo json_encode([

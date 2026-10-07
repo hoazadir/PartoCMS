@@ -287,6 +287,19 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 
     <!-- ==================== دیدگاه‌ها ==================== -->
     <?php
+    // چک تنظیمات — نمایش/عدم نمایش دیدگاه‌های قدیمی
+    $__showLegacyComments = true;
+    try {
+        $__rvPath = __DIR__ . '/modules/reviews/includes/ReviewManager.php';
+        if (file_exists($__rvPath)) {
+            require_once $__rvPath;
+            $__rvSettings = (new ReviewManager(getDB()))->getSettings('global');
+            $__showLegacyComments = !empty($__rvSettings['enable_comments']);
+        }
+    } catch (Throwable $e) {}
+    ?>
+    <?php if ($__showLegacyComments): ?>
+    <?php
     // دریافت دیدگاه‌های تایید شده
     $stmt = $pdo->prepare("
         SELECT c.*, u.username as registered_username
@@ -433,6 +446,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             </form>
         </div>
     </div>
+    <?php endif; // $__showLegacyComments ?>
 
     <!-- 🆕 نظرات و امتیازدهی (Reviews Module) -->
     <?php
