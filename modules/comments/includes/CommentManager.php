@@ -105,6 +105,21 @@ class CommentManager
         $chk->execute([$contentId]);
         if (!$chk->fetchColumn()) return ['ok' => false, 'error' => 'محتوا یافت نشد'];
 
+        // 🆕 چک تنظیمات تأیید خودکار
+        $status = 'pending';
+        try {
+            $__rvPath = __DIR__ . '/../../reviews/includes/ReviewManager.php';
+            if (file_exists($__rvPath)) {
+                require_once $__rvPath;
+                $__settings = (new ReviewManager($this->pdo))->getSettings('global');
+                if (!empty($__settings['comments_auto_approve'])) {
+                    $status = 'approved';
+                }
+            }
+        } catch (Throwable $e) {
+            // silent — fallback به pending
+        }
+
         try {
             $stmt = $this->pdo->prepare("
                 INSERT INTO comments
@@ -120,7 +135,7 @@ class CommentManager
                 !empty($data['author_website']) ? trim($data['author_website']) : null,
                 $data['author_ip'] ?? null,
                 $comment,
-                'pending',
+                $status,
                 !empty($data['user_id']) ? (int) $data['user_id'] : null,
             ]);
             return ['ok' => true, 'id' => (int) $this->pdo->lastInsertId()];

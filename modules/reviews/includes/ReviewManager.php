@@ -433,6 +433,9 @@ class ReviewManager
             'show_summary'         => true,
             'show_form'            => true,
             'show_list'            => true,
+            // 🆕 Comments compatibility
+            'enable_comments'      => true,
+            'comments_auto_approve'=> false,
         ];
 
         foreach ($rows as $row) {

@@ -40,6 +40,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'show_summary'        => !empty($_POST['show_summary']),
         'show_form'           => !empty($_POST['show_form']),
         'show_list'           => !empty($_POST['show_list']),
+        // 🆕 Comments compatibility
+        'enable_comments'      => !empty($_POST['enable_comments']),
+        'comments_auto_approve'=> !empty($_POST['comments_auto_approve']),
     ];
 
     if ($manager->updateSettings('global', $settings)) {
@@ -461,16 +464,47 @@ $stats = [
             </div>
         </div>
 
-        <!-- بخش ۴: نمایش -->
+        <!-- 💬 سیستم دیدگاه‌ها (Comments) -->
         <div class="section">
             <h3 class="section-title">
-                <span class="icon">📄</span>
-                نمایش
+                <span class="icon">💬</span>
+                سیستم دیدگاه‌ها (Comments)
             </h3>
 
             <div class="setting-row">
                 <div class="setting-info">
-                    <span class="label">فعال‌سازی خودکار در مقالات</span>
+                    <span class="label">فعال بودن سیستم دیدگاه‌ها</span>
+                    <div class="hint">اگر غیرفعال شود، بخش دیدگاه‌ها در مقالات نمایش داده نمی‌شود</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="enable_comments" value="1" <?= !empty($settings['enable_comments']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="label">تأیید خودکار دیدگاه‌ها</span>
+                    <div class="hint">اگر خاموش باشد، دیدگاه‌های جدید نیاز به تأیید مدیر دارند</div>
+                </div>
+                <label class="switch">
+                    <input type="checkbox" name="comments_auto_approve" value="1" <?= !empty($settings['comments_auto_approve']) ? 'checked' : '' ?>>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+        </div>
+
+        <!-- ⭐ سیستم نظرات (Reviews) -->
+        <div class="section">
+            <h3 class="section-title">
+                <span class="icon">⭐</span>
+                سیستم نظرات (Reviews)
+            </h3>
+
+            <div class="setting-row">
+                <div class="setting-info">
+                    <span class="label">نمایش خودکار نظرات در مقالات</span>
                     <div class="hint">نمایش خودکار بخش نظرات در تمام مقالات سایت</div>
                 </div>
                 <label class="switch">
@@ -481,7 +515,7 @@ $stats = [
 
             <div class="setting-row">
                 <div class="setting-info">
-                    <span class="label">فعال‌سازی خودکار در محصولات</span>
+                    <span class="label">نمایش خودکار نظرات در محصولات</span>
                     <div class="hint">نمایش خودکار بخش نظرات در تمام محصولات فروشگاه</div>
                 </div>
                 <label class="switch">
@@ -492,7 +526,7 @@ $stats = [
 
             <div class="setting-row">
                 <div class="setting-info">
-                    <span class="label">فعال‌سازی خودکار در صفحات</span>
+                    <span class="label">نمایش خودکار نظرات در صفحات</span>
                     <div class="hint">نمایش خودکار بخش نظرات در تمام صفحات سایت</div>
                 </div>
                 <label class="switch">
@@ -500,6 +534,15 @@ $stats = [
                     <span class="slider"></span>
                 </label>
             </div>
+
+        </div>
+
+        <!-- 🎨 نمایش ظاهری -->
+        <div class="section">
+            <h3 class="section-title">
+                <span class="icon">🎨</span>
+                نمایش ظاهری
+            </h3>
 
             <div class="setting-row">
                 <div class="setting-info">
