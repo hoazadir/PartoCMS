@@ -1,4 +1,10 @@
 <?php
+// 🆕 Cache-Control — جلوگیری از کش شدن در مرورگر
+// تا تغییرات تنظیمات Reviews/Comments فوراً اعمال شوند
+header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+header('Pragma: no-cache');
+header('Expires: 0');
+
 require_once __DIR__ . '/config.php';
 
 // ═══ AdWidget v3 برای نمایش تبلیغات ═══
