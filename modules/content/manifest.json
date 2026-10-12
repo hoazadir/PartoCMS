@@ -1,0 +1,37 @@
+{
+    "name": "مقالات و صفحات",
+    "slug": "content",
+    "version": "1.0.0",
+    "description": "ایجاد و مدیریت مقالات، صفحات و محصولات",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "content.view",
+        "content.create",
+        "content.edit",
+        "content.delete",
+        "content.publish"
+    ],
+    "menu": {
+        "title": "مقالات و صفحات",
+        "icon": "📄",
+        "url": "/modules/content/admin.php",
+        "order": 10,
+        "parent": "content"
+    },
+    "database": {
+        "tables": ["content_items", "content_types"]
+    },
+    "settings": {
+        "enabled": true,
+        "items_per_page": 20,
+        "enable_comments": true
+    },
+    "icon": "📄",
+    "menu_group": "content"
+}
