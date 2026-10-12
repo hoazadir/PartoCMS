@@ -1244,3 +1244,47 @@ post.php, index.php, category.php, search.php, login.php, register.php
 ---
 
 **پایان TODO.md**
+
+---
+
+## 🆕 فاز ۳-E: ماژول Newsletter (در حال)
+
+**شروع:** 2026-10-12
+**معماری:** DDD + SOLID + PSR-4 + DI Container
+
+### پیشرفت فازها:
+
+| فاز | عنوان | وضعیت |
+|:---:|-------|:-----:|
+| ۱ | Skeleton + DI Container | ✅ |
+| ۲ | Value Objects + Exceptions | ✅ |
+| ۳ | Entities + SendStatus | ✅ |
+| ۴ | Repositories (PDO) + Schema | ✅ |
+| ۵ | Services (Subscription/Campaign/Send) | ⏳ |
+| ۶ | Admin UI + AJAX + Frontend | ⏳ |
+| ۷ | Tests + README | ⏳ |
+
+**کامیت‌های مرتبط:**
+- 6fa30f1 — فاز ۱
+- 012f548 — فاز ۲
+- fa414fc — فاز ۳
+- bcb227a — فاز ۴
+
+**آمار:**
+- ۱۹ فایل PHP
+- ~۲۵۰۰ خط کد
+- ۳ جدول DB
+- ~۶۰ assertion تست موفق
+
+---
+
+## 🆕 B7: Content Group به Dynamic Registry (تکمیل)
+
+**تاریخ:** 2026-10-12
+**کامیت:** 93cbb28
+
+- انتقال content/categories/media/comments به dynamicGroups
+- canAccess با permission check
+- حذف hardcoded (۳۷ خط)
+- استانداردسازی ۱۰ فایل CSS legacy
+

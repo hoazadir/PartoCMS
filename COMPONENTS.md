@@ -68,6 +68,47 @@ index.php, database.php, admin-user.php, site-type.php, install.php
 
 ---
 
+## 🔄 بخش ۲.۵: در حال ساخت (۲ مورد)
+
+| # | کامپوننت | وضعیت | جزئیات |
+|---|----------|:-----:|--------|
+| ۱ | **Reviews + Rating** | ✅ کامل | فاز ۳ — کامیت شده |
+| ۲ | **Newsletter** | 🔄 ۴ از ۷ فاز | فاز ۳-E — در حال توسعه |
+
+### 📦 Reviews + Rating — کامل ✅
+
+**مسیر:** `modules/reviews/`
+**تاریخ تکمیل:** 2026-10-05
+**امکانات:**
+- ثبت نظر + امتیاز ستاره‌ای (AJAX)
+- رأی «مفید / غیرمفید»
+- moderation + صف تأیید
+- polymorphic (محصول، مقاله، املاک، خودرو، ...)
+- 3-state toggle (disabled / pending / published)
+
+### 📮 Newsletter — در حال (۴/۷ فاز)
+
+**مسیر:** `modules/newsletter/`
+**شروع:** 2026-10-12
+**معماری:** DDD + SOLID + PSR-4 + DI Container
+
+| فاز | عنوان | وضعیت |
+|:---:|-------|:-----:|
+| ۱ | Skeleton + DI Container | ✅ |
+| ۲ | Value Objects + Exceptions | ✅ |
+| ۳ | Entities + SendStatus | ✅ |
+| ۴ | Repositories (PDO) + Schema | ✅ |
+| ۵ | Services | ⏳ |
+| ۶ | Admin UI + AJAX | ⏳ |
+| ۷ | Tests + README | ⏳ |
+
+**جداول DB:** `newsletter_subscribers`, `newsletter_campaigns`, `newsletter_sends`
+
+**Placeholders بعدی:**
+- ۵ ماژول عمومی remaining: Social Share, Live Chat, Advanced Search, FAQ, Testimonials
+
+---
+
 ## ❌ بخش ۳: کامپوننت‌های Missing (۱۱۵ مورد)
 
 ### 🌐 عمومی — مشترک همه سایت‌ها (۸)
