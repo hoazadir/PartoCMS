@@ -105,11 +105,7 @@ foreach (['all', 'pending', 'approved', 'spam'] as $s) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
-        .sidebar { background: #2c3e50; min-height: 100vh; color: #fff; padding: 0; position: fixed; right: 0; top: 0; width: 240px; z-index: 100; overflow-y: auto; }
-        .sidebar .brand { padding: 20px; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #34495e; font-size: 14px; }
-        .sidebar a:hover, .sidebar a.active { background: #3498db; }
-        .main { margin-right: 240px; padding: 25px; }
+        .main { margin-right: 260px; padding: 25px; }
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .stat-btn { background: #fff; border-radius: 10px; padding: 12px 18px; margin-bottom: 15px; text-decoration: none; color: #2c3e50; display: block; border: 2px solid transparent; transition: all 0.2s; }
         .stat-btn:hover { border-color: #3498db; }
@@ -121,11 +117,8 @@ foreach (['all', 'pending', 'approved', 'spam'] as $s) {
         .comment-box.approved { border-right-color: #27ae60; }
         .comment-box.spam { border-right-color: #e74c3c; }
         .comment-box.rejected { border-right-color: #95a5a6; }
-        @media (max-width: 768px) {
-            .sidebar { width: 60px; }
-            .sidebar .brand h5, .sidebar a span { display: none; }
-            .sidebar a { justify-content: center; }
-            .main { margin-right: 60px; padding: 15px; }
+        @media (max-width: 900px) {
+            .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>
 </head>
