@@ -121,21 +121,14 @@ if (isset($_GET['edit'])) {
     <style>
         * { box-sizing: border-box; }
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
-        .sidebar { background: #2c3e50; min-height: 100vh; color: #fff; padding: 0; position: fixed; right: 0; top: 0; width: 240px; z-index: 100; overflow-y: auto; }
-        .sidebar .brand { padding: 20px; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #34495e; font-size: 14px; }
-        .sidebar a:hover, .sidebar a.active { background: #3498db; }
-        .main { margin-right: 240px; padding: 25px; }
+        .main { margin-right: 260px; padding: 25px; }
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
         .card { border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 10px; margin-bottom: 20px; }
         .cat-card { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; border-right: 4px solid #3498db; }
         .cat-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .cat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
-        @media (max-width: 768px) {
-            .sidebar { width: 60px; }
-            .sidebar .brand h5, .sidebar .brand small, .sidebar a span { display: none; }
-            .sidebar a { justify-content: center; }
-            .main { margin-right: 60px; padding: 15px; }
+        @media (max-width: 900px) {
+            .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>
 </head>
