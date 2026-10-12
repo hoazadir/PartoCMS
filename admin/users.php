@@ -174,14 +174,7 @@ if (isset($_GET['edit'])) {
     <style>
         * { box-sizing: border-box; }
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
-        .sidebar { background: #2c3e50; min-height: 100vh; color: #fff; padding: 0; position: fixed; right: 0; top: 0; width: 240px; z-index: 100; overflow-y: auto; }
-        .sidebar .brand { padding: 20px; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar .brand h5 { margin: 0; font-size: 16px; }
-        .sidebar .brand small { opacity: 0.6; font-size: 11px; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #34495e; font-size: 14px; transition: background 0.2s; }
-        .sidebar a:hover { background: #34495e; }
-        .sidebar a.active { background: #3498db; border-right: 4px solid #fff; }
-        .main { margin-right: 240px; padding: 25px; }
+        .main { margin-right: 260px; padding: 25px; }
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; }
         .top-bar h4 { margin: 0; color: #2c3e50; }
         .stat-card { background: #fff; border-radius: 10px; padding: 18px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
@@ -201,11 +194,8 @@ if (isset($_GET['edit'])) {
         .table { font-size: 13px; }
         .table th { background: #f8f9fa; font-weight: 600; color: #2c3e50; }
         .table td { vertical-align: middle; }
-        @media (max-width: 768px) {
-            .sidebar { width: 60px; }
-            .sidebar .brand h5, .sidebar .brand small, .sidebar a span { display: none; }
-            .sidebar a { justify-content: center; padding: 14px 5px; }
-            .main { margin-right: 60px; padding: 15px; }
+        @media (max-width: 900px) {
+            .main { margin-right: 0; padding: 70px 15px 15px; }
             .table { font-size: 11px; }
         }
     </style>

@@ -55,19 +55,12 @@ $forms = $pdo->query("
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
-        .sidebar { background: #2c3e50; min-height: 100vh; color: #fff; padding: 0; position: fixed; right: 0; top: 0; width: 240px; z-index: 100; overflow-y: auto; }
-        .sidebar .brand { padding: 20px; text-align: center; border-bottom: 1px solid #34495e; }
-        .sidebar a { color: #ecf0f1; text-decoration: none; padding: 14px 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #34495e; font-size: 14px; }
-        .sidebar a:hover, .sidebar a.active { background: #3498db; }
-        .main { margin-right: 240px; padding: 25px; }
+        .main { margin-right: 260px; padding: 25px; }
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .form-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-right: 4px solid #3498db; }
         .form-card.inactive { border-right-color: #95a5a6; opacity: 0.7; }
-        @media (max-width: 768px) {
-            .sidebar { width: 60px; }
-            .sidebar .brand h5, .sidebar a span { display: none; }
-            .sidebar a { justify-content: center; }
-            .main { margin-right: 60px; padding: 15px; }
+        @media (max-width: 900px) {
+            .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>
 </head>
