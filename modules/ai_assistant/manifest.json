@@ -1,0 +1,36 @@
+{
+    "name": "دستیار هوشمند",
+    "slug": "ai_assistant",
+    "version": "1.0.0",
+    "description": "دستیار هوشمند مبتنی بر Ollama برای چت، تحلیل خطا و پیشنهادات",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "ai_assistant.view",
+        "ai_assistant.chat",
+        "ai_assistant.settings"
+    ],
+    "menu": {
+        "title": "دستیار هوشمند",
+        "icon": "🤖",
+        "url": "/modules/ai_assistant/chat.php",
+        "order": 150,
+        "parent": "ai"
+    },
+    "database": {
+        "tables": ["ai_conversations", "ai_messages"]
+    },
+    "settings": {
+        "enabled": true,
+        "provider": "ollama",
+        "model": "llama3",
+        "max_tokens": 2048
+    },
+    "icon": "🤖",
+    "menu_group": "ai"
+}
