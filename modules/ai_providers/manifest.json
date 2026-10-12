@@ -1,0 +1,37 @@
+{
+    "name": "ارائه‌دهندگان AI",
+    "slug": "ai_providers",
+    "version": "1.0.0",
+    "description": "مدیریت ارائه‌دهندگان هوش مصنوعی ابری (Groq, Gemini, OpenRouter) با Fallback خودکار",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "ai_providers.view",
+        "ai_providers.manage",
+        "ai_providers.test",
+        "ai_providers.settings"
+    ],
+    "menu": {
+        "title": "ارائه‌دهندگان AI",
+        "icon": "☁️",
+        "url": "/admin/ai_providers.php",
+        "order": 151,
+        "parent": "ai"
+    },
+    "database": {
+        "tables": ["ai_providers", "ai_provider_chain"]
+    },
+    "settings": {
+        "enabled": true,
+        "default_provider": "openrouter",
+        "fallback_enabled": true,
+        "timeout_seconds": 30
+    },
+    "icon": "☁️",
+    "menu_group": "ai"
+}
