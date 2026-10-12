@@ -1,0 +1,39 @@
+{
+    "name": "جدول‌ساز",
+    "slug": "table_builder",
+    "version": "1.0.0",
+    "description": "ساخت جداول بدون SQL، CRUD خودکار، Export/Import، Drag & Drop",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.0",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "table_builder.view",
+        "table_builder.create",
+        "table_builder.edit",
+        "table_builder.delete",
+        "table_builder.export",
+        "table_builder.settings"
+    ],
+    "menu": {
+        "title": "جدول‌ساز",
+        "icon": "📊",
+        "url": "/admin/table_builder.php",
+        "order": 104,
+        "parent": "tools_pro"
+    },
+    "database": {
+        "tables": ["table_definitions", "table_fields", "table_data"]
+    },
+    "settings": {
+        "enabled": true,
+        "allow_module_generation": true,
+        "default_engine": "InnoDB",
+        "default_charset": "utf8mb4"
+    },
+    "icon": "📊",
+    "menu_group": "tools_pro"
+}
