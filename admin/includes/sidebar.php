@@ -850,43 +850,6 @@ $baseSite  = SITE_URL;
     </a>
     <?php endif; ?>    
 
-<!-- ==================== مدیریت محتوا ==================== -->
-    <?php if ($hasContentGroup): ?>
-    <div class="menu-group <?= $isContentGroup ? 'open has-active' : '' ?>" data-group="content">
-        <div class="menu-group-header" onclick="toggleMenuGroup(this)">
-            <span class="group-icon">📝</span>
-            <span class="group-title"><?= __t('menu_content', [], 'مدیریت محتوا') ?></span>
-            <span class="arrow">▼</span>
-        </div>
-        <div class="menu-group-items">
-            <?php if ($canContent): ?>
-            <a href="<?= $baseSite ?>/modules/content/admin.php" class="<?= strpos($currentPath, 'modules/content') !== false ? 'active' : '' ?>">
-                <span class="item-icon">📄</span>
-                <span><?= __t('menu_posts', [], 'مقالات و صفحات') ?></span>
-            </a>
-            <?php endif; ?>
-            <?php if ($canCategories): ?>
-            <a href="<?= $baseAdmin ?>/categories.php" class="<?= $currentFile === 'categories.php' ? 'active' : '' ?>">
-                <span class="item-icon">🏷</span>
-                <span><?= __t('menu_categories', [], 'دسته‌بندی‌ها') ?></span>
-            </a>
-            <?php endif; ?>
-            <?php if ($canMedia): ?>
-            <a href="<?= $baseAdmin ?>/media.php" class="<?= $currentFile === 'media.php' ? 'active' : '' ?>">
-                <span class="item-icon">🖼</span>
-                <span><?= __t('menu_media', [], 'رسانه‌ها') ?></span>
-            </a>
-            <?php endif; ?>
-            <?php if ($canComments): ?>
-            <a href="<?= SITE_URL ?>/modules/comments/admin/index.php" class="<?= strpos($currentPath, 'modules/comments') !== false ? 'active' : '' ?>">
-                <span class="item-icon">💬</span>
-                <span><?= __t('menu_comments', [], 'دیدگاه‌ها') ?></span>
-            </a>
-            <?php endif; ?>
-        </div>
-    </div>
-    <?php endif; ?>
-
     <!-- ==================== ابزارها ==================== -->
     <?php if ($hasToolsGroup): ?>
     <div class="menu-group <?= $isModulesGroup ? 'open has-active' : '' ?>" data-group="modules">

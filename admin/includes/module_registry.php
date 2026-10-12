@@ -13,6 +13,54 @@ class ModuleRegistry {
     private $registry = null;
 
     private static $defaultMap = [
+        // 🆕 Content group (2026-10-12) — B7
+        'content' => [
+            'name' => 'مقالات و صفحات',
+            'icon' => '📄',
+            'menu_group' => 'content',
+            'sort_order' => 10,
+            'is_core' => 1,
+            'pages' => [
+                'content_posts' => 'modules/content/admin.php',
+            ],
+            'includes' => [],
+        ],
+        'categories' => [
+            'name' => 'دسته‌بندی‌ها',
+            'icon' => '🏷',
+            'menu_group' => 'content',
+            'sort_order' => 11,
+            'is_core' => 1,
+            'pages' => [
+                'categories_list' => 'admin/categories.php',
+            ],
+            'includes' => [],
+        ],
+        'media' => [
+            'name' => 'رسانه‌ها',
+            'icon' => '🖼',
+            'menu_group' => 'content',
+            'sort_order' => 12,
+            'is_core' => 1,
+            'pages' => [
+                'media_gallery' => 'admin/media.php',
+            ],
+            'includes' => [],
+        ],
+        'comments' => [
+            'name' => 'دیدگاه‌ها',
+            'icon' => '💬',
+            'menu_group' => 'content',
+            'sort_order' => 13,
+            'is_core' => 0,
+            'pages' => [
+                'comments_list' => 'modules/comments/admin/index.php',
+            ],
+            'includes' => [
+                'comment_manager'  => 'modules/comments/includes/CommentManager.php',
+                'comment_renderer' => 'modules/comments/includes/CommentRenderer.php',
+            ],
+        ],
         // 🆕 AI Providers (2026-10-03)
         'reviews' => [
             'name' => 'نظرات و امتیازدهی',
@@ -142,7 +190,7 @@ class ModuleRegistry {
         ],
     ];
 
-    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing'];
+    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing', 'content'];
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
