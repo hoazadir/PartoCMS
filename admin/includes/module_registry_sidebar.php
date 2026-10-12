@@ -68,6 +68,11 @@ class ModuleRegistrySidebar {
         // 🆕 Reviews (2026-10-05)
         'list'         => '📋',
         'pending'      => '⏳',
+        // 🆕 Content group (2026-10-12)
+        'content_posts'    => '📄',
+        'categories_list'  => '🏷',
+        'media_gallery'    => '🖼',
+        'comments_list'    => '💬',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -97,6 +102,11 @@ class ModuleRegistrySidebar {
         // 🆕 Reviews (2026-10-05)
         'list'         => 'همه نظرات',
         'pending'      => 'در انتظار تأیید',
+        // 🆕 Content group (2026-10-12)
+        'content_posts'    => 'مقالات و صفحات',
+        'categories_list'  => 'دسته‌بندی‌ها',
+        'media_gallery'    => 'رسانه‌ها',
+        'comments_list'    => 'دیدگاه‌ها',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -111,6 +121,7 @@ class ModuleRegistrySidebar {
         'generated'   => '📦',
         'ai'          => '🤖',
         'marketing'   => '💼',
+        'content'     => '📝',
     ];
 
     public function __construct($registry) {
