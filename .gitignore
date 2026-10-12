@@ -134,3 +134,7 @@ admin/*-debug.php
 
 # ==================== فایل خالی main ====================
 /main
+
+# ─── Module configs (no secrets, must be committed) ───
+!modules/*/config.php
+!modules/*/*/config.php
