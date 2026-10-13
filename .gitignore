@@ -16,7 +16,7 @@ cloudflared
 stunnel.conf
 
 # ==================== وابستگی‌ها ====================
-/vendor/
+/vendor/*
 /node_modules/
 
 # ==================== لاگ‌ها و کش ====================
@@ -138,3 +138,7 @@ admin/*-debug.php
 # ─── Module configs (no secrets, must be committed) ───
 !modules/*/config.php
 !modules/*/*/config.php
+
+# ─── Force track PHPMailer (installed manually) ───
+!vendor/phpmailer/
+!vendor/phpmailer/**
