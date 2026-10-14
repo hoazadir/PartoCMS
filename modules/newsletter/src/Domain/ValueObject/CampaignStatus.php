@@ -26,27 +26,14 @@ enum CampaignStatus: string
      */
     public function label(): string
     {
-        $isFa = function_exists('getI18n')
-            && method_exists(getI18n(), 'getCurrentLang')
-            && str_starts_with(getI18n()->getCurrentLang(), 'fa');
-
-        return $isFa
-            ? match($this) {
-                self::DRAFT     => 'پیش‌نویس',
-                self::SCHEDULED => 'زمان‌بندی شده',
-                self::SENDING   => 'در حال ارسال',
-                self::SENT      => 'ارسال شده',
-                self::PAUSED    => 'متوقف شده',
-                self::FAILED    => 'ناموفق',
-            }
-            : match($this) {
-                self::DRAFT     => 'Draft',
-                self::SCHEDULED => 'Scheduled',
-                self::SENDING   => 'Sending',
-                self::SENT      => 'Sent',
-                self::PAUSED    => 'Paused',
-                self::FAILED    => 'Failed',
-            };
+        return match($this) {
+            self::DRAFT     => 'پیش‌نویس',
+            self::SCHEDULED => 'زمان‌بندی شده',
+            self::SENDING   => 'در حال ارسال',
+            self::SENT      => 'ارسال شده',
+            self::PAUSED    => 'متوقف شده',
+            self::FAILED    => 'ناموفق',
+        };
     }
 
     /**

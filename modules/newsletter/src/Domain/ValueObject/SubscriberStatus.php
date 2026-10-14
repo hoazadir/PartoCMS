@@ -24,23 +24,12 @@ enum SubscriberStatus: string
      */
     public function label(): string
     {
-        $isFa = function_exists('getI18n')
-            && method_exists(getI18n(), 'getCurrentLang')
-            && str_starts_with(getI18n()->getCurrentLang(), 'fa');
-
-        return $isFa
-            ? match($this) {
-                self::PENDING      => 'در انتظار تأیید',
-                self::ACTIVE       => 'فعال',
-                self::UNSUBSCRIBED => 'لغو شده',
-                self::BOUNCED      => 'برگشتی',
-            }
-            : match($this) {
-                self::PENDING      => 'Pending',
-                self::ACTIVE       => 'Active',
-                self::UNSUBSCRIBED => 'Unsubscribed',
-                self::BOUNCED      => 'Bounced',
-            };
+        return match($this) {
+            self::PENDING      => 'در انتظار تأیید',
+            self::ACTIVE       => 'فعال',
+            self::UNSUBSCRIBED => 'لغو شده',
+            self::BOUNCED      => 'برگشتی',
+        };
     }
 
     /**
