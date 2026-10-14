@@ -22,27 +22,14 @@ enum SendStatus: string
 
     public function label(): string
     {
-        $isFa = function_exists('getI18n')
-            && method_exists(getI18n(), 'getCurrentLang')
-            && str_starts_with(getI18n()->getCurrentLang(), 'fa');
-
-        return $isFa
-            ? match($this) {
-                self::QUEUED  => 'در صف',
-                self::SENT    => 'ارسال شده',
-                self::OPENED  => 'باز شده',
-                self::CLICKED => 'کلیک شده',
-                self::FAILED  => 'ناموفق',
-                self::BOUNCED => 'برگشتی',
-            }
-            : match($this) {
-                self::QUEUED  => 'Queued',
-                self::SENT    => 'Sent',
-                self::OPENED  => 'Opened',
-                self::CLICKED => 'Clicked',
-                self::FAILED  => 'Failed',
-                self::BOUNCED => 'Bounced',
-            };
+        return match($this) {
+            self::QUEUED  => 'در صف',
+            self::SENT    => 'ارسال شده',
+            self::OPENED  => 'باز شده',
+            self::CLICKED => 'کلیک شده',
+            self::FAILED  => 'ناموفق',
+            self::BOUNCED => 'برگشتی',
+        };
     }
 
     public function color(): string
