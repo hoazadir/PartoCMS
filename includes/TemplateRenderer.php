@@ -16,6 +16,10 @@
  *   {{menu:main-menu}}
  *   {{comments}}
  */
+require_once __DIR__ . '/../modules/newsletter/bootstrap.php';
+
+use PartoCMS\Newsletter\Widget\Shortcode;
+
 class TemplateRenderer {
     private $pdo;
     private $data = [];
@@ -123,7 +127,7 @@ class TemplateRenderer {
             'post.id' => $post['id'],
             'post.title' => $post['title'] ?? '',
             'post.slug' => $post['slug'] ?? '',
-            'post.content' => $post['content'] ?? '',
+            'post.content' => Shortcode::parse($post['content'] ?? '', ['source' => 'template']),
             'post.excerpt' => $post['excerpt'] ?? '',
             'post.featured_image' => $post['featured_image'] ?? '',
             'post.author' => $post['author_name'] ?? 'ناشناس',

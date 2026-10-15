@@ -6,6 +6,10 @@ header('Pragma: no-cache');
 header('Expires: 0');
 
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/modules/newsletter/bootstrap.php';
+
+use PartoCMS\Newsletter\Widget\Shortcode;
+
 
 // ═══ AdWidget v3 برای نمایش تبلیغات ═══
 $adsAvailable = false;
@@ -289,7 +293,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     <?php endif; ?>
 
     <!-- محتوا -->
-    <div class="content"><?= $post['content'] ?></div>
+    <div class="content"><?= Shortcode::parse($post['content'], ['source' => 'post']) ?></div>
 
     <!-- ==================== دیدگاه‌ها ==================== -->
     <?php

@@ -58,12 +58,26 @@ final class SubscriptionService
             ];
         }
 
-        // ─── Case 2: exists but unsubscribed/bounced → reactivate ───
+        // ─── Case 2: exists but not active ───
         if ($existing) {
             $existing->rename($name);
+
+            // ─── 2a: still pending → rotate token, resend confirmation ───
+            if ($existing->status() === SubscriberStatus::PENDING) {
+                $existing->rotateToken(TokenGenerator::generate());
+                $this->repo->save($existing);
+                return [
+                    'success'            => true,
+                    'subscriber'         => $existing,
+                    'message'            => 'confirmation_resent',
+                    'needs_confirmation' => true,
+                ];
+            }
+
+            // ─── 2b: unsubscribed/bounced ───
             if ($this->doubleOptIn) {
-                // Reset to pending for re-confirmation
-                $existing = $this->resetForReconfirmation($existing);
+                $existing->resetToPending();
+                $existing->rotateToken(TokenGenerator::generate());
                 $this->repo->save($existing);
                 return [
                     'success'            => true,
@@ -72,6 +86,8 @@ final class SubscriptionService
                     'needs_confirmation' => true,
                 ];
             }
+
+            // ─── 2c: no double opt-in → reactivate directly ───
             $existing->confirm();
             $this->repo->save($existing);
             return [
@@ -241,14 +257,4 @@ final class SubscriptionService
         ];
     }
 
-    /**
-     * Reset existing subscriber for double opt-in re-confirmation.
-     * NOTE: Subscriber entity lacks rotateToken() for now — this is a
-     * minimal implementation. Will be refactored in phase 7.
-     */
-    private function resetForReconfirmation(Subscriber $subscriber): Subscriber
-    {
-        $subscriber->unsubscribe();
-        return $subscriber;
-    }
 }
