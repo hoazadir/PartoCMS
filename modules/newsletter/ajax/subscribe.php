@@ -11,9 +11,11 @@ require_once __DIR__ . '/../../../modules/newsletter/bootstrap.php';
 require_once __DIR__ . '/../../../admin/includes/rate_limiter.php';
 
 use PartoCMS\Newsletter\Infrastructure\Persistence\PdoSubscriberRepository;
+use PartoCMS\Newsletter\Infrastructure\Mailer\MailerFactory;
 use PartoCMS\Newsletter\Domain\Service\SubscriptionService;
 use PartoCMS\Newsletter\Domain\ValueObject\Email;
 use PartoCMS\Newsletter\Domain\Exception\InvalidEmailException;
+use PartoCMS\Newsletter\Mailer\SubscriptionMailer;
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -89,13 +91,34 @@ try {
     // ثبت در rate limiter
     try { $limiter->record('subscribe:' . $email, true, $ip); } catch (Throwable $e) {}
 
+    // ─── 🆕 ارسال ایمیل lifecycle ───
+    $subscriber = $result['subscriber'] ?? null;
+    if ($subscriber !== null) {
+        try {
+            $mailerFactory      = MailerFactory::fromDatabase($pdo);
+            $subscriptionMailer = new SubscriptionMailer($mailerFactory->build());
+
+            if ($result['needs_confirmation']) {
+                // ایمیل تأیید (double opt-in)
+                $subscriptionMailer->sendConfirmation($subscriber);
+            } elseif (in_array($result['message'], ['subscribed', 'reactivated'], true)) {
+                // ایمیل خوش‌آمد (بلافاصله فعال)
+                $subscriptionMailer->sendWelcome($subscriber);
+            }
+        } catch (Throwable $e) {
+            error_log('Newsletter subscribe email error: ' . $e->getMessage());
+            // silent fail — عضویت ذخیره شده، فقط ایمیل نرسید
+        }
+    }
+
     // پیام موفقیت
     $messages = [
-        'subscribed'             => '✅ با موفقیت در خبرنامه عضو شدید',
+        'subscribed'             => '✅ با موفقیت در خبرنامه عضو شدید. ایمیل خوش‌آمد ارسال شد.',
         'already_subscribed'     => '✅ شما قبلاً در خبرنامه عضو هستید',
         'reactivated'            => '✅ عضویت شما فعال شد',
-        'confirmation_sent'      => '📧 لطفاً ایمیل خود را بررسی کنید و لینک تأیید را کلیک کنید',
-        'reconfirmation_required' => '📧 لطفاً ایمیل خود را بررسی کنید و لینک تأیید را کلیک کنید',
+        'confirmation_sent'      => '📧 ایمیل تأیید ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید و لینک تأیید را کلیک کنید.',
+        'confirmation_resent'    => '📧 ایمیل تأیید مجدداً ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید.',
+        'reconfirmation_required' => '📧 ایمیل تأیید ارسال شد. لطفاً صندوق ورودی خود را بررسی کنید و لینک تأیید را کلیک کنید.',
     ];
 
     $message = $messages[$result['message']] ?? '✅ درخواست شما ثبت شد';

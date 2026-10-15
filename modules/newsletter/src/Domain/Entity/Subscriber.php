@@ -137,6 +137,26 @@ final class Subscriber
         $this->touch();
     }
 
+    /**
+     * 🆕 بازنشانی به حالت «در انتظار تأیید» (برای double opt-in مجدد)
+     */
+    public function resetToPending(): void
+    {
+        $this->status = SubscriberStatus::PENDING;
+        $this->confirmedAt = null;
+        $this->unsubscribedAt = null;
+        $this->touch();
+    }
+
+    /**
+     * 🆕 چرخش توکن (برای ارسال دوباره ایمیل تأیید)
+     */
+    public function rotateToken(string $newToken): void
+    {
+        $this->token = $newToken;
+        $this->touch();
+    }
+
     public function markAsBounced(): void
     {
         $this->status = SubscriberStatus::BOUNCED;
