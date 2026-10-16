@@ -77,7 +77,12 @@ function nl_status_badge(SubscriberStatus $status): string
         .pagination { display: flex; gap: 6px; margin-top: 20px; justify-content: center; }
         .pagination a, .pagination span { padding: 8px 14px; background: #fff; border-radius: 6px; text-decoration: none; color: #334155; font-size: 13px; }
         .pagination .current { background: #6366f1; color: #fff; }
-        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
+        @media (max-width: 1100px) {
+            .main { margin-right: 0; padding: 70px 15px 15px; }
+            .card { padding: 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+            .sub-table { font-size: 11px; min-width: 600px; }
+            .sub-table th, .sub-table td { padding: 8px 6px; }
+        }
     </style>
 </head>
 <body>
