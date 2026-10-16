@@ -33,6 +33,8 @@ class ModuleRegistrySidebar {
         'items'     => ['singular' => 'آیتم',   'plural' => 'آیتم‌ها',   'icon' => '📦'],
         'test01'    => ['singular' => 'آیتم',   'plural' => 'آیتم‌ها',   'icon' => '📦'],
         'ai_assistant' => ['singular' => 'دستیار', 'plural' => 'دستیار هوشمند', 'icon' => '🤖'],
+        'reviews'    => ['singular' => 'نظر',     'plural' => 'نظرات',    'icon' => '⭐'],
+        'newsletter' => ['singular' => 'خبرنامه', 'plural' => 'خبرنامه', 'icon' => '📧'],
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -300,7 +302,16 @@ class ModuleRegistrySidebar {
         $html .= '        <div class="menu-group-items">' . "\n";
 
         foreach ($modules as $slug => $module) {
-            foreach ($module['pages'] ?? [] as $key => $path) {
+            $pages = $module['pages'] ?? [];
+
+            // ماژول چند صفحه‌ای → زیرگروه
+            if (count($pages) > 1) {
+                $html .= $this->renderModuleSubGroup($slug, $module, $currentFile, $currentPath, $baseAdmin);
+                continue;
+            }
+
+            // ماژول تک صفحه‌ای → لینک مستقیم
+            foreach ($pages as $key => $path) {
                 $icon = self::$pageIcons[$key] ?? '📄';
                 $title = self::$pageTitles[$key] ?? ucfirst($key);
                 $isActive = (basename($path) === $currentFile);
