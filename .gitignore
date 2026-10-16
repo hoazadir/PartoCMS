@@ -145,3 +145,7 @@ admin/*-debug.php
 
 # موقت: بکاپ‌های migration/responsive
 _backup_*/
+
+# Newsletter cron worker artifacts
+modules/newsletter/cron/worker.log
+modules/newsletter/cron/worker.lock
