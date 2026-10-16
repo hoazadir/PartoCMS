@@ -84,7 +84,7 @@ foreach ($pdo->query("SELECT id, name, slug FROM roles")->fetchAll() as $r) {
 
         .badge-status { font-size: 10px; padding: 3px 8px; border-radius: 10px; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

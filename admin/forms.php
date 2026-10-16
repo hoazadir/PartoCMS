@@ -59,7 +59,7 @@ $forms = $pdo->query("
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .form-card { background: #fff; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-right: 4px solid #3498db; }
         .form-card.inactive { border-right-color: #95a5a6; opacity: 0.7; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>

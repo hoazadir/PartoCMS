@@ -212,7 +212,7 @@ if (isset($_GET['edit'])) {
         .seo-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; }
         .seo-header h5 { margin: 0; color: #2c3e50; display: flex; align-items: center; gap: 8px; }
         .seo-arrow { font-size: 14px; transition: transform 0.3s; color: #95a5a6; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

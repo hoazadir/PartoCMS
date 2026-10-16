@@ -189,7 +189,7 @@ $cntCore        = count($coreModules);
 <style>
 body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
 .main{margin-right:260px;padding:20px;min-height:100vh}
-@media(max-width:900px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
+@media(max-width:1100px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
 
 /* Stat Cards */
 .stat-card{background:#fff;border-radius:12px;padding:18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.05);height:100%}

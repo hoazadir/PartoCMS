@@ -107,7 +107,7 @@ $sidebarFile = __DIR__ . '/includes/sidebar.php';
             box-sizing: border-box;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main-content {
                 margin-right: 0 !important;
                 padding: 70px 15px 15px !important;

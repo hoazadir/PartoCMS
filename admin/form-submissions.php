@@ -111,7 +111,7 @@ $statusLabels = [
         .submission-data .row-data:last-child { border-bottom: none; }
         .submission-data .label { font-weight: bold; color: #34495e; min-width: 130px; font-size: 13px; }
         .submission-data .value { color: #2c3e50; font-size: 13px; flex: 1; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>

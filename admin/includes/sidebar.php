@@ -1081,7 +1081,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // بستن سایدبار در موبایل پس از کلیک روی لینک
     document.querySelectorAll('.sidebar a').forEach(link => {
         link.addEventListener('click', () => {
-            if (window.innerWidth <= 900) {
+            if (window.innerWidth <= 1100) {
                 setTimeout(closeMobileSidebar, 100);
             }
         });
@@ -1118,7 +1118,7 @@ let resizeTimer;
 window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        if (window.innerWidth > 900) {
+        if (window.innerWidth > 1100) {
             closeMobileSidebar();
         }
     }, 100);

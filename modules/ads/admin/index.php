@@ -41,7 +41,7 @@ $currentFile = basename($_SERVER['PHP_SELF']);
     <style>
         body { background: #f1f5f9; font-family: Tahoma, sans-serif; }
         .main { margin-right: 260px; padding: 20px; }
-        @media (max-width: 900px) { .main { margin-right: 0; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; } }
         .stat-card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
         .stat-card .icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
     </style>

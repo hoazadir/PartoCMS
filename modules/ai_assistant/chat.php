@@ -40,7 +40,7 @@ $directUrl = SITE_URL . '/modules/ai_assistant/chat.php';
 <style>
 body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0;height:100vh;overflow:hidden}
 .main{margin-right:260px;height:100vh;display:flex;flex-direction:column}
-@media(max-width:900px){.main{margin-right:0}}
+@media(max-width:1100px){.main{margin-right:0}}
 .chat-header{background:linear-gradient(135deg,#06b6d4,#0891b2);color:#fff;padding:15px 25px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.1)}
 .chat-header h1{margin:0;font-size:18px;display:flex;align-items:center;gap:10px}
 .chat-header .model-badge{background:rgba(255,255,255,.2);padding:4px 12px;border-radius:12px;font-size:11px;font-family:monospace}

@@ -194,7 +194,7 @@ if (isset($_GET['edit'])) {
         .table { font-size: 13px; }
         .table th { background: #f8f9fa; font-weight: 600; color: #2c3e50; }
         .table td { vertical-align: middle; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
             .table { font-size: 11px; }
         }

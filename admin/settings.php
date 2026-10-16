@@ -82,7 +82,7 @@ $systemInfo = [
         .info-item .label { color: #64748b; }
         .info-item .value { font-weight: bold; color: #1e293b; }
         .color-preview { width: 40px; height: 40px; border-radius: 8px; border: 2px solid #e0e0e0; display: inline-block; vertical-align: middle; margin-left: 10px; cursor: pointer; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

@@ -67,7 +67,7 @@ $statusMap = [
     <style>
         body { background: #f1f5f9; font-family: Tahoma, sans-serif; }
         .main { margin-right: 260px; padding: 20px; }
-        @media (max-width: 900px) { .main { margin-right: 0; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; } }
     </style>
 </head>
 <body>

@@ -196,7 +196,7 @@ function renderItemTree($items, $level = 0) {
         .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
         .empty-state i { font-size: 50px; display: block; margin-bottom: 15px; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
             .item-url { display: none; }
         }

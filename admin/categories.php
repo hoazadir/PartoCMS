@@ -127,7 +127,7 @@ if (isset($_GET['edit'])) {
         .cat-card { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; transition: all 0.2s; border-right: 4px solid #3498db; }
         .cat-card:hover { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .cat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: #fff; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>
