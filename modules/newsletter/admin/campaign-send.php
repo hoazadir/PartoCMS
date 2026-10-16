@@ -158,7 +158,7 @@ $breakdownUi = [
         }
         .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 3px solid #fff; border-radius: 50%; border-top-color: transparent; animation: spin 0.8s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
     </style>
 </head>
 <body>
