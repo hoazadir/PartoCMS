@@ -142,3 +142,6 @@ admin/*-debug.php
 # ─── Force track PHPMailer (installed manually) ───
 !vendor/phpmailer/
 !vendor/phpmailer/**
+
+# موقت: بکاپ‌های migration/responsive
+_backup_*/
