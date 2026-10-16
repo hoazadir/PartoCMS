@@ -75,7 +75,7 @@ $paymentMap = [
     <style>
         body { background: #f1f5f9; font-family: Tahoma, sans-serif; }
         .main { margin-right: 260px; padding: 20px; }
-        @media (max-width: 900px) { .main { margin-right: 0; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; } }
         .stat-card { background: #fff; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
     </style>
 </head>

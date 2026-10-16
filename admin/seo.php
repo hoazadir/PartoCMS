@@ -72,7 +72,7 @@ $missingSeo = $pdo->query("
         .card { border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 12px; margin-bottom: 20px; }
         .card-header { background: #fff; border-bottom: 1px solid #f0f0f0; padding: 15px 20px; border-radius: 12px 12px 0 0; font-weight: bold; color: #1e293b; display: flex; align-items: center; gap: 10px; }
         .form-label { font-weight: bold; font-size: 13px; color: #34495e; }
-        @media (max-width: 900px) { .main { margin-right: 70px; padding: 15px; } }
+        @media (max-width: 1100px) { .main { margin-right: 70px; padding: 15px; } }
     </style>
 </head>
 <body>

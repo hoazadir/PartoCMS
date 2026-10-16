@@ -261,7 +261,7 @@ $moduleGroupLabels = [
         .badge-core { background: #dbeafe; color: #1e40af; }
         .badge-off { background: #f1f5f9; color: #64748b; }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

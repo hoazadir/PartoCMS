@@ -252,7 +252,7 @@ html, body { margin: 0; padding: 0; height: 100%; font-family: Tahoma, Arial, sa
 .gjs-editor-cont { margin-left: 250px !important; transition: margin-left 0.2s; }
 body.panel-collapsed .gjs-editor-cont { margin-left: 0 !important; }
 
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
     .custom-toolbar { height: auto; padding: 6px; flex-wrap: wrap; gap: 6px; }
     .side-panel { width: 200px; }
     .toolbar-group button { padding: 4px 7px; font-size: 10px; }
@@ -260,7 +260,7 @@ body.panel-collapsed .gjs-editor-cont { margin-left: 0 !important; }
 }
 
 /* Sidebar Override for Editor */
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
     #gjs { width: calc(100% - 70px) !important; margin-right: 70px !important; }
     .custom-toolbar { right: 70px !important; }
 }

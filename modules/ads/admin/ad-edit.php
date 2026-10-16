@@ -234,7 +234,7 @@ try {
     <style>
         body { background: #f1f5f9; font-family: Tahoma, sans-serif; margin: 0; }
         .main { margin-right: 260px; padding: 20px; max-width: 1400px; }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
         .form-card { background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.05); margin-bottom: 20px; overflow: hidden; }
         .form-card-header { padding: 15px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; font-weight: bold; color: #0f172a; }
         .form-card-header .icon { color: #06b6d4; margin-left: 8px; font-size: 18px; }

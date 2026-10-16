@@ -265,7 +265,7 @@ $sidebarFile = __DIR__ . '/includes/sidebar.php';
 <style>
 body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
 .main{margin-right:260px;padding:20px;min-height:100vh}
-@media (max-width:900px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
+@media (max-width:1100px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
 .page-header{background:linear-gradient(135deg,#1e293b,#334155);color:#fff;padding:25px 30px;border-radius:15px;margin-bottom:25px}
 .page-header h1{margin:0;font-size:22px}
 .page-header p{margin:5px 0 0;opacity:.7;font-size:13px}

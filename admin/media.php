@@ -259,7 +259,7 @@ $mediaList = $pdo->query("
 
         /* ✅ سایدبار قدیمی حذف شد — الان از includes/sidebar.php استفاده می‌شود */
         .main { margin-right: 260px; padding: 25px; }
-        @media (max-width: 900px) { .main { margin-right: 0 !important; padding: 70px 15px 15px !important; } }
+        @media (max-width: 1100px) { .main { margin-right: 0 !important; padding: 70px 15px 15px !important; } }
 
         .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
         .upload-zone { background: #fff; border: 3px dashed #bdc3c7; border-radius: 12px; padding: 40px; text-align: center; margin-bottom: 25px; cursor: pointer; transition: all 0.2s; }

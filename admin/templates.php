@@ -30,7 +30,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         .badge-inactive { background: #95a5a6; }
         .btn-action { margin: 0 2px; }
         .posts-badge { background: #ffc107; color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; margin-right: 5px; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

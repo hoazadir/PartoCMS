@@ -55,7 +55,7 @@ $siteName = function_exists('getSetting') ? getSetting('site_name', 'وب‌سا
 <style>
 body{background:#f1f5f9;font-family:Tahoma,sans-serif;margin:0}
 .main{margin-right:260px;padding:20px;min-height:100vh}
-@media(max-width:900px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
+@media(max-width:1100px){.main{margin-right:0!important;padding:70px 15px 15px!important}}
 .page-header{background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:25px 30px;border-radius:15px;margin-bottom:25px}
 .page-header h1{margin:0;font-size:22px}
 .card{background:#fff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,.05);margin-bottom:20px;overflow:hidden}

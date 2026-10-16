@@ -121,7 +121,7 @@ $recentViews = $pdo->query("
             background: #f8fafc; padding: 5px 12px; border-radius: 8px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 70px; padding: 15px; }
         }
     </style>

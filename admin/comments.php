@@ -117,7 +117,7 @@ foreach (['all', 'pending', 'approved', 'spam'] as $s) {
         .comment-box.approved { border-right-color: #27ae60; }
         .comment-box.spam { border-right-color: #e74c3c; }
         .comment-box.rejected { border-right-color: #95a5a6; }
-        @media (max-width: 900px) {
+        @media (max-width: 1100px) {
             .main { margin-right: 0; padding: 70px 15px 15px; }
         }
     </style>
