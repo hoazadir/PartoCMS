@@ -114,7 +114,7 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
         .log-table th { background: #f1f5f9; padding: 10px; text-align: right; font-weight: bold; color: #334155; }
         .log-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; }
         .empty-logs { text-align: center; padding: 30px; color: #94a3b8; font-size: 14px; }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } .info-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } .info-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>

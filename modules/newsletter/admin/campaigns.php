@@ -73,7 +73,7 @@ $flash = nl_flash();
         .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; color: #fff; display: inline-block; }
         .metrics { display: flex; gap: 8px; font-size: 11px; color: #64748b; }
         .metrics span { display: inline-flex; align-items: center; gap: 2px; }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } .camp-table { font-size: 11px; } .camp-table th, .camp-table td { padding: 8px 6px; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } .camp-table { font-size: 11px; } .camp-table th, .camp-table td { padding: 8px 6px; } }
     </style>
 </head>
 <body>

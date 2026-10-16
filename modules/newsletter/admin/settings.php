@@ -163,7 +163,7 @@ $smtpConfigured = !empty($settings['newsletter_smtp_host']);
         .status-ok { background: #16a34a; }
         .status-warn { background: #f59e0b; }
         .test-box { background: #fef3c7; border: 2px solid #fcd34d; border-radius: 8px; padding: 15px; margin-top: 15px; }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } .form-grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } .form-grid { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>

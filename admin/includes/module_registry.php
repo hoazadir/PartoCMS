@@ -78,7 +78,33 @@ class ModuleRegistry {
                 'review_renderer' => 'modules/reviews/includes/ReviewRenderer.php',
             ],
         ],
-        'ai_providers' => [
+        
+        'newsletter' => [
+
+            'name' => 'خبرنامه',
+
+            'icon' => '📧',
+
+            'menu_group' => 'marketing',
+
+            'sort_order' => 50,
+
+            'is_core' => 0,
+
+            'pages' => [
+
+                'subscribers' => 'modules/newsletter/admin/index.php',
+
+                'campaigns'   => 'modules/newsletter/admin/campaigns.php',
+
+                'settings'    => 'modules/newsletter/admin/settings.php',
+
+            ],
+
+            'includes' => [],
+
+        ],
+'ai_providers' => [
             'name' => 'ارائه‌دهندگان AI',
             'icon' => '☁️',
             'menu_group' => 'ai',

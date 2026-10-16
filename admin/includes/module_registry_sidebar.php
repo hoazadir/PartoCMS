@@ -73,6 +73,9 @@ class ModuleRegistrySidebar {
         'categories_list'  => '🏷',
         'media_gallery'    => '🖼',
         'comments_list'    => '💬',
+        // 🆕 Newsletter (2026-10-16)
+        'subscribers'      => '👥',
+        'campaigns'        => '✉️',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -107,6 +110,9 @@ class ModuleRegistrySidebar {
         'categories_list'  => 'دسته‌بندی‌ها',
         'media_gallery'    => 'رسانه‌ها',
         'comments_list'    => 'دیدگاه‌ها',
+        // 🆕 Newsletter (2026-10-16)
+        'subscribers'      => 'مشترکین',
+        'campaigns'        => 'کمپین‌ها',
     ];
 
     // ═══════════════════════════════════════════════════════════

@@ -141,7 +141,7 @@ $statusLabel = $campaign ? $campaign->status()->label() : 'جدید';
         .schedule-box { background: #fef3c7; border: 2px solid #fcd34d; border-radius: 8px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .tokens-hint { background: #eef2ff; border-right: 4px solid #6366f1; padding: 12px 15px; border-radius: 6px; margin-bottom: 15px; font-size: 12px; }
         .tokens-hint code { background: #fff; padding: 2px 8px; border-radius: 4px; color: #4338ca; font-weight: bold; direction: ltr; display: inline-block; }
-        @media (max-width: 900px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
+        @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } }
     </style>
 </head>
 <body>

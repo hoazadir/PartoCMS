@@ -403,7 +403,7 @@ $baseSite  = SITE_URL;
         font-family: monospace;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
         .language-switcher .switcher-dropdown {
             position: static;
             margin-top: 10px;
@@ -459,7 +459,7 @@ $baseSite  = SITE_URL;
     .sidebar-backdrop.active { display: block; }
 
     /* ==================== Responsive ==================== */
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
         .sidebar {
             width: 280px;
             right: -300px;
@@ -481,7 +481,7 @@ $baseSite  = SITE_URL;
         .menu-group-items a { padding: 13px 20px 13px 50px; }
     }
 
-    @media (max-width: 900px) and (orientation: landscape) {
+    @media (max-width: 1100px) and (orientation: landscape) {
         .sidebar { width: 300px; top: 0; bottom: 0; }
         .sidebar .brand { padding: 12px 20px; }
         .sidebar .brand h5 { font-size: 14px; }
@@ -493,7 +493,7 @@ $baseSite  = SITE_URL;
         .main { padding-top: 60px !important; }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
         body .main,
         body .col-md-10,
         body > div[style*="margin-right"] {
@@ -511,7 +511,7 @@ $baseSite  = SITE_URL;
     html[dir="ltr"] .main { margin-right: 0; margin-left: 260px; }
 
     /* در موبایل */
-    @media (max-width: 900px) {
+    @media (max-width: 1100px) {
         .sidebar { right: -300px !important; left: auto !important; }
         html[dir="ltr"] .sidebar { right: auto !important; left: -300px !important; }
         .sidebar.mobile-open { right: 0 !important; }
