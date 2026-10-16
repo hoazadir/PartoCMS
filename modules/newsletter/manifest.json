@@ -1,0 +1,64 @@
+{
+    "name": "خبرنامه",
+    "slug": "newsletter",
+    "version": "1.0.0",
+    "description": "سیستم خبرنامه حرفه‌ای با معماری DDD — ثبت‌نام دو مرحله‌ای، مدیریت مشترکین، کمپین‌ها، ارسال SMTP، ردیابی باز شدن و ویجت فرانت‌اند.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0",
+        "phpmailer": ">=6.9"
+    },
+    "permissions": [
+        "newsletter.view",
+        "newsletter.manage",
+        "newsletter.send",
+        "newsletter.settings"
+    ],
+    "menu": {
+        "title": "خبرنامه",
+        "icon": "📧",
+        "url": "/modules/newsletter/admin/index.php",
+        "order": 50,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "مشترکین",
+                "url": "/modules/newsletter/admin/index.php",
+                "icon": "👥"
+            },
+            {
+                "title": "کمپین‌ها",
+                "url": "/modules/newsletter/admin/campaigns.php",
+                "icon": "✉️"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/newsletter/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "newsletter_subscribers",
+            "newsletter_campaigns",
+            "newsletter_sends"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "double_optin": true,
+        "batch_size": 50,
+        "smtp_host": "",
+        "smtp_port": 587,
+        "smtp_user": "",
+        "smtp_secure": "tls",
+        "from_name": "",
+        "from_email": ""
+    },
+    "icon": "📧",
+    "menu_group": "marketing"
+}
