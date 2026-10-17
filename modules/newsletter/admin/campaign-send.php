@@ -61,13 +61,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'process_batch':
-                // پردازش یک batch (AJAX-like)
-                $sendSvc = $GLOBALS['nl_container']->get(SendService::class);
-                $result = $sendSvc->processQueue($id, 10);
-                echo json_encode([
-                    'ok' => true,
-                    'data' => $result,
-                ]);
+                // پردازش یک batch (AJAX) — جدا از try/catch اصلی تا Redirect نشود
+                ob_clean(); // پاک کردن هر Warning یا خروجی مزاحم
+                header('Content-Type: application/json; charset=utf-8');
+                try {
+                    $sendSvc = $GLOBALS['nl_container']->get(SendService::class);
+                    $result = $sendSvc->processQueue($id, 10);
+                    echo json_encode([
+                        'ok' => true,
+                        'data' => $result,
+                    ]);
+                } catch (Throwable $e) {
+                    echo json_encode([
+                        'ok' => false,
+                        'error' => $e->getMessage()
+                    ]);
+                }
                 exit;
 
             case 'force_complete':
