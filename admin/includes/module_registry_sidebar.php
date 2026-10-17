@@ -35,6 +35,7 @@ class ModuleRegistrySidebar {
         'ai_assistant' => ['singular' => 'دستیار', 'plural' => 'دستیار هوشمند', 'icon' => '🤖'],
         'reviews'    => ['singular' => 'نظر',     'plural' => 'نظرات',    'icon' => '⭐'],
         'newsletter' => ['singular' => 'خبرنامه', 'plural' => 'خبرنامه', 'icon' => '📧'],
+        'faq' => ['singular' => 'سوال', 'plural' => 'سوالات متداول', 'icon' => '❓'],
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -78,6 +79,8 @@ class ModuleRegistrySidebar {
         // 🆕 Newsletter (2026-10-16)
         'subscribers'      => '👥',
         'campaigns'        => '✉️',
+        'faq_list'         => '📋',
+        'faq_edit'         => '✏️',
         'shop_dashboard' => '📊',
         'shop_products' => '📦',
         'shop_categories' => '🏷️',
@@ -129,6 +132,8 @@ class ModuleRegistrySidebar {
         // 🆕 Newsletter (2026-10-16)
         'subscribers'      => 'مشترکین',
         'campaigns'        => 'کمپین‌ها',
+        'faq_list'         => 'لیست سوالات',
+        'faq_edit'         => 'افزودن / ویرایش',
         'shop_dashboard' => 'داشبورد',
         'shop_products' => 'محصولات',
         'shop_categories' => 'دسته‌بندی‌ها',

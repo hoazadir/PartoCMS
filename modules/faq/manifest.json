@@ -1,0 +1,35 @@
+{
+    "name": "سوالات متداول",
+    "slug": "faq",
+    "version": "1.0.0",
+    "description": "مدیریت سوالات متداول (FAQ) با معماری DDD",
+    "author": "Hooman Oliaei",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "faq.view",
+        "faq.manage"
+    ],
+    "menu": {
+        "title": "سوالات متداول",
+        "icon": "❓",
+        "url": "/modules/faq/admin/index.php",
+        "order": 60,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست سوالات",
+                "url": "/modules/faq/admin/index.php",
+                "icon": "📋"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "faqs"
+        ]
+    }
+}
