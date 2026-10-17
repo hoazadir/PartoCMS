@@ -103,9 +103,11 @@ final class CampaignService
     {
         $campaign = $this->findOrFail($id);
 
-        // Transition to "sending"
-        $campaign->startSending();
-        $campaign = $this->campaignRepo->save($campaign);
+        // Transition to "sending" only if not already in that state (idempotent)
+        if ($campaign->status() !== CampaignStatus::SENDING) {
+            $campaign->startSending();
+            $campaign = $this->campaignRepo->save($campaign);
+        }
 
         // Queue logs for active subscribers who aren't already queued
         $subscribers = $this->subscriberRepo->findAllActive();
