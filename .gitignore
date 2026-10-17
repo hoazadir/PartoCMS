@@ -168,3 +168,16 @@ aether-*.token
 # اما exampleها کامیت می‌شوند:
 !aether.example.toml
 !aether.example-masque.toml
+
+# ==================== VPN/Proxy secrets (aether) ====================
+# فقط secrets جدا می‌شوند. ساختار و اسکریپت‌ها در Git می‌مانند.
+aether.toml
+aether-masque.toml
+aether.local.toml
+aether-masque.local.toml
+aether-*.local.toml
+aether-*.token
+
+# اما exampleها کامیت می‌شوند:
+!aether.example.toml
+!aether.example-masque.toml
