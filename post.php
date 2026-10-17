@@ -7,8 +7,10 @@ header('Expires: 0');
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/modules/newsletter/bootstrap.php';
+require_once __DIR__ . '/modules/faq/bootstrap.php';
 
 use PartoCMS\Newsletter\Widget\Shortcode;
+use PartoCMS\Faq\Widget\FaqShortcode;
 
 
 // ═══ AdWidget v3 برای نمایش تبلیغات ═══
@@ -293,7 +295,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     <?php endif; ?>
 
     <!-- محتوا -->
-    <div class="content"><?= Shortcode::parse($post['content'], ['source' => 'post']) ?></div>
+    <div class="content"><?= FaqShortcode::parse(Shortcode::parse($post['content'], ['source' => 'post'])) ?></div>
 
     <!-- ==================== دیدگاه‌ها ==================== -->
     <?php

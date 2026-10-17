@@ -17,8 +17,10 @@
  *   {{comments}}
  */
 require_once __DIR__ . '/../modules/newsletter/bootstrap.php';
+require_once __DIR__ . '/../modules/faq/bootstrap.php';
 
 use PartoCMS\Newsletter\Widget\Shortcode;
+use PartoCMS\Faq\Widget\FaqShortcode;
 
 class TemplateRenderer {
     private $pdo;
@@ -127,7 +129,7 @@ class TemplateRenderer {
             'post.id' => $post['id'],
             'post.title' => $post['title'] ?? '',
             'post.slug' => $post['slug'] ?? '',
-            'post.content' => Shortcode::parse($post['content'] ?? '', ['source' => 'template']),
+            'post.content' => FaqShortcode::parse(Shortcode::parse($post['content'] ?? '', ['source' => 'template'])),
             'post.excerpt' => $post['excerpt'] ?? '',
             'post.featured_image' => $post['featured_image'] ?? '',
             'post.author' => $post['author_name'] ?? 'ناشناس',
