@@ -2,8 +2,9 @@
     "name": "سوالات متداول",
     "slug": "faq",
     "version": "1.0.0",
-    "description": "مدیریت سوالات متداول (FAQ) با معماری DDD",
+    "description": "سیستم مدیریت سوالات متداول با معماری DDD، مجهز به ویرایشگر حرفه‌ای و نمایش آکاردئونی در فرانت‌اند.",
     "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
     "license": "Proprietary",
     "requires": {
         "php": ">=8.1",
@@ -31,5 +32,10 @@
         "tables": [
             "faqs"
         ]
-    }
+    },
+    "settings": {
+        "enabled": true
+    },
+    "icon": "❓",
+    "menu_group": "marketing"
 }
