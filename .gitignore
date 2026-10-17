@@ -149,3 +149,9 @@ _backup_*/
 # Newsletter cron worker artifacts
 modules/newsletter/cron/worker.log
 modules/newsletter/cron/worker.lock
+
+# ==================== VPN/Proxy secrets (aether) ====================
+aether.local.toml
+aether-masque.local.toml
+aether-*.local.toml
+# aether.toml و aether.sh و aether-masque.toml در Git می‌مانند (ساختار)
