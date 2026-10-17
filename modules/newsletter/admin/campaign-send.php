@@ -10,13 +10,19 @@ use PartoCMS\Newsletter\Domain\Service\CampaignService;
 use PartoCMS\Newsletter\Domain\Service\SendService;
 use PartoCMS\Newsletter\Domain\ValueObject\CampaignStatus;
 use PartoCMS\Newsletter\Domain\ValueObject\SendStatus;
+use PartoCMS\Newsletter\Domain\ValueObject\SubscriberStatus;
 use PartoCMS\Newsletter\Infrastructure\Persistence\PdoCampaignRepository;
 use PartoCMS\Newsletter\Infrastructure\Persistence\PdoSendLogRepository;
+use PartoCMS\Newsletter\Infrastructure\Persistence\PdoSubscriberRepository;
 
 /** @var CampaignService $campaignSvc */
 $campaignSvc = $GLOBALS['nl_container']->get(CampaignService::class);
 $campaignRepo = $GLOBALS['nl_container']->get(PdoCampaignRepository::class);
 $logRepo      = $GLOBALS['nl_container']->get(PdoSendLogRepository::class);
+$subRepo      = $GLOBALS['nl_container']->get(PdoSubscriberRepository::class);
+
+// تعداد مشترکین فعال — مبنای نمایش دکمه «شروع ارسال»
+$activeSubscribers = $subRepo->count(SubscriberStatus::ACTIVE);
 
 $id = (int) ($_GET['id'] ?? 0);
 if ($id < 1) {
@@ -191,13 +197,13 @@ $breakdownUi = [
     <div class="card">
         <h5>📊 پیشرفت ارسال</h5>
         <div class="progress-wrap">
-            <div class="progress-bar" id="progressBar" style="width: <?= $percent ?>%;">
+            <div class="progress-bar" id="progressBar" style="width: <?= $percent ?>%;" data-total="<?= $total ?>">
                 <?= $percent ?>%
             </div>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 13px; color: #64748b;">
-            <span>پردازش شده: <?= number_format($processed) ?> از <?= number_format($total) ?></span>
-            <span>در صف: <strong><?= number_format($queued) ?></strong></span>
+            <span>پردازش شده: <strong id="statProcessed"><?= number_format($processed) ?></strong> از <strong id="statTotal"><?= number_format($total) ?></strong></span>
+            <span>در صف: <strong id="statQueued"><?= number_format($queued) ?></strong></span>
         </div>
     </div>
 
@@ -244,7 +250,7 @@ $breakdownUi = [
         <h5>⚙️ عملیات</h5>
         <div class="actions-bar">
 
-            <?php if ($canStart && $total > 0): ?>
+            <?php if ($canStart && $activeSubscribers > 0): ?>
                 <form method="post" style="display:inline; margin:0;">
                     <input type="hidden" name="action" value="start">
                     <button type="submit" class="btn btn-success">
@@ -252,9 +258,9 @@ $breakdownUi = [
                         <?= $campaign->status() === CampaignStatus::PAUSED ? 'ادامه ارسال' : 'شروع ارسال' ?>
                     </button>
                 </form>
-            <?php elseif ($canStart && $total === 0): ?>
+            <?php elseif ($canStart && $activeSubscribers === 0): ?>
                 <div style="color: #94a3b8; font-size: 13px; padding: 10px;">
-                    ⚠️ هیچ مشترک فعالی برای ارسال وجود ندارد
+                    ⚠️ هیچ مشترک فعالی برای ارسال وجود ندارد — ابتدا از بخش «مشترکین» مشترک اضافه یا تأیید کنید
                     <a href="<?= nl_admin_url() ?>" style="color: #6366f1; margin-right: 10px;">افزودن مشترک</a>
                 </div>
             <?php endif; ?>
@@ -271,6 +277,9 @@ $breakdownUi = [
             <?php if ($total > 0 && !$isDone): ?>
                 <button type="button" id="btnBatch" class="btn btn-primary" onclick="processBatch()">
                     <i class="bi bi-lightning-charge"></i> پردازش دسته‌ای (۱۰ ایمیل)
+                </button>
+                <button type="button" id="btnAuto" class="btn btn-success" onclick="toggleAutoSend()">
+                    <i class="bi bi-rocket-takeoff"></i> <span id="autoLabel">ارسال خودکار کامل</span>
                 </button>
             <?php endif; ?>
 
@@ -293,6 +302,103 @@ $breakdownUi = [
 </div>
 
 <script>
+// ─── Auto-Send Loop ───
+let autoSendActive = false;
+let autoSendTimer  = null;
+
+function toggleAutoSend() {
+    if (autoSendActive) {
+        stopAutoSend();
+    } else {
+        startAutoSend();
+    }
+}
+
+function startAutoSend() {
+    autoSendActive = true;
+    const btn = document.getElementById('btnAuto');
+    if (!btn) return;
+    btn.classList.remove('btn-success');
+    btn.classList.add('btn-warning');
+    btn.innerHTML = '<span class="loading-spinner"></span> <span id="autoLabel">در حال ارسال خودکار — کلیک برای توقف</span>';
+    runAutoCycle();
+}
+
+function stopAutoSend() {
+    autoSendActive = false;
+    if (autoSendTimer) {
+        clearTimeout(autoSendTimer);
+        autoSendTimer = null;
+    }
+    const btn = document.getElementById('btnAuto');
+    if (!btn) return;
+    btn.classList.remove('btn-warning');
+    btn.classList.add('btn-success');
+    btn.innerHTML = '<i class="bi bi-rocket-takeoff"></i> <span id="autoLabel">ادامه ارسال خودکار</span>';
+}
+
+async function runAutoCycle() {
+    if (!autoSendActive) return;
+
+    try {
+        const formData = new FormData();
+        formData.append('action', 'process_batch');
+
+        const resp = await fetch('?id=<?= (int) $campaign->id() ?>', {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await resp.json();
+
+        if (!data.ok) {
+            stopAutoSend();
+            alert('خطا در پردازش خودکار.');
+            return;
+        }
+
+        const d = data.data;
+        updateProgressLive(d);
+
+        if (d.campaign_completed || d.remaining === 0) {
+            stopAutoSend();
+            setTimeout(() => location.reload(), 1500);
+            return;
+        }
+
+        if (d.processed === 0) {
+            stopAutoSend();
+            alert('هیچ ایمیلی پردازش نشد. متوقف شد.');
+            return;
+        }
+
+        autoSendTimer = setTimeout(runAutoCycle, 2000);
+    } catch (e) {
+        stopAutoSend();
+        alert('خطای شبکه: ' + e.message);
+    }
+}
+
+function updateProgressLive(data) {
+    const totalEl = document.getElementById('statTotal');
+    if (!totalEl) return;
+    const total = parseInt(totalEl.textContent.replace(/[^0-9]/g, ''), 10);
+    if (!total) return;
+
+    const remaining = data.remaining ?? 0;
+    const processed = total - remaining;
+    const percent   = Math.round((processed / total) * 1000) / 10;
+
+    const bar = document.getElementById('progressBar');
+    if (bar) {
+        bar.style.width = percent + '%';
+        bar.textContent = percent + '%';
+    }
+    const p = document.getElementById('statProcessed');
+    if (p) p.textContent = processed.toLocaleString('en-US');
+    const q = document.getElementById('statQueued');
+    if (q) q.textContent = Number(remaining).toLocaleString('en-US');
+}
+
 async function processBatch() {
     const btn = document.getElementById('btnBatch');
     const original = btn.innerHTML;
@@ -327,7 +433,9 @@ async function processBatch() {
 
 // Auto-refresh هر ۱۰ ثانیه اگر sending است
 <?php if ($campaign->status() === CampaignStatus::SENDING && $queued > 0): ?>
-setTimeout(() => location.reload(), 10000);
+setInterval(() => {
+    if (!autoSendActive) location.reload();
+}, 10000);
 <?php endif; ?>
 </script>
 

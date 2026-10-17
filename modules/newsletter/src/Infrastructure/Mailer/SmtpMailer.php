@@ -32,6 +32,76 @@ final class SmtpMailer implements MailerInterface
         private bool   $debug        = false
     ) {}
 
+    private ?PHPMailer $mailer = null;
+
+    private function getMailer(): PHPMailer
+    {
+        if ($this->mailer !== null) {
+            return $this->mailer;
+        }
+
+        $mail = new PHPMailer(true);
+
+        // ─── SMTP config ───
+        $mail->isSMTP();
+        $mail->Host    = $this->host;
+        $mail->Port    = $this->port;
+        $mail->Timeout = $this->timeout;
+        $mail->CharSet = 'UTF-8';
+        $mail->SMTPKeepAlive = true; // reuse single connection across sends
+
+        if ($this->debug) {
+            $mail->SMTPDebug   = SMTP::DEBUG_SERVER;
+            $mail->Debugoutput = 'error_log';
+        }
+
+        // ─── Encryption ───
+        $enc = strtolower($this->encryption);
+        if ($enc === 'tls') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        } elseif ($enc === 'ssl') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } else {
+            $mail->SMTPSecure  = '';
+            $mail->SMTPAutoTLS = false;
+        }
+
+        // ─── Auth ───
+        if ($this->username !== '') {
+            $mail->SMTPAuth = true;
+            $mail->Username = $this->username;
+            $mail->Password = $this->password;
+        } else {
+            $mail->SMTPAuth = false;
+        }
+
+        // ─── From / Reply-To ───
+        $fromEmail = $this->fromEmail !== '' ? $this->fromEmail : $this->username;
+        if ($fromEmail === '') {
+            throw new RuntimeException('SmtpMailer: fromEmail is required.');
+        }
+        $mail->setFrom($fromEmail, $this->fromName);
+        if ($this->replyTo !== '') {
+            $mail->addReplyTo($this->replyTo);
+        }
+
+        $this->mailer = $mail;
+        return $this->mailer;
+    }
+
+    public function close(): void
+    {
+        if ($this->mailer !== null) {
+            $this->mailer->smtpClose();
+            $this->mailer = null;
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->close();
+    }
+
     public function send(
         string $to,
         ?string $toName,
@@ -40,52 +110,11 @@ final class SmtpMailer implements MailerInterface
         ?string $bodyText = null,
         ?string $preheader = null
     ): string {
-        $mail = new PHPMailer(true);
+        $mail = $this->getMailer();
 
         try {
-            // ─── SMTP config ───
-            $mail->isSMTP();
-            $mail->Host    = $this->host;
-            $mail->Port    = $this->port;
-            $mail->Timeout = $this->timeout;
-            $mail->CharSet = 'UTF-8';
-
-            if ($this->debug) {
-                $mail->SMTPDebug   = SMTP::DEBUG_SERVER;
-                $mail->Debugoutput = 'error_log';
-            }
-
-            // ─── Encryption ───
-            $enc = strtolower($this->encryption);
-            if ($enc === 'tls') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-            } elseif ($enc === 'ssl') {
-                $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
-            } else {
-                $mail->SMTPSecure  = '';
-                $mail->SMTPAutoTLS = false;
-            }
-
-            // ─── Auth ───
-            if ($this->username !== '') {
-                $mail->SMTPAuth = true;
-                $mail->Username = $this->username;
-                $mail->Password = $this->password;
-            } else {
-                $mail->SMTPAuth = false;
-            }
-
-            // ─── From / Reply-To ───
-            $fromEmail = $this->fromEmail !== '' ? $this->fromEmail : $this->username;
-            if ($fromEmail === '') {
-                throw new RuntimeException('SmtpMailer: fromEmail is required.');
-            }
-            $mail->setFrom($fromEmail, $this->fromName);
-            if ($this->replyTo !== '') {
-                $mail->addReplyTo($this->replyTo);
-            }
-
             // ─── Recipient ───
+            $mail->clearAddresses();
             $mail->addAddress($to, (string) $toName);
 
             // ─── Content ───
@@ -99,6 +128,7 @@ final class SmtpMailer implements MailerInterface
 
             return $messageId !== '' ? $messageId : ('<' . uniqid('nl-', true) . '@' . $this->host . '>');
         } catch (PHPMailerException $e) {
+            $this->close();
             throw new RuntimeException('SMTP send failed: ' . $e->getMessage(), 0, $e);
         }
     }
