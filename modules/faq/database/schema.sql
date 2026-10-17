@@ -1,0 +1,12 @@
+-- PartoCMS - FAQ Module Database Schema
+
+CREATE TABLE IF NOT EXISTS `faqs` (
+    `id` INT AUTO_INCREMENT PRIMARY KEY,
+    `question` VARCHAR(255) NOT NULL,
+    `answer` TEXT NOT NULL,
+    `category` VARCHAR(100) DEFAULT NULL,
+    `sort_order` INT DEFAULT 0,
+    `is_active` TINYINT(1) DEFAULT 1,
+    `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

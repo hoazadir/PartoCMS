@@ -138,6 +138,18 @@ class ModuleRegistry {
             ],
             'includes' => [],
         ],
+        'faq' => [
+            'name' => 'سوالات متداول',
+            'icon' => '❓',
+            'menu_group' => 'marketing',
+            'sort_order' => 60,
+            'is_core' => 0,
+            'pages' => [
+                'faq_list' => 'modules/faq/admin/index.php',
+                'faq_edit' => 'modules/faq/admin/edit.php',
+            ],
+            'includes' => [],
+        ],
         'ai_providers' => [
             'name' => 'ارائه‌دهندگان AI',
             'icon' => '☁️',
