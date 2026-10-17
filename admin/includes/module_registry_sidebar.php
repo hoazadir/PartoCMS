@@ -78,6 +78,20 @@ class ModuleRegistrySidebar {
         // 🆕 Newsletter (2026-10-16)
         'subscribers'      => '👥',
         'campaigns'        => '✉️',
+        'shop_dashboard' => '📊',
+        'shop_products' => '📦',
+        'shop_categories' => '🏷️',
+        'shop_orders' => '🧾',
+        'shop_customers' => '👥',
+        'shop_coupons' => '🎟️',
+        'shop_shipping' => '🚚',
+        'shop_reports' => '📈',
+        'shop_settings' => '⚙️',
+        'ads_dashboard' => '📊',
+        'ads_list' => '🖼️',
+        'ads_positions' => '📐',
+        'ads_campaigns' => '🎯',
+        'ads_reports' => '📈',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -115,6 +129,20 @@ class ModuleRegistrySidebar {
         // 🆕 Newsletter (2026-10-16)
         'subscribers'      => 'مشترکین',
         'campaigns'        => 'کمپین‌ها',
+        'shop_dashboard' => 'داشبورد',
+        'shop_products' => 'محصولات',
+        'shop_categories' => 'دسته‌بندی‌ها',
+        'shop_orders' => 'سفارشات',
+        'shop_customers' => 'مشتریان',
+        'shop_coupons' => 'کوپن‌ها',
+        'shop_shipping' => 'روش‌های ارسال',
+        'shop_reports' => 'گزارش فروش',
+        'shop_settings' => 'تنظیمات',
+        'ads_dashboard' => 'داشبورد',
+        'ads_list' => 'تبلیغات',
+        'ads_positions' => 'موقعیت‌ها',
+        'ads_campaigns' => 'کمپین‌ها',
+        'ads_reports' => 'گزارش‌ها',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -129,6 +157,7 @@ class ModuleRegistrySidebar {
         'generated'   => '📦',
         'ai'          => '🤖',
         'marketing'   => '💼',
+        'commerce'    => '🛒',
         'content'     => '📝',
     ];
 

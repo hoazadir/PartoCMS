@@ -698,7 +698,7 @@ $baseSite  = SITE_URL;
 
     <!-- ==================== فروشگاه (ماژول) ==================== -->
     <?php
-    $shopMenuFile = dirname(__DIR__, 2) . '/modules/shop/menu.php';
+    $shopMenuFile = ''; // موقتاً غیرفعال شد تا سیستم داینامیک جایگزین شود
     if (file_exists($shopMenuFile)):
         $shopMenu = include $shopMenuFile;
         if (!empty($shopMenu)):
@@ -726,7 +726,7 @@ $baseSite  = SITE_URL;
 
     <!-- ==================== تبلیغات (ماژول) ==================== -->
     <?php
-    $adsMenuFile = dirname(__DIR__, 2) . '/modules/ads/menu.php';
+    $adsMenuFile = ''; // موقتاً غیرفعال شد تا سیستم داینامیک جایگزین شود
     if (file_exists($adsMenuFile)):
         $adsMenu = include $adsMenuFile;
         if (!empty($adsMenu)):

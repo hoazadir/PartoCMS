@@ -104,7 +104,41 @@ class ModuleRegistry {
             'includes' => [],
 
         ],
-'ai_providers' => [
+'shop' => [
+            'name' => 'فروشگاه',
+            'icon' => '🛒',
+            'menu_group' => 'commerce',
+            'sort_order' => 30,
+            'is_core' => 0,
+            'pages' => [
+                'shop_dashboard'  => 'modules/shop/admin/index.php',
+                'shop_products'   => 'modules/shop/admin/products.php',
+                'shop_categories' => 'modules/shop/admin/categories.php',
+                'shop_orders'     => 'modules/shop/admin/orders.php',
+                'shop_customers'  => 'modules/shop/admin/customers.php',
+                'shop_coupons'    => 'modules/shop/admin/coupons.php',
+                'shop_shipping'   => 'modules/shop/admin/shipping.php',
+                'shop_reports'    => 'modules/shop/admin/reports.php',
+                'shop_settings'   => 'modules/shop/admin/settings.php',
+            ],
+            'includes' => [],
+        ],
+        'ads' => [
+            'name' => 'تبلیغات',
+            'icon' => '📢',
+            'menu_group' => 'marketing',
+            'sort_order' => 40,
+            'is_core' => 0,
+            'pages' => [
+                'ads_dashboard' => 'modules/ads/admin/index.php',
+                'ads_list'      => 'modules/ads/admin/ads.php',
+                'ads_positions' => 'modules/ads/admin/ad-positions.php',
+                'ads_campaigns' => 'modules/ads/admin/ad-campaigns.php',
+                'ads_reports'   => 'modules/ads/admin/ad-reports.php',
+            ],
+            'includes' => [],
+        ],
+        'ai_providers' => [
             'name' => 'ارائه‌دهندگان AI',
             'icon' => '☁️',
             'menu_group' => 'ai',
@@ -216,7 +250,7 @@ class ModuleRegistry {
         ],
     ];
 
-    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing', 'content'];
+    private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing', 'content', 'commerce'];
 
     public function __construct($pdo) {
         $this->pdo = $pdo;
@@ -395,6 +429,7 @@ class ModuleRegistry {
             'ai'           => 'هوش مصنوعی',
             'generated'    => 'ماژول‌های ساخته شده',
             'marketing'    => 'بازاریابی',
+            'commerce'     => 'فروشگاه',
             default        => '📦 ' . $slug,
         };
     }
