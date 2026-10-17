@@ -151,13 +151,7 @@ modules/newsletter/cron/worker.log
 modules/newsletter/cron/worker.lock
 
 # ==================== VPN/Proxy secrets (aether) ====================
-aether.local.toml
-aether-masque.local.toml
-aether-*.local.toml
-# aether.toml و aether.sh و aether-masque.toml در Git می‌مانند (ساختار)
-
-# ==================== VPN/Proxy secrets (aether) ====================
-# فقط secrets جدا می‌شوند. ساختار و اسکریپت‌ها در Git می‌مانند.
+# فقط secrets جدا می‌شوند. ساختار، اسکریپت‌ها و exampleها کامیت می‌شوند.
 aether.toml
 aether-masque.toml
 aether.local.toml
@@ -165,19 +159,8 @@ aether-masque.local.toml
 aether-*.local.toml
 aether-*.token
 
-# اما exampleها کامیت می‌شوند:
+# استثنا: exampleها + اسکریپت + lastconn در Git می‌مانند
 !aether.example.toml
 !aether.example-masque.toml
-
-# ==================== VPN/Proxy secrets (aether) ====================
-# فقط secrets جدا می‌شوند. ساختار و اسکریپت‌ها در Git می‌مانند.
-aether.toml
-aether-masque.toml
-aether.local.toml
-aether-masque.local.toml
-aether-*.local.toml
-aether-*.token
-
-# اما exampleها کامیت می‌شوند:
-!aether.example.toml
-!aether.example-masque.toml
+!aether.sh
+!aether-lastconn.toml

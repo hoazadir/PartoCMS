@@ -1,0 +1,37 @@
+# ============================================================
+# Aether MASQUE — Example Configuration (NO SECRETS)
+# ============================================================
+# این فایل الگوست. برای MASQUE (HTTP/3-based VPN) استفاده می‌شود.
+#
+# استفاده:
+#   1. cp aether.example-masque.toml aether-masque.toml
+#   2. مقادیر واقعی را در aether-masque.toml پر کنید
+#   3. aether-masque.toml در .gitignore است — هرگز به Git نمی‌رود
+
+# ============ Device Identity ============
+device_id     = "YOUR_MASQUE_DEVICE_ID_HERE"
+access_token  = "YOUR_MASQUE_ACCESS_TOKEN_HERE"
+client_id     = "YOUR_CLIENT_ID"
+organization  = ""
+
+# ============ WireGuard Keys ============
+wg_private_key     = "YOUR_MASQUE_WG_PRIVATE_KEY_HERE"
+wg_peer_public_key = "bmXOC+F1FxEMF9dyiK2H5/1SUtzH0JuVo51h2wPfgyo="
+
+# ============ Client Certificate (ECDSA) ============
+# از پنل Aether → دستگاه MASQUE → Certificate
+# قالب دقیق:
+#   cert_pem = """
+#   -----BEGIN CERTIFICATE-----
+#   ...base64...
+#   -----END CERTIFICATE-----
+#   """
+cert_pem = ""
+key_pem  = ""
+cert_issued_at = 0
+
+# ============ Assigned Networking ============
+ipv4              = "172.16.0.2"
+ipv6              = "YOUR_MASQUE_IPV6_FROM_PANEL"
+gateway_proxy     = "172.16.0.1:2480"
+assigned_endpoint = "YOUR_MASQUE_ENDPOINT_IP"
