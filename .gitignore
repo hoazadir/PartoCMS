@@ -164,3 +164,7 @@ aether-*.token
 !aether.example-masque.toml
 !aether.sh
 !aether-lastconn.toml
+
+# gool secondary identity (WireGuard inner — contains secrets!)
+aether-secondary.toml
+aether-*-secondary.toml
