@@ -168,3 +168,7 @@ aether-*.token
 # gool secondary identity (WireGuard inner — contains secrets!)
 aether-secondary.toml
 aether-*-secondary.toml
+
+# gool secondary identity (WireGuard inner — contains secrets!)
+aether-secondary.toml
+aether-*-secondary.toml
