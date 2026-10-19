@@ -901,3 +901,41 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 **تاریخ:** 2026-10-18
 **مخزن:** https://github.com/hoazadir/PartoCMS
 **لایسنس:** Proprietary — تمامی حقوق محفوظ است
+
+---
+
+## 🆕 فاز ۳-G: Testimonials Module ✅ ۱۰۰٪
+
+**تاریخ تکمیل:** 2026-10-19
+**کامیت‌ها:** `1558672`, `d99f06b`, `c881ea9`, `46a5c93`
+
+**آمار:** ۲۱ فایل، ۴,۲۸۲ خط، ۱ جدول DB (testimonials با ۱۶ ستون و ۶ index)
+
+**معماری:** DDD + SOLID + PSR-4 + autoloader
+
+| فاز | عنوان | کامیت |
+|:---:|-------|-------|
+| ۱ | Backend (Domain + Infrastructure) | 1558672 |
+| ۲ | Admin UI (۵ صفحه) | d99f06b |
+| ۳ | Frontend (Widget + Shortcode + AJAX) | c881ea9 |
+| ۴ | Registry + Manifest + README | 46a5c93 |
+
+**امکانات:**
+- CRUD کامل از پنل ادمین
+- فرم AJAX از فرانت (بدون لاگین)
+- امتیاز ستاره‌ای (۱-۵) + آواتار + Featured
+- صف تایید (pending/published/rejected)
+- i18n (fa-IR, en-US) + RTL/LTR
+- ضد اسپم ۳ لایه
+- Bulk operations + فیلترها
+- شورت‌کد [testimonials] + ۷ attribute
+- ویجت grid/slider + CSS responsive
+
+**دسترسی:**
+- Admin: /modules/testimonials/admin/index.php
+- AJAX: /modules/testimonials/ajax/submit.php
+- Sidebar: Marketing > Testimonials
+
+**تست:** ۴۰+ assertion، همه php -l سبز، AJAX موفق
+
+---
