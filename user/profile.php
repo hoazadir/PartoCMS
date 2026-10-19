@@ -94,6 +94,7 @@ $pageTitle = 'پروفایل من';
     <a href="password.php"><i class="bi bi-key"></i> <span><?= __t('fe_change_password', [], 'تغییر رمز') ?></span></a>
     <a href="posts.php"><i class="bi bi-file-text"></i> <span><?= __t('fe_my_posts', [], 'مقالات من') ?></span></a>
     <a href="comments.php"><i class="bi bi-chat-dots"></i> <span><?= __t('fe_my_comments', [], 'دیدگاه‌های من') ?></span></a>
+    <a href="orders.php"><i class="bi bi-bag-check"></i> <span>سفارش‌های من</span></a>
     <hr style="border-color:#34495e;margin:5px 0;">
     <a href="../index.php"><i class="bi bi-house"></i> <span>صفحه اصلی</span></a>
     <a href="../logout.php" class="text-danger"><i class="bi bi-box-arrow-right"></i> <span><?= __t('fe_logout', [], 'خروج') ?></span></a>

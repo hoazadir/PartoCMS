@@ -221,7 +221,26 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 </div>
                 <div class="field">
                     <label>نام مشتری</label>
-                    <input type="text" name="client_name" value="<?= t_esc($form['client_name']) ?>" maxlength="150">
+                    <input type="text" name="client_name" list="contacts_list" value="<?= t_esc($form['client_name']) ?>" maxlength="150" class="form-control" placeholder="نام مشتری را انتخاب یا تایپ کنید">
+                    <datalist id="contacts_list">
+                        <?php
+                        try {
+                            $db_contacts = getDB();
+                            $stmt = $db_contacts->query("SELECT * FROM contacts LIMIT 1");
+                            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                            $col = 'name';
+                            if ($row) {
+                                foreach (['name', 'full_name', 'title', 'first_name'] as $test_col) {
+                                    if (isset($row[$test_col])) { $col = $test_col; break; }
+                                }
+                            }
+                            $list = $db_contacts->query("SELECT $col FROM contacts")->fetchAll(PDO::FETCH_COLUMN);
+                            foreach ($list as $name) {
+                                echo '<option value="' . t_esc($name) . '">';
+                            }
+                        } catch (Exception $e) {}
+                        ?>
+                    </datalist>" maxlength="150">
                 </div>
                 <div class="field">
                     <label>دسته‌بندی</label>
@@ -244,7 +263,10 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 </div>
                 <div class="field full">
                     <label>لینک پروژه</label>
-                    <input type="url" name="project_url" value="<?= t_esc($form['project_url']) ?>" maxlength="255">
+                    <div style="display:flex; gap:8px; align-items:center;">
+            <input type="url" name="project_url" value="<?= t_esc($form['project_url']) ?>
+            <button type="button" class="btn btn-outline-secondary" onclick="testProjectUrl(this)" title="تست لینک" style="padding: 8px 12px; background:#f1f5f9; border:1px solid #cbd5e1; border-radius:6px; cursor:pointer;">🌐</button>
+        </div>" maxlength="255">
                 </div>
                 <div class="field full">
                     <label>توضیح کوتاه</label>

@@ -45,6 +45,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     VALUES (?, ?, ?, ?, 1, NOW())
                 ");
                 $stmt->execute([$username, $email, $hashed, $userRoleId]);
+
+                $newUserId = $pdo->lastInsertId();
+
+                // --- شروع همگام‌سازی کاربر با CRM و فروشگاه ---
+                try {
+                    $nameParts = explode(' ', trim($username), 2);
+                    $firstName = $nameParts[0];
+                    $lastName = $nameParts[1] ?? '';
+
+                    // ثبت در CRM (contacts)
+                    $stmtCrm = $pdo->prepare("INSERT INTO contacts (first_name, last_name, email, is_active, created_at) VALUES (?, ?, ?, 1, NOW())");
+                    $stmtCrm->execute([$firstName, $lastName, $email]);
+
+                    // ثبت در فروشگاه (shop_customers)
+                    $stmtShop = $pdo->prepare("INSERT INTO shop_customers (user_id, first_name, last_name, email, created_at) VALUES (?, ?, ?, ?, NOW())");
+                    $stmtShop->execute([$newUserId, $firstName, $lastName, $email]);
+                } catch (Throwable $e) {
+                    error_log("User Sync Error: " . $e->getMessage());
+                }
+                // --- پایان همگام‌سازی ---
+
                 
                 $success = __t('fe_account_created', [], 'حساب شما با موفقیت ساخته شد!');
             }
