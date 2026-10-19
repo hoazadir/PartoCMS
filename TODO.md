@@ -42,6 +42,7 @@
 | **فاز ۳-G** | **Testimonials Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **فاز ۳-H** | **Team Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **فاز ۳-I** | **Services Module** | **✅ ۱۰۰٪** | ۱۰۰ |
+| **فاز ۳-J** | **Portfolio Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | فاز ۳-D | Smart Installer + Tier | 🟡 ~۷۵٪ | ۷۵ |
 | فاز ۴ | قالب‌ساز + ۶۰ تمپلیت | 🚨 ۰٪ | ۰ |
 | فاز ۵ | ماژول وبلاگ | 🟡 ~۵۰٪ | ۵۰ |
@@ -809,7 +810,7 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 - **زبان‌های فعال:** ۲۰
 - **Providerهای ترجمه:** ۷
 - **Providerهای AI:** ۵ (Ollama, OpenRouter, Groq, Gemini, OpenAI)
-- **ماژول‌ها:** ۱۴ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, reviews, services, shop, table_builder, team, testimonials)
+- **ماژول‌ها:** ۱۵ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, portfolio, reviews, services, shop, table_builder, team, testimonials)
 - **خطوط فروشگاه:** ۸,۱۱۸
 - **خطوط تبلیغات:** ۷,۲۳۶
 - **خطوط Newsletter:** ~۲,۵۰۰
@@ -1010,5 +1011,33 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 **دسترسی:**
 - Admin: /modules/services/admin/index.php
 - Sidebar: Marketing > خدمات
+
+**تست:** ۱۰+ assertion، همه php -l سبز، Widget/Shortcode PASS
+
+---
+
+## 🆕 فاز ۳-J: Portfolio Module ✅ ۱۰۰٪
+
+**تاریخ تکمیل:** 2026-10-19
+**کامیت‌ها:** `5af34b5`, `c529ed6`, `6f2bc22`, `84e9f9b`, + phase 3/4
+
+**آمار:** ۲۰ فایل، ~۳,۱۲۵ خط، ۱ جدول DB (portfolio_items با ۱۷ ستون و ۶ index)
+
+**معماری:** DDD + SOLID + PSR-4 + TinyMCE
+
+**امکانات:**
+- CRUD با TinyMCE (description + content)
+- گالری تصاویر (JSON array)
+- تگ‌ها (JSON array)
+- دسته‌بندی + نام مشتری + تاریخ/لینک پروژه
+- 16:10 thumbnail با hover zoom
+- 3-line description clamp
+- شورت‌کد [portfolio] + ۹ attribute
+- ویجت grid/slider + CSS responsive
+- RTL/LTR + i18n
+
+**دسترسی:**
+- Admin: /modules/portfolio/admin/index.php
+- Sidebar: Marketing > نمونه‌کارها
 
 **تست:** ۱۰+ assertion، همه php -l سبز، Widget/Shortcode PASS
