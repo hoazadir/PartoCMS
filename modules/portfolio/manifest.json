@@ -1,0 +1,61 @@
+{
+    "name": "نمونه‌کارها",
+    "slug": "portfolio",
+    "version": "1.0.0",
+    "description": "سیستم مدیریت نمونه‌کارها با معماری DDD، گالری تصاویر، تگ‌ها، TinyMCE و ویجت فرانت‌اند.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "portfolio.view",
+        "portfolio.create",
+        "portfolio.edit",
+        "portfolio.delete",
+        "portfolio.settings"
+    ],
+    "menu": {
+        "title": "نمونه‌کارها",
+        "icon": "🎨",
+        "url": "/modules/portfolio/admin/index.php",
+        "order": 75,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست نمونه‌کارها",
+                "url": "/modules/portfolio/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "افزودن نمونه‌کار",
+                "url": "/modules/portfolio/admin/create.php",
+                "icon": "➕"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/portfolio/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "portfolio_items"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "items_per_page": 20,
+        "show_thumbnail": true,
+        "show_client": true,
+        "show_category": true,
+        "show_tags": true,
+        "show_date": true,
+        "default_status": "published"
+    },
+    "icon": "🎨",
+    "menu_group": "marketing"
+}
