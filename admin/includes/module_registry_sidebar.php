@@ -54,9 +54,6 @@ class ModuleRegistrySidebar {
         'testimonials_list'     => '📋',
         'testimonials_create'   => '➕',
         'testimonials_settings' => '⚙️',
-        'testimonials_list'     => '📋',
-        'testimonials_create'   => '➕',
-        'testimonials_settings' => '⚙️',
         // صفحات ماژول‌های خاص
         'languages'    => '🌍',
         'translations' => '📚',
@@ -155,6 +152,9 @@ class ModuleRegistrySidebar {
         'ads_positions' => 'موقعیت‌ها',
         'ads_campaigns' => 'کمپین‌ها',
         'ads_reports' => 'گزارش‌ها',
+            'testimonials_list'     => 'لیست نظرات',
+        'testimonials_create'   => 'ایجاد نظر',
+        'testimonials_settings' => 'تنظیمات نظرات',
     ];
 
     // ═══════════════════════════════════════════════════════════
