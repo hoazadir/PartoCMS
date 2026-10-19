@@ -260,6 +260,19 @@ class ModuleRegistry {
                 'table_builder' => 'admin/includes/table_builder.php',
             ],
         ],
+        'testimonials' => [
+            'name' => 'نظرات مشتریان',
+            'icon' => '💬',
+            'menu_group' => 'marketing',
+            'sort_order' => 50,
+            'is_core' => 0,
+            'pages' => [
+                'testimonials_list'     => 'modules/testimonials/admin/index.php',
+                'testimonials_create'   => 'modules/testimonials/admin/create.php',
+                'testimonials_settings' => 'modules/testimonials/admin/settings.php',
+            ],
+            'includes' => [],
+        ],
     ];
 
     private static $dynamicGroups = ['i18n', 'translation', 'security', 'backup_auto', 'tools_pro', 'generated', 'ai', 'marketing', 'content', 'commerce'];

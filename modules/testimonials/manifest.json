@@ -1,0 +1,67 @@
+{
+    "name": "نظرات مشتریان",
+    "slug": "testimonials",
+    "version": "1.0.0",
+    "description": "سیستم نظرات مشتریان با معماری DDD، امتیاز ستاره‌ای، فرم فرانت‌اند، ضد اسپم و مدیریت کامل از پنل ادمین.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "testimonials.view",
+        "testimonials.create",
+        "testimonials.edit",
+        "testimonials.delete",
+        "testimonials.approve",
+        "testimonials.settings"
+    ],
+    "menu": {
+        "title": "نظرات مشتریان",
+        "icon": "💬",
+        "url": "/modules/testimonials/admin/index.php",
+        "order": 50,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست نظرات",
+                "url": "/modules/testimonials/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "نظر جدید",
+                "url": "/modules/testimonials/admin/create.php",
+                "icon": "➕"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/testimonials/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "testimonials"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "auto_approve": false,
+        "require_email": false,
+        "allow_guest": true,
+        "items_per_page": 20,
+        "show_avatar": true,
+        "show_company": true,
+        "show_position": true,
+        "show_rating": true,
+        "spam_cooldown": 5,
+        "spam_daily_limit": 10,
+        "min_content_length": 10,
+        "max_content_length": 5000
+    },
+    "icon": "💬",
+    "menu_group": "marketing"
+}

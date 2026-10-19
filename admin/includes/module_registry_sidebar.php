@@ -36,6 +36,7 @@ class ModuleRegistrySidebar {
         'reviews'    => ['singular' => 'نظر',     'plural' => 'نظرات',    'icon' => '⭐'],
         'newsletter' => ['singular' => 'خبرنامه', 'plural' => 'خبرنامه', 'icon' => '📧'],
         'faq' => ['singular' => 'سوال', 'plural' => 'سوالات متداول', 'icon' => '❓'],
+        'testimonials' => ['singular' => 'نظر', 'plural' => 'نظرات مشتریان', 'icon' => '💬'],
     ];
 
     // ═══════════════════════════════════════════════════════════
