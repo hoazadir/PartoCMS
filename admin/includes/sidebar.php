@@ -2,6 +2,12 @@
 /**
  * Sidebar استاندارد - نسخه ریسپانسیو با مسیرهای مطلق (اصلاح نهایی)
  */
+// جلوگیری از cache در سایدبار
+if (!headers_sent()) {
+    header('Cache-Control: no-cache, no-store, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
 if (!isset($siteName)) {
     $siteName = function_exists('getSetting') ? getSetting('site_name', 'وب‌سایت من') : 'وب‌سایت من';
 }
@@ -162,7 +168,11 @@ $baseSite  = SITE_URL;
     .menu-group.open .menu-group-header .arrow { transform: rotate(180deg); }
     .menu-group.has-active .menu-group-header { color: #3b82f6; }
 
-    .menu-group-items {
+    /* اصلاح ارتفاع برای منوهای طولانی */
+.menu-group.open > .menu-group-items {
+    max-height: 2000px !important;
+}
+.menu-group-items {
         max-height: 0;
         overflow: hidden;
         transition: max-height 0.35s ease;

@@ -38,6 +38,7 @@ class ModuleRegistrySidebar {
         'faq' => ['singular' => 'سوال', 'plural' => 'سوالات متداول', 'icon' => '❓'],
         'testimonials' => ['singular' => 'نظر', 'plural' => 'نظرات مشتریان', 'icon' => '💬'],
         'team' => ['singular' => 'عضو', 'plural' => 'تیم ما', 'icon' => '👥'],
+        'services' => ['singular' => 'خدمت', 'plural' => 'خدمات', 'icon' => '🛠️'],
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -103,6 +104,9 @@ class ModuleRegistrySidebar {
             'team_list'             => '📋',
         'team_create'           => '➕',
         'team_settings'         => '⚙️',
+            'services_list'             => '📋',
+        'services_create'           => '➕',
+        'services_settings'         => '⚙️',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -162,6 +166,9 @@ class ModuleRegistrySidebar {
             'team_list'             => 'لیست اعضا',
         'team_create'           => 'افزودن عضو',
         'team_settings'         => 'تنظیمات',
+            'services_list'             => 'لیست خدمات',
+        'services_create'           => 'افزودن خدمت',
+        'services_settings'         => 'تنظیمات',
     ];
 
     // ═══════════════════════════════════════════════════════════

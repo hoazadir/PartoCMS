@@ -260,11 +260,24 @@ class ModuleRegistry {
                 'table_builder' => 'admin/includes/table_builder.php',
             ],
         ],
+        'services' => [
+            'name' => 'خدمات',
+            'icon' => '🛠️',
+            'menu_group' => 'marketing',
+            'sort_order' => 70,
+            'is_core' => 0,
+            'pages' => [
+                'services_list'     => 'modules/services/admin/index.php',
+                'services_create'   => 'modules/services/admin/create.php',
+                'services_settings' => 'modules/services/admin/settings.php',
+            ],
+            'includes' => [],
+        ],
         'team' => [
             'name' => 'تیم ما',
             'icon' => '👥',
             'menu_group' => 'marketing',
-            'sort_order' => 60,
+            'sort_order' => 65,
             'is_core' => 0,
             'pages' => [
                 'team_list'     => 'modules/team/admin/index.php',
