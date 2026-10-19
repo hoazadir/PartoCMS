@@ -260,6 +260,19 @@ class ModuleRegistry {
                 'table_builder' => 'admin/includes/table_builder.php',
             ],
         ],
+        'team' => [
+            'name' => 'تیم ما',
+            'icon' => '👥',
+            'menu_group' => 'marketing',
+            'sort_order' => 60,
+            'is_core' => 0,
+            'pages' => [
+                'team_list'     => 'modules/team/admin/index.php',
+                'team_create'   => 'modules/team/admin/create.php',
+                'team_settings' => 'modules/team/admin/settings.php',
+            ],
+            'includes' => [],
+        ],
         'testimonials' => [
             'name' => 'نظرات مشتریان',
             'icon' => '💬',

@@ -37,6 +37,7 @@ class ModuleRegistrySidebar {
         'newsletter' => ['singular' => 'خبرنامه', 'plural' => 'خبرنامه', 'icon' => '📧'],
         'faq' => ['singular' => 'سوال', 'plural' => 'سوالات متداول', 'icon' => '❓'],
         'testimonials' => ['singular' => 'نظر', 'plural' => 'نظرات مشتریان', 'icon' => '💬'],
+        'team' => ['singular' => 'عضو', 'plural' => 'تیم ما', 'icon' => '👥'],
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -99,6 +100,9 @@ class ModuleRegistrySidebar {
         'ads_positions' => '📐',
         'ads_campaigns' => '🎯',
         'ads_reports' => '📈',
+            'team_list'             => '📋',
+        'team_create'           => '➕',
+        'team_settings'         => '⚙️',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -155,6 +159,9 @@ class ModuleRegistrySidebar {
             'testimonials_list'     => 'همه نظرات مشتریان',
         'testimonials_create'   => 'افزودن نظر مشتری',
         'testimonials_settings' => 'تنظیمات',
+            'team_list'             => 'لیست اعضا',
+        'team_create'           => 'افزودن عضو',
+        'team_settings'         => 'تنظیمات',
     ];
 
     // ═══════════════════════════════════════════════════════════
