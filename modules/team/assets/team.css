@@ -1,0 +1,183 @@
+/* ============================================================
+   PartoCMS — Team Module
+   Frontend Styles
+   @author Hooman Oliaei
+   ============================================================ */
+
+.team-container {
+    margin: 25px 0;
+    font-family: Tahoma, Arial, sans-serif;
+    direction: rtl;
+}
+
+/* ─── Grid ─── */
+.team-grid {
+    display: grid;
+    gap: 20px;
+    grid-template-columns: repeat(var(--cols, 3), 1fr);
+}
+
+/* ─── Card ─── */
+.team-card {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 24px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+}
+.team-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.team-card.is-featured {
+    border-color: #fbbf24;
+    background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
+}
+
+/* ─── Photo ─── */
+.team-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin: 0 auto 15px;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: block;
+}
+.team-photo-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: bold;
+    color: #6366f1;
+    background: #eef2ff;
+    border: 3px solid #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ─── Info ─── */
+.team-name {
+    font-weight: 700;
+    font-size: 17px;
+    color: #1e293b;
+    margin: 0 0 6px;
+}
+.team-position {
+    font-size: 13px;
+    color: #6366f1;
+    font-weight: 600;
+    margin: 0 0 4px;
+}
+.team-department {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0 0 12px;
+}
+.team-bio {
+    font-size: 13px;
+    line-height: 1.7;
+    color: #475569;
+    margin: 12px 0;
+    text-align: center;
+}
+
+/* ─── Social ─── */
+.team-social {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid #f1f5f9;
+}
+.team-social a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #475569;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    font-size: 14px;
+}
+.team-social a:hover {
+    background: #6366f1;
+    color: #fff;
+}
+
+/* ─── Slider ─── */
+.team-slider {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+}
+.team-slider-track {
+    display: flex;
+    gap: 20px;
+    transition: transform 0.4s ease;
+}
+.team-slider-track > .team-card {
+    flex: 0 0 calc(100% / var(--cols, 3) - 14px);
+    min-width: 0;
+}
+.team-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    z-index: 10;
+    color: #475569;
+}
+.team-nav:hover { background: #f8fafc; }
+.team-nav.prev { right: -10px; }
+.team-nav.next { left: -10px; }
+
+/* ─── Empty ─── */
+.team-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: #94a3b8;
+    font-size: 14px;
+    background: #f8fafc;
+    border-radius: 12px;
+    border: 2px dashed #e2e8f0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+    .team-grid { grid-template-columns: repeat(min(var(--cols, 2), 2), 1fr); }
+    .team-slider-track > .team-card { flex: 0 0 calc(50% - 10px); }
+}
+@media (max-width: 600px) {
+    .team-grid { grid-template-columns: 1fr; }
+    .team-slider-track > .team-card { flex: 0 0 100%; }
+    .team-photo, .team-photo-placeholder { width: 80px; height: 80px; }
+    .team-nav { width: 36px; height: 36px; }
+    .team-nav.prev { right: 5px; }
+    .team-nav.next { left: 5px; }
+}
+
+/* ─── RTL ─── */
+html[dir="ltr"] .team-container { direction: ltr; }
