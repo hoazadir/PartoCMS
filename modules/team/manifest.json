@@ -1,0 +1,61 @@
+{
+    "name": "تیم ما",
+    "slug": "team",
+    "version": "1.0.0",
+    "description": "سیستم مدیریت اعضای تیم با معماری DDD، عکس، بیوگرافی، شبکه‌های اجتماعی و ویجت فرانت‌اند.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "team.view",
+        "team.create",
+        "team.edit",
+        "team.delete",
+        "team.settings"
+    ],
+    "menu": {
+        "title": "تیم ما",
+        "icon": "👥",
+        "url": "/modules/team/admin/index.php",
+        "order": 60,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست اعضا",
+                "url": "/modules/team/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "افزودن عضو",
+                "url": "/modules/team/admin/create.php",
+                "icon": "➕"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/team/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "team_members"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "items_per_page": 20,
+        "show_photo": true,
+        "show_position": true,
+        "show_department": true,
+        "show_bio": true,
+        "show_social": true,
+        "default_status": "published"
+    },
+    "icon": "👥",
+    "menu_group": "marketing"
+}
