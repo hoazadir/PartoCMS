@@ -177,3 +177,4 @@ aether-*-secondary.toml
 # Portfolio uploads
 assets/uploads/portfolio/
 !assets/uploads/portfolio/.htaccess
+assets/uploads/services/*

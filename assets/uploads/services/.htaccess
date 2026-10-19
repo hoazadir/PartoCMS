@@ -1,0 +1,5 @@
+# PartoCMS — Portfolio uploads
+<FilesMatch "\.(php|phtml|phar|pl|py|jsp|asp|sh|cgi)$">
+    Require all denied
+</FilesMatch>
+Options -Indexes
