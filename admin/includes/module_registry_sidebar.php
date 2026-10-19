@@ -152,9 +152,9 @@ class ModuleRegistrySidebar {
         'ads_positions' => 'موقعیت‌ها',
         'ads_campaigns' => 'کمپین‌ها',
         'ads_reports' => 'گزارش‌ها',
-            'testimonials_list'     => 'لیست نظرات',
-        'testimonials_create'   => 'ایجاد نظر',
-        'testimonials_settings' => 'تنظیمات نظرات',
+            'testimonials_list'     => 'همه نظرات مشتریان',
+        'testimonials_create'   => 'افزودن نظر مشتری',
+        'testimonials_settings' => 'تنظیمات',
     ];
 
     // ═══════════════════════════════════════════════════════════
