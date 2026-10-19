@@ -94,6 +94,88 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
         .btn-secondary { background: #e2e8f0; color: #334155; }
         .tox-tinymce { border-radius: 8px !important; }
         @media (max-width: 1100px) { .main { margin-right: 0; padding: 70px 15px 15px; } .form-grid { grid-template-columns: 1fr; } }
+    
+        /* ─── Gallery Manager ─── */
+        .gallery-manager {
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 15px;
+            background: #f8fafc;
+        }
+        .gallery-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .gallery-preview:empty { display: none; }
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            background: #fff;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .gallery-remove {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(220, 38, 38, 0.9);
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            line-height: 1;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .gallery-remove:hover { background: #b91c1c; }
+        .gallery-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+        .btn-gallery-upload {
+            padding: 10px 20px;
+            background: #6366f1;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-gallery-upload:hover { background: #4f46e5; }
+        .btn-gallery-upload:disabled { opacity: 0.6; cursor: wait; }
+        .gallery-hint { font-size: 12px; color: #64748b; }
+        #gallery-textarea {
+            min-height: 80px;
+            margin-top: 10px;
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: monospace;
+        }
+
     </style>
 </head>
 <body>
@@ -150,10 +232,19 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                     <label>محتوای کامل</label>
                     <textarea name="content" id="content-editor"><?= t_esc($form['content']) ?></textarea>
                 </div>
-                <div class="field full">
-                    <label>گالری تصاویر (هر خط یک URL)</label>
-                    <textarea name="gallery_str" placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg"><?= t_esc($form['gallery_str']) ?></textarea>
-                    <small>هر URL در یک خط جداگانه</small>
+                                <div class="field full">
+                    <label>گالری تصاویر</label>
+                    <div class="gallery-manager">
+                        <div class="gallery-preview" id="gallery-preview"></div>
+                        <div class="gallery-actions">
+                            <button type="button" class="btn-gallery-upload" id="btn-gallery-upload">
+                                📁 انتخاب فایل از سیستم
+                            </button>
+                            <span class="gallery-hint">یا URLها را دستی وارد کنید (هر خط یک URL)</span>
+                        </div>
+                        <input type="file" id="gallery-file-input" accept="image/*" multiple style="display:none">
+                        <textarea name="gallery_str" id="gallery-textarea" placeholder="https://example.com/img1.jpg&#10;https://example.com/img2.jpg"><?= t_esc($form['gallery_str']) ?></textarea>
+                    </div>
                 </div>
                 <div class="field full">
                     <label>تگ‌ها (با کاما جدا کنید)</label>
@@ -208,5 +299,121 @@ tinymce.init({
     content_style: 'body { font-family: Tahoma, Arial, sans-serif; font-size: 14px; direction: rtl; }'
 });
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js"></script>
+<script>
+// ─── TinyMCE ───
+tinymce.init({
+    selector: '#desc-editor, #content-editor',
+    height: 300,
+    menubar: false,
+    plugins: 'lists link image table code fullscreen',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link image | alignleft aligncenter alignright | code fullscreen',
+    directionality: 'rtl',
+    branding: false,
+    promotion: false,
+    content_style: 'body { font-family: Tahoma, Arial, sans-serif; font-size: 14px; direction: rtl; }'
+});
+
+// ─── Gallery Manager ───
+(function() {
+    const textarea = document.getElementById('gallery-textarea');
+    const preview = document.getElementById('gallery-preview');
+    const fileInput = document.getElementById('gallery-file-input');
+    const uploadBtn = document.getElementById('btn-gallery-upload');
+    const csrfToken = '<?= portfolio_csrf_token() ?>';
+
+    if (!textarea || !preview || !fileInput || !uploadBtn) return;
+
+    function getUrls() {
+        return textarea.value.split('\n').map(u => u.trim()).filter(u => u !== '');
+    }
+
+    function setUrls(urls) {
+        textarea.value = urls.join('\n');
+        renderPreview(urls);
+    }
+
+    function renderPreview(urls) {
+        preview.innerHTML = '';
+        urls.forEach((url, idx) => {
+            const div = document.createElement('div');
+            div.className = 'gallery-item';
+
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = '';
+            img.onerror = () => { img.style.opacity = '0.3'; };
+            div.appendChild(img);
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'gallery-remove';
+            btn.textContent = '×';
+            btn.addEventListener('click', () => {
+                const current = getUrls();
+                current.splice(idx, 1);
+                setUrls(current);
+            });
+            div.appendChild(btn);
+
+            preview.appendChild(div);
+        });
+    }
+
+    textarea.addEventListener('input', () => renderPreview(getUrls()));
+
+    uploadBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', async () => {
+        const files = fileInput.files;
+        if (!files.length) return;
+
+        uploadBtn.disabled = true;
+        const originalText = uploadBtn.textContent;
+        uploadBtn.textContent = '⏳ در حال آپلود...';
+
+        const currentUrls = getUrls();
+        let success = 0;
+        let failed = 0;
+
+        for (const file of files) {
+            const fd = new FormData();
+            fd.append('files[]', file);
+            fd.append('_csrf', csrfToken);
+
+            try {
+                const res = await fetch('/modules/portfolio/ajax/upload.php', {
+                    method: 'POST',
+                    body: fd
+                });
+                const json = await res.json();
+                if (json.success && json.urls) {
+                    currentUrls.push(...json.urls);
+                    success++;
+                } else {
+                    failed++;
+                    console.error('Upload failed:', json.message);
+                }
+            } catch (err) {
+                failed++;
+                console.error('Upload error:', err);
+            }
+        }
+
+        setUrls(currentUrls);
+        uploadBtn.disabled = false;
+        uploadBtn.textContent = originalText;
+        fileInput.value = '';
+
+        if (failed > 0) {
+            alert('آپلود: ' + success + ' موفق، ' + failed + ' ناموفق');
+        }
+    });
+
+    renderPreview(getUrls());
+})();
+</script>
+
 </body>
 </html>

@@ -172,3 +172,8 @@ aether-*-secondary.toml
 # gool secondary identity (WireGuard inner — contains secrets!)
 aether-secondary.toml
 aether-*-secondary.toml
+
+
+# Portfolio uploads
+assets/uploads/portfolio/
+!assets/uploads/portfolio/.htaccess
