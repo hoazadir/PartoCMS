@@ -1,0 +1,60 @@
+{
+    "name": "خدمات",
+    "slug": "services",
+    "version": "1.0.0",
+    "description": "سیستم مدیریت خدمات با معماری DDD، قیمت، ویژگی‌ها و ویجت فرانت‌اند.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "services.view",
+        "services.create",
+        "services.edit",
+        "services.delete",
+        "services.settings"
+    ],
+    "menu": {
+        "title": "خدمات",
+        "icon": "🛠️",
+        "url": "/modules/services/admin/index.php",
+        "order": 70,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست خدمات",
+                "url": "/modules/services/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "افزودن خدمت",
+                "url": "/modules/services/admin/create.php",
+                "icon": "➕"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/services/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": [
+            "services"
+        ]
+    },
+    "settings": {
+        "enabled": true,
+        "items_per_page": 20,
+        "show_icon": true,
+        "show_price": true,
+        "show_features": true,
+        "show_category": true,
+        "default_status": "published"
+    },
+    "icon": "🛠️",
+    "menu_group": "marketing"
+}
