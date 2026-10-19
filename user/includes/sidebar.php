@@ -10,16 +10,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
     <nav class="nav flex-column">
         <?php foreach ($menuItems as $item): ?>
-            <a class="nav-link <?= $currentPage === $item['url'] ? 'active' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
+            <?php $isActive = ($currentPage === basename($item['url'])); ?>
+            <a class="nav-link <?= $isActive ? 'active' : '' ?> <?= strpos($item['url'], 'logout') !== false ? 'text-danger' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
                 <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i> <?= htmlspecialchars($item['title']) ?>
             </a>
         <?php endforeach; ?>
-        <hr class="text-white-50 mx-2">
-        <a class="nav-link text-danger" href="../logout.php"><i class="bi bi-box-arrow-right"></i> خروج</a>
     </nav>
 </div>
 
-<!-- Mobile Offcanvas Sidebar (استفاده از offcanvas-start برای راست‌چین) -->
+<!-- Mobile Offcanvas Sidebar -->
 <div class="offcanvas offcanvas-start text-bg-dark" style="width: 250px;" tabindex="-1" id="userSidebarMobile">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title">👤 پنل کاربری</h5>
@@ -28,12 +27,11 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div class="offcanvas-body p-0">
         <nav class="nav flex-column">
             <?php foreach ($menuItems as $item): ?>
-                <a class="nav-link <?= $currentPage === $item['url'] ? 'active' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
+                <?php $isActive = ($currentPage === basename($item['url'])); ?>
+                <a class="nav-link <?= $isActive ? 'active' : '' ?> <?= strpos($item['url'], 'logout') !== false ? 'text-danger' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
                     <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i> <?= htmlspecialchars($item['title']) ?>
                 </a>
             <?php endforeach; ?>
-            <hr class="text-white-50 mx-2">
-            <a class="nav-link text-danger" href="../logout.php"><i class="bi bi-box-arrow-right"></i> خروج</a>
         </nav>
     </div>
 </div>
