@@ -128,11 +128,11 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                 </div>
                 <div class="field full">
                     <label>توضیح کوتاه</label>
-                    <textarea name="description" maxlength="500"><?= t_esc($form['description']) ?></textarea>
+                    <textarea name="description" id="desc-editor" maxlength="500"><?= t_esc($form['description']) ?></textarea>
                 </div>
                 <div class="field full">
                     <label>محتوای کامل</label>
-                    <textarea name="content"><?= t_esc($form['content']) ?></textarea>
+                    <textarea name="content" id="content-editor"><?= t_esc($form['content']) ?></textarea>
                 </div>
                 <div class="field">
                     <label>آیکون (emoji)</label>
@@ -187,5 +187,21 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
     </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.3/tinymce.min.js"></script>
+<script>
+tinymce.init({
+    selector: '#desc-editor, #content-editor',
+    height: 300,
+    menubar: false,
+    plugins: 'lists link image table code fullscreen',
+    toolbar: 'undo redo | bold italic underline | bullist numlist | link image | alignleft aligncenter alignright | code fullscreen',
+    directionality: 'rtl',
+    branding: false,
+    promotion: false,
+    content_style: 'body { font-family: Tahoma, Arial, sans-serif; font-size: 14px; direction: rtl; }'
+});
+</script>
+
 </body>
 </html>
