@@ -228,8 +228,15 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                     <input type="text" name="category" value="<?= t_esc($form['category']) ?>" maxlength="100">
                 </div>
                 <div class="field">
-                    <label>URL تصویر اصلی</label>
-                    <input type="url" name="thumbnail_url" value="<?= t_esc($form['thumbnail_url']) ?>" maxlength="255">
+                    <label>تصویر اصلی (Thumbnail)</label>
+                    <div id="thumb-upload-box" style="border: 2px dashed #cbd5e1; padding: 20px; text-align: center; cursor: pointer; border-radius: 8px; background: #f8fafc; margin-bottom: 10px;">
+                        <div id="thumb-placeholder" style="display: <?= $form['thumbnail_url'] ? 'none' : 'block' ?>; color: #64748b;">
+                            📁 برای انتخاب تصویر کلیک کنید یا عکس را اینجا رها کنید
+                        </div>
+                        <img id="thumb-preview" src="<?= t_esc($form['thumbnail_url']) ?>" style="display: <?= $form['thumbnail_url'] ? 'block' : 'none' ?>; max-width: 100%; max-height: 200px; margin: 0 auto; border-radius: 6px;" />
+                    </div>
+                    <input type="hidden" name="thumbnail_url" id="thumbnail_url_input" value="<?= t_esc($form['thumbnail_url']) ?>">
+                    <input type="file" id="thumb-file-input" accept="image/*" style="display: none;">
                 </div>
                 <div class="field">
                     <label>تاریخ پروژه</label>
@@ -446,6 +453,65 @@ tinymce.init({
     renderPreview(getUrls());
 })();
 </script>
+
+
+    <!-- Thumbnail Uploader JS -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const thumbBox = document.getElementById('thumb-upload-box');
+        if (!thumbBox) return;
+        const thumbFileInput = document.getElementById('thumb-file-input');
+        const thumbHiddenInput = document.getElementById('thumbnail_url_input');
+        const thumbPreview = document.getElementById('thumb-preview');
+        const thumbPlaceholder = document.getElementById('thumb-placeholder');
+
+        thumbBox.addEventListener('click', () => thumbFileInput.click());
+        thumbBox.addEventListener('dragover', (e) => { e.preventDefault(); thumbBox.style.borderColor = '#6d28d9'; });
+        thumbBox.addEventListener('dragleave', () => { thumbBox.style.borderColor = '#cbd5e1'; });
+        thumbBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            thumbBox.style.borderColor = '#cbd5e1';
+            if (e.dataTransfer.files.length > 0) {
+                thumbFileInput.files = e.dataTransfer.files;
+                uploadThumbnail(thumbFileInput.files[0]);
+            }
+        });
+
+        thumbFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) uploadThumbnail(this.files[0]);
+        });
+
+        async function uploadThumbnail(file) {
+            thumbPlaceholder.style.display = 'block';
+            thumbPlaceholder.innerHTML = '⏳ در حال آپلود...';
+            thumbPreview.style.display = 'none';
+
+            const fd = new FormData();
+            fd.append('files[]', file);
+            const csrfMeta = document.querySelector('input[name="_csrf"]');
+            fd.append('_csrf', csrfMeta ? csrfMeta.value : '');
+
+            try {
+                const response = await fetch('../ajax/upload.php', { method: 'POST', body: fd });
+                const data = await response.json();
+                if (data.success && data.files && data.files.length > 0) {
+                    const url = data.files[0].url;
+                    thumbHiddenInput.value = url;
+                    thumbPreview.src = url;
+                    thumbPreview.style.display = 'block';
+                    thumbPlaceholder.style.display = 'none';
+                } else {
+                    alert('خطا در آپلود: ' + (data.message || 'پاسخ نامعتبر'));
+                    thumbPlaceholder.innerHTML = '📁 برای انتخاب تصویر کلیک کنید';
+                }
+            } catch (error) {
+                console.error(error);
+                alert('خطای شبکه در آپلود تصویر.');
+                thumbPlaceholder.innerHTML = '📁 برای انتخاب تصویر کلیک کنید';
+            }
+        }
+    });
+    </script>
 
 </body>
 </html>

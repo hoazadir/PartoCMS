@@ -145,13 +145,26 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                     <label>محتوای کامل</label>
                     <textarea name="content" id="content-editor"><?= t_esc($form['content']) ?></textarea>
                 </div>
-                <div class="field">
+                <div class="field" style="position: relative;">
                     <label>آیکون (emoji)</label>
-                    <input type="text" name="icon" value="<?= t_esc($form['icon']) ?>" placeholder="مثلاً 🌐">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" name="icon" id="icon-input" value="<?= t_esc($form['icon']) ?>" placeholder="مثلاً 🌐" style="flex: 1;">
+                        <button type="button" id="emoji-toggle-btn" style="padding: 0 15px; background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 6px; cursor: pointer; font-size: 18px;">😀</button>
+                    </div>
+                    <div id="emoji-picker-wrapper" style="display: none; position: absolute; top: 100%; right: 0; z-index: 1000; margin-top: 5px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden;">
+                        <emoji-picker></emoji-picker>
+                    </div>
                 </div>
                 <div class="field">
-                    <label>URL تصویر</label>
-                    <input type="url" name="image_url" value="<?= t_esc($form['image_url']) ?>">
+                    <label>تصویر (Image)</label>
+                    <div id="service-image-box" style="border: 2px dashed #cbd5e1; padding: 20px; text-align: center; cursor: pointer; border-radius: 8px; background: #f8fafc; margin-bottom: 10px;">
+                        <div id="service-image-placeholder" style="display: <?= $form['image_url'] ? 'none' : 'block' ?>; color: #64748b;">
+                            📁 برای انتخاب تصویر کلیک کنید یا عکس را اینجا رها کنید
+                        </div>
+                        <img id="service-image-preview" src="<?= t_esc($form['image_url']) ?>" style="display: <?= $form['image_url'] ? 'block' : 'none' ?>; max-width: 100%; max-height: 200px; margin: 0 auto; border-radius: 6px;" />
+                    </div>
+                    <input type="hidden" name="image_url" id="service_image_url_input" value="<?= t_esc($form['image_url']) ?>">
+                    <input type="file" id="service-image-file" accept="image/*" style="display: none;">
                 </div>
                 <div class="field">
                     <label>قیمت</label>
@@ -232,6 +245,96 @@ tinymce.init({
     content_style: 'body { font-family: Tahoma, Arial, sans-serif; font-size: 14px; direction: rtl; }'
 });
 </script>
+
+
+    <!-- Service Image Uploader JS -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const imgBox = document.getElementById('service-image-box');
+        if (!imgBox) return;
+        const fileInput = document.getElementById('service-image-file');
+        const hiddenInput = document.getElementById('service_image_url_input');
+        const preview = document.getElementById('service-image-preview');
+        const placeholder = document.getElementById('service-image-placeholder');
+
+        imgBox.addEventListener('click', () => fileInput.click());
+        imgBox.addEventListener('dragover', (e) => { e.preventDefault(); imgBox.style.borderColor = '#6d28d9'; });
+        imgBox.addEventListener('dragleave', () => { imgBox.style.borderColor = '#cbd5e1'; });
+        imgBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            imgBox.style.borderColor = '#cbd5e1';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                uploadServiceImage(fileInput.files[0]);
+            }
+        });
+
+        fileInput.addEventListener('change', function() {
+            if (this.files.length > 0) uploadServiceImage(this.files[0]);
+        });
+
+        async function uploadServiceImage(file) {
+            placeholder.style.display = 'block';
+            placeholder.innerHTML = '⏳ در حال آپلود...';
+            preview.style.display = 'none';
+
+            const fd = new FormData();
+            fd.append('files[]', file);
+            const csrfMeta = document.querySelector('input[name="_csrf"]');
+            fd.append('_csrf', csrfMeta ? csrfMeta.value : '');
+
+            try {
+                const response = await fetch('../ajax/upload.php', { method: 'POST', body: fd });
+                const data = await response.json();
+                if (data.success && data.urls && data.urls.length > 0) {
+                    const url = data.urls[0];
+                    hiddenInput.value = url;
+                    preview.src = url;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                } else {
+                    alert('خطا در آپلود: ' + (data.message || 'پاسخ نامعتبر'));
+                    placeholder.innerHTML = '📁 برای انتخاب تصویر کلیک کنید';
+                }
+            } catch (error) {
+                console.error(error);
+                alert('خطای شبکه در آپلود تصویر.');
+                placeholder.innerHTML = '📁 برای انتخاب تصویر کلیک کنید';
+            }
+        }
+    });
+    </script>
+
+
+    <!-- Emoji Picker -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.getElementById('emoji-toggle-btn');
+        const wrapper = document.getElementById('emoji-picker-wrapper');
+        const input = document.getElementById('icon-input');
+        const picker = document.querySelector('emoji-picker');
+
+        if (toggleBtn && wrapper && input && picker) {
+            toggleBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                wrapper.style.display = wrapper.style.display === 'none' ? 'block' : 'none';
+            });
+
+            picker.addEventListener('emoji-click', event => {
+                input.value = event.detail.unicode;
+                wrapper.style.display = 'none';
+            });
+
+            // بستن پنل با کلیک بیرون از آن
+            document.addEventListener('click', (e) => {
+                if (!wrapper.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) {
+                    wrapper.style.display = 'none';
+                }
+            });
+        }
+    });
+    </script>
 
 </body>
 </html>
