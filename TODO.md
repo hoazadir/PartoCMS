@@ -41,6 +41,7 @@
 | **B7** | **Content→Dynamic Registry** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **فاز ۳-G** | **Testimonials Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **فاز ۳-H** | **Team Module** | **✅ ۱۰۰٪** | ۱۰۰ |
+| **فاز ۳-I** | **Services Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | فاز ۳-D | Smart Installer + Tier | 🟡 ~۷۵٪ | ۷۵ |
 | فاز ۴ | قالب‌ساز + ۶۰ تمپلیت | 🚨 ۰٪ | ۰ |
 | فاز ۵ | ماژول وبلاگ | 🟡 ~۵۰٪ | ۵۰ |
@@ -808,7 +809,7 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 - **زبان‌های فعال:** ۲۰
 - **Providerهای ترجمه:** ۷
 - **Providerهای AI:** ۵ (Ollama, OpenRouter, Groq, Gemini, OpenAI)
-- **ماژول‌ها:** ۱۳ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, reviews, shop, table_builder, team, testimonials)
+- **ماژول‌ها:** ۱۴ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, reviews, services, shop, table_builder, team, testimonials)
 - **خطوط فروشگاه:** ۸,۱۱۸
 - **خطوط تبلیغات:** ۷,۲۳۶
 - **خطوط Newsletter:** ~۲,۵۰۰
@@ -975,3 +976,39 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 - Sidebar: Marketing > تیم ما
 
 **تست:** ۱۳+ assertion، همه php -l سبز، Widget/Shortcode PASS
+
+---
+
+## 🆕 فاز ۳-I: Services Module ✅ ۱۰۰٪
+
+**تاریخ تکمیل:** 2026-10-19
+**کامیت‌ها:** `fb04ecd`, `b13c802`, `cc630e6`, `7845364`
+
+**آمار:** ۱۸ فایل، ~۲,۹۶۵ خط، ۱ جدول DB (services با ۱۶ ستون و ۶ index)
+
+**معماری:** DDD + SOLID + PSR-4 + autoloader
+
+| فاز | عنوان | کامیت |
+|:---:|-------|-------|
+| ۱ | Backend (Domain + Infrastructure) | fb04ecd |
+| ۲ | Admin UI (۵ صفحه) | b13c802 |
+| ۳ | Frontend (Widget + Shortcode + CSS) | cc630e6 |
+| ۴ | Registry + Manifest + README | 7845364 |
+
+**امکانات:**
+- CRUD کامل از پنل ادمین
+- آیکون (emoji) یا تصویر
+- قیمت + واحد قیمت
+- ویژگی‌ها (JSON array)
+- دسته‌بندی (فیلتر)
+- وضعیت (published/hidden) + Featured + sort_order
+- Bulk operations + فیلترها (status, category, search)
+- شورت‌کد [services] + ۸ attribute
+- ویجت grid/slider + CSS responsive
+- RTL/LTR + i18n
+
+**دسترسی:**
+- Admin: /modules/services/admin/index.php
+- Sidebar: Marketing > خدمات
+
+**تست:** ۱۰+ assertion، همه php -l سبز، Widget/Shortcode PASS
