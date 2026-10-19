@@ -39,6 +39,7 @@
 | **فاز ۳-F** | **Reviews + Comments + Registry** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **FAQ** | **سوالات متداول** | **✅ ۱۰۰٪** | ۱۰۰ |
 | **B7** | **Content→Dynamic Registry** | **✅ ۱۰۰٪** | ۱۰۰ |
+| **فاز ۳-G** | **Testimonials Module** | **✅ ۱۰۰٪** | ۱۰۰ |
 | فاز ۳-D | Smart Installer + Tier | 🟡 ~۷۵٪ | ۷۵ |
 | فاز ۴ | قالب‌ساز + ۶۰ تمپلیت | 🚨 ۰٪ | ۰ |
 | فاز ۵ | ماژول وبلاگ | 🟡 ~۵۰٪ | ۵۰ |
@@ -806,7 +807,7 @@ DeepL, Microsoft, Yandex, Google, Lingva, Libre, MyMemory
 - **زبان‌های فعال:** ۲۰
 - **Providerهای ترجمه:** ۷
 - **Providerهای AI:** ۵ (Ollama, OpenRouter, Groq, Gemini, OpenAI)
-- **ماژول‌ها:** ۱۱ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, reviews, shop, table_builder)
+- **ماژول‌ها:** ۱۲ (ads, ai_assistant, ai_providers, comments, content, faq, generated, newsletter, reviews, shop, table_builder, testimonials)
 - **خطوط فروشگاه:** ۸,۱۱۸
 - **خطوط تبلیغات:** ۷,۲۳۶
 - **خطوط Newsletter:** ~۲,۵۰۰
