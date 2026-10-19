@@ -1,0 +1,295 @@
+<?php
+/**
+ * PartoCMS — Portfolio Module
+ * Infrastructure: PdoPortfolioRepository
+ */
+
+declare(strict_types=1);
+
+namespace PartoCMS\Portfolio\Infrastructure\Persistence;
+
+use PDO;
+use PDOException;
+use PartoCMS\Portfolio\Domain\Entity\PortfolioItem;
+use PartoCMS\Portfolio\Domain\Exception\PortfolioException;
+use PartoCMS\Portfolio\Domain\Repository\PortfolioRepositoryInterface;
+
+final class PdoPortfolioRepository implements PortfolioRepositoryInterface
+{
+    private const TABLE = 'portfolio_items';
+
+    public function __construct(private readonly PDO $pdo) {}
+
+    public function create(PortfolioItem $item): int
+    {
+        try {
+            $sql = "INSERT INTO " . self::TABLE . "
+                    (title, slug, client_name, description, content, thumbnail_url, gallery, category, tags, project_date, project_url, status, is_featured, sort_order, language)
+                    VALUES (:title, :slug, :client_name, :description, :content, :thumbnail_url, :gallery, :category, :tags, :project_date, :project_url, :status, :is_featured, :sort_order, :language)";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($item->toArray());
+            return (int) $this->pdo->lastInsertId();
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('create', $e);
+        }
+    }
+
+    public function update(PortfolioItem $item): bool
+    {
+        if ($item->getId() === null) {
+            throw PortfolioException::invalidInput('id', 'ID is required for update');
+        }
+        try {
+            $data = $item->toArray();
+            $data['id'] = $item->getId();
+            $sql = "UPDATE " . self::TABLE . " SET
+                    title = :title, slug = :slug, client_name = :client_name,
+                    description = :description, content = :content,
+                    thumbnail_url = :thumbnail_url, gallery = :gallery,
+                    category = :category, tags = :tags, project_date = :project_date,
+                    project_url = :project_url, status = :status,
+                    is_featured = :is_featured, sort_order = :sort_order, language = :language
+                    WHERE id = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($data);
+            return $stmt->rowCount() >= 0;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('update', $e);
+        }
+    }
+
+    public function delete(int $id): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare("DELETE FROM " . self::TABLE . " WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('delete', $e);
+        }
+    }
+
+    public function updateStatus(int $id, string $status): bool
+    {
+        if (!in_array($status, PortfolioItem::VALID_STATUSES, true)) {
+            throw PortfolioException::invalidStatus($status);
+        }
+        try {
+            $stmt = $this->pdo->prepare("UPDATE " . self::TABLE . " SET status = :status WHERE id = :id");
+            $stmt->execute([':status' => $status, ':id' => $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('updateStatus', $e);
+        }
+    }
+
+    public function toggleFeatured(int $id): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare("UPDATE " . self::TABLE . " SET is_featured = NOT is_featured WHERE id = :id");
+            $stmt->execute([':id' => $id]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('toggleFeatured', $e);
+        }
+    }
+
+    public function updateSortOrder(int $id, int $order): bool
+    {
+        try {
+            $stmt = $this->pdo->prepare("UPDATE " . self::TABLE . " SET sort_order = :order WHERE id = :id");
+            $stmt->execute([':id' => $id, ':order' => $order]);
+            return $stmt->rowCount() > 0;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('updateSortOrder', $e);
+        }
+    }
+
+    public function findById(int $id): ?PortfolioItem
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM " . self::TABLE . " WHERE id = :id LIMIT 1");
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? PortfolioItem::fromArray($row) : null;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('findById', $e);
+        }
+    }
+
+    public function findBySlug(string $slug): ?PortfolioItem
+    {
+        try {
+            $stmt = $this->pdo->prepare("SELECT * FROM " . self::TABLE . " WHERE slug = :slug LIMIT 1");
+            $stmt->execute([':slug' => $slug]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $row ? PortfolioItem::fromArray($row) : null;
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('findBySlug', $e);
+        }
+    }
+
+    public function findAll(array $filters = []): array
+    {
+        try {
+            [$where, $params] = $this->buildWhere($filters);
+            $orderBy = $this->buildOrderBy($filters);
+            $limitSql = $this->buildLimit($filters);
+            $sql = "SELECT * FROM " . self::TABLE . " {$where} {$orderBy} {$limitSql}";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return array_map(fn($row) => PortfolioItem::fromArray($row), $stmt->fetchAll(PDO::FETCH_ASSOC));
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('findAll', $e);
+        }
+    }
+
+    public function findPublished(array $filters = []): array
+    {
+        $filters['status'] = PortfolioItem::STATUS_PUBLISHED;
+        $filters['order_by'] = $filters['order_by'] ?? 'sort_order';
+        $filters['order_dir'] = $filters['order_dir'] ?? 'ASC';
+        return $this->findAll($filters);
+    }
+
+    public function count(array $filters = []): int
+    {
+        try {
+            [$where, $params] = $this->buildWhere($filters);
+            $sql = "SELECT COUNT(*) FROM " . self::TABLE . " {$where}";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return (int) $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('count', $e);
+        }
+    }
+
+    public function getStats(): array
+    {
+        try {
+            $sql = "SELECT
+                COUNT(*) AS total,
+                SUM(CASE WHEN status = 'published' THEN 1 ELSE 0 END) AS published,
+                SUM(CASE WHEN status = 'hidden' THEN 1 ELSE 0 END) AS hidden,
+                SUM(CASE WHEN is_featured = 1 THEN 1 ELSE 0 END) AS featured
+                FROM " . self::TABLE;
+            $row = $this->pdo->query($sql)->fetch(PDO::FETCH_ASSOC);
+            return [
+                'total'     => (int) ($row['total'] ?? 0),
+                'published' => (int) ($row['published'] ?? 0),
+                'hidden'    => (int) ($row['hidden'] ?? 0),
+                'featured'  => (int) ($row['featured'] ?? 0),
+            ];
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('getStats', $e);
+        }
+    }
+
+    public function getCategories(): array
+    {
+        try {
+            $sql = "SELECT DISTINCT category FROM " . self::TABLE . " WHERE category IS NOT NULL AND category != '' ORDER BY category ASC";
+            return $this->pdo->query($sql)->fetchAll(PDO::FETCH_COLUMN);
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('getCategories', $e);
+        }
+    }
+
+    public function getAllTags(): array
+    {
+        try {
+            $stmt = $this->pdo->query("SELECT tags FROM " . self::TABLE . " WHERE tags IS NOT NULL AND tags != ''");
+            $allTags = [];
+            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                $decoded = json_decode((string) $row['tags'], true);
+                if (is_array($decoded)) {
+                    foreach ($decoded as $tag) {
+                        $allTags[] = $tag;
+                    }
+                }
+            }
+            return array_values(array_unique($allTags));
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('getAllTags', $e);
+        }
+    }
+
+    public function bulkUpdateStatus(array $ids, string $status): int
+    {
+        if (!in_array($status, PortfolioItem::VALID_STATUSES, true)) {
+            throw PortfolioException::invalidStatus($status);
+        }
+        $ids = array_values(array_filter(array_map('intval', $ids), fn($id) => $id > 0));
+        if (empty($ids)) return 0;
+        try {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $params = array_merge([$status], $ids);
+            $sql = "UPDATE " . self::TABLE . " SET status = ? WHERE id IN ({$placeholders})";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('bulkUpdateStatus', $e);
+        }
+    }
+
+    public function bulkDelete(array $ids): int
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids), fn($id) => $id > 0));
+        if (empty($ids)) return 0;
+        try {
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $sql = "DELETE FROM " . self::TABLE . " WHERE id IN ({$placeholders})";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($ids);
+            return $stmt->rowCount();
+        } catch (PDOException $e) {
+            throw PortfolioException::databaseError('bulkDelete', $e);
+        }
+    }
+
+    private function buildWhere(array $filters): array
+    {
+        $where = [];
+        $params = [];
+        if (!empty($filters['status']) && in_array($filters['status'], PortfolioItem::VALID_STATUSES, true)) {
+            $where[] = 'status = :status';
+            $params[':status'] = $filters['status'];
+        }
+        if (isset($filters['is_featured'])) {
+            $where[] = 'is_featured = :is_featured';
+            $params[':is_featured'] = $filters['is_featured'] ? 1 : 0;
+        }
+        if (!empty($filters['language'])) {
+            $where[] = 'language = :language';
+            $params[':language'] = $filters['language'];
+        }
+        if (!empty($filters['category'])) {
+            $where[] = 'category = :category';
+            $params[':category'] = $filters['category'];
+        }
+        if (!empty($filters['search'])) {
+            $where[] = '(title LIKE :search OR client_name LIKE :search OR description LIKE :search OR content LIKE :search)';
+            $params[':search'] = '%' . $filters['search'] . '%';
+        }
+        $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+        return [$whereSql, $params];
+    }
+
+    private function buildOrderBy(array $filters): string
+    {
+        $allowed = ['id', 'title', 'sort_order', 'project_date', 'created_at'];
+        $orderBy = in_array($filters['order_by'] ?? '', $allowed, true) ? $filters['order_by'] : 'sort_order';
+        $orderDir = strtoupper($filters['order_dir'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
+        return "ORDER BY {$orderBy} {$orderDir}, id ASC";
+    }
+
+    private function buildLimit(array $filters): string
+    {
+        if (empty($filters['limit'])) return '';
+        $limit = max(1, (int) $filters['limit']);
+        $offset = max(0, (int) ($filters['offset'] ?? 0));
+        return "LIMIT {$limit} OFFSET {$offset}";
+    }
+}
