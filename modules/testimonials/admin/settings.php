@@ -23,6 +23,18 @@ $defaults = $config['defaults'];
 // تعریف فیلدهای تنظیمات (گروه‌بندی شده)
 // ─────────────────────────────────────────────────────────────
 $fields = [
+    'module_status' => [
+        'title' => '🔌 وضعیت ماژول',
+        'description' => 'فعال یا غیرفعال کردن کل ماژول نظرات مشتریان در سایت',
+        'fields' => [
+            'is_enabled' => [
+                'type'  => 'checkbox',
+                'label' => 'فعال بودن ماژول',
+                'help'  => 'اگر غیرفعال باشد، منو و فرم‌های ثبت نظر در سایت نمایش داده نمی‌شوند.',
+                'source' => 'db_module',
+            ],
+        ],
+    ],
     'general' => [
         'title' => '⚙️ تنظیمات عمومی',
         'description' => 'تنظیمات پایه برای ثبت و نمایش نظرات',
@@ -159,8 +171,14 @@ $fields = [
 // خواندن مقادیر فعلی
 // ─────────────────────────────────────────────────────────────
 $current = [];
+$pdo = getDB();
+$stmtMod = $pdo->prepare("SELECT is_enabled FROM modules WHERE slug = 'testimonials' LIMIT 1");
+$stmtMod->execute();
+$current['is_enabled'] = (bool) $stmtMod->fetchColumn();
+
 foreach ($fields as $group) {
     foreach ($group['fields'] as $key => $def) {
+        if ($key === 'is_enabled') continue;
         $source = $def['source'] ?? 'defaults';
         if ($source === 'widget') {
             $widgetConfig = $config['widget'];
@@ -190,8 +208,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()
             ");
 
+            $stmtMod = $pdo->prepare("UPDATE modules SET is_enabled = ? WHERE slug = 'testimonials'");
+            $stmtMod->execute([!empty($_POST['settings_is_enabled']) ? 1 : 0]);
+
             foreach ($fields as $group) {
                 foreach ($group['fields'] as $key => $def) {
+                    if ($key === 'is_enabled') continue; // قبلاً ذخیره شد
+                    
                     $inputName = 'settings_' . $key;
                     $value = null;
 

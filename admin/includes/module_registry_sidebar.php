@@ -51,6 +51,12 @@ class ModuleRegistrySidebar {
         'add'       => '➕',
         'edit'      => '✏️',
         'settings'  => '⚙️',
+        'testimonials_list'     => '📋',
+        'testimonials_create'   => '➕',
+        'testimonials_settings' => '⚙️',
+        'testimonials_list'     => '📋',
+        'testimonials_create'   => '➕',
+        'testimonials_settings' => '⚙️',
         // صفحات ماژول‌های خاص
         'languages'    => '🌍',
         'translations' => '📚',
