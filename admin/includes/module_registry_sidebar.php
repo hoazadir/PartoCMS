@@ -39,6 +39,7 @@ class ModuleRegistrySidebar {
         'testimonials' => ['singular' => 'نظر', 'plural' => 'نظرات مشتریان', 'icon' => '💬'],
         'team' => ['singular' => 'عضو', 'plural' => 'تیم ما', 'icon' => '👥'],
         'services' => ['singular' => 'خدمت', 'plural' => 'خدمات', 'icon' => '🛠️'],
+        'portfolio' => ['singular' => 'نمونه‌کار', 'plural' => 'نمونه‌کارها', 'icon' => '🎨'],
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -107,6 +108,9 @@ class ModuleRegistrySidebar {
             'services_list'             => '📋',
         'services_create'           => '➕',
         'services_settings'         => '⚙️',
+            'portfolio_list'             => '📋',
+        'portfolio_create'           => '➕',
+        'portfolio_settings'         => '⚙️',
     ];
 
     // ═══════════════════════════════════════════════════════════
@@ -169,6 +173,9 @@ class ModuleRegistrySidebar {
             'services_list'             => 'لیست خدمات',
         'services_create'           => 'افزودن خدمت',
         'services_settings'         => 'تنظیمات',
+            'portfolio_list'             => 'لیست نمونه‌کارها',
+        'portfolio_create'           => 'افزودن نمونه‌کار',
+        'portfolio_settings'         => 'تنظیمات',
     ];
 
     // ═══════════════════════════════════════════════════════════

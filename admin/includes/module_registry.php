@@ -260,6 +260,19 @@ class ModuleRegistry {
                 'table_builder' => 'admin/includes/table_builder.php',
             ],
         ],
+        'portfolio' => [
+            'name' => 'نمونه‌کارها',
+            'icon' => '🎨',
+            'menu_group' => 'marketing',
+            'sort_order' => 75,
+            'is_core' => 0,
+            'pages' => [
+                'portfolio_list'     => 'modules/portfolio/admin/index.php',
+                'portfolio_create'   => 'modules/portfolio/admin/create.php',
+                'portfolio_settings' => 'modules/portfolio/admin/settings.php',
+            ],
+            'includes' => [],
+        ],
         'services' => [
             'name' => 'خدمات',
             'icon' => '🛠️',
