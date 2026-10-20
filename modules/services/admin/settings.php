@@ -6,6 +6,43 @@
 declare(strict_types=1);
 require_once __DIR__ . '/_bootstrap.php';
 
+    // --- Dynamic Location Options ---
+    $dynamic_locations = [
+        'none' => 'هیچ‌کدام (فقط با شورت‌کد)',
+        'home' => 'صفحه اصلی سایت',
+        'footer' => 'فوتر سایت (همه صفحات)',
+        'header' => 'منوی بالا (هدر)',
+        'all_pages' => 'همه صفحات و نوشته‌ها',
+    ];
+    try {
+        if (function_exists('getDB')) {
+            $db = getDB();
+            // واکشی محتواهای منتشر شده (برگه‌ها و نوشته‌ها)
+            $pages = $db->query("SELECT id, title FROM content_items WHERE status = 'published' ORDER BY title ASC")->fetchAll(PDO::FETCH_ASSOC);
+            if ($pages) {
+                foreach ($pages as $p) {
+                    $dynamic_locations['content_' . $p['id']] = 'محتوا: ' . $p['title'];
+                }
+            }
+            // واکشی منوهای فعال
+            $menus = $db->query("SELECT id, name FROM menus WHERE is_active = 1 ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+            if ($menus) {
+                foreach ($menus as $m) {
+                    $dynamic_locations['menu_' . $m['id']] = 'منو: ' . $m['name'];
+                }
+            }
+        }
+    } catch (Exception $e) {
+        // خطا را نادیده بگیر تا صفحه تنظیمات خراب نشود
+    }
+    // -----------------------------
+    
+
+
+    
+    
+
+
 $config = services_config();
 $defaults = $config['defaults'];
 
@@ -73,6 +110,14 @@ $fields = [
         'title' => '🧩 تنظیمات ویجت',
         'description' => 'پیش‌فرض‌های نمایش ویجت خدمات',
         'fields' => [
+            'location' => [
+                'type' => 'select',
+                'label' => 'محل نمایش خودکار',
+                'help' => 'انتخاب کنید ویجت خدمات به صورت خودکار در کدام بخش سایت نمایش داده شود.',
+                'options' => $dynamic_locations,
+                'source' => 'widget',
+            ],
+        
             'limit' => [
                 'type' => 'number',
                 'label' => 'تعداد پیش‌فرض',
@@ -246,6 +291,11 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                                 <div class="field-label">
                                     <label for="<?= t_esc($inputName) ?>"><?= t_esc($def['label']) ?></label>
                                     <small><?= t_esc($def['help']) ?></small>
+                                    <?php if (strpos($inputName, 'location') !== false): ?>
+                                        <?= render_create_page_button() ?>
+                                    <?php endif; ?>
+                                    
+                                    
                                 </div>
                                 <div class="field-input">
                                     <?php if ($def['type'] === 'checkbox'): ?>

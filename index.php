@@ -291,6 +291,42 @@ if ($menuHtml):
     <?php endif; ?>
 </div>
 
+
+    
+    
+
+    <!-- Services Widget Auto-Render -->
+    <?php
+    $svcFile = __DIR__ . '/modules/services/src/Widget/ServiceWidget.php';
+    if (file_exists($svcFile)) {
+        require_once $svcFile;
+        $svcSettings = function_exists('services_get_settings') ? services_get_settings('widget') : [];
+        $svcLocation = $svcSettings['location'] ?? 'none';
+        
+        $currentContentId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $shouldRender = false;
+
+        if ($svcLocation === 'home' && empty($currentContentId)) {
+            $shouldRender = true;
+        } elseif ($svcLocation === 'all_pages') {
+            $shouldRender = true;
+        } elseif ($svcLocation === 'footer') {
+            $shouldRender = true; // فوتر در همه صفحات نمایش داده می‌شود
+        } elseif (strpos($svcLocation, 'content_') === 0) {
+            $targetId = (int)str_replace('content_', '', $svcLocation);
+            if ($currentContentId === $targetId) {
+                $shouldRender = true;
+            }
+        }
+
+        if ($shouldRender) {
+            echo '<div class="container my-5" style="margin-top: 40px; margin-bottom: 40px;">';
+            echo \PartoCMS\Services\Widget\ServiceWidget::render($svcSettings);
+            echo '</div>';
+        }
+    }
+    ?>
+    
 <footer style="background: #2c3e50; color: #bdc3c7; padding: 25px; text-align: center; font-size: 13px; margin-top: 50px;">
     © ۲۰۲۶ - <?= htmlspecialchars($siteName) ?>
 </footer>
