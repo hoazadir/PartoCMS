@@ -10,7 +10,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </div>
     <nav class="nav flex-column">
         <?php foreach ($menuItems as $item): ?>
-            <?php $isActive = ($currentPage === basename($item['url'])); ?>
+            <?php $isActive = ($currentPage === basename($item['url']) && strpos($item['url'], '/') !== 0); ?>
             <a class="nav-link <?= $isActive ? 'active' : '' ?> <?= strpos($item['url'], 'logout') !== false ? 'text-danger' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
                 <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i> <?= htmlspecialchars($item['title']) ?>
             </a>
@@ -27,7 +27,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     <div class="offcanvas-body p-0">
         <nav class="nav flex-column">
             <?php foreach ($menuItems as $item): ?>
-                <?php $isActive = ($currentPage === basename($item['url'])); ?>
+                <?php $isActive = ($currentPage === basename($item['url']) && strpos($item['url'], '/') !== 0); ?>
                 <a class="nav-link <?= $isActive ? 'active' : '' ?> <?= strpos($item['url'], 'logout') !== false ? 'text-danger' : '' ?>" href="<?= htmlspecialchars($item['url']) ?>">
                     <i class="bi <?= htmlspecialchars($item['icon']) ?>"></i> <?= htmlspecialchars($item['title']) ?>
                 </a>

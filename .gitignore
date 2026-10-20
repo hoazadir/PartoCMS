@@ -179,3 +179,4 @@ assets/uploads/portfolio/
 !assets/uploads/portfolio/.htaccess
 assets/uploads/services/*
 !assets/uploads/services/.htaccess
+assets/uploads/avatars/*
