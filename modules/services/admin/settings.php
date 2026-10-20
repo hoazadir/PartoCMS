@@ -292,7 +292,7 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
                                     <label for="<?= t_esc($inputName) ?>"><?= t_esc($def['label']) ?></label>
                                     <small><?= t_esc($def['help']) ?></small>
                                     <?php if (strpos($inputName, 'location') !== false): ?>
-                                        <?= render_create_page_button() ?>
+                                        <?= render_create_page_button('➕ ایجاد صفحه جدید', '/modules/page_builder/admin/edit.php', false) ?>
                                     <?php endif; ?>
                                     
                                     
