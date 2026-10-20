@@ -1,0 +1,36 @@
+{
+    "name": "صفحه‌ساز",
+    "slug": "page_builder",
+    "version": "1.0.0",
+    "description": "ماژول ایجاد صفحات سفارشی با چیدمان دلخواه (Drag & Drop) و ویجت‌های داینامیک.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "page_builder.view",
+        "page_builder.create",
+        "page_builder.edit",
+        "page_builder.delete"
+    ],
+    "menu": {
+        "title": "صفحه‌ساز",
+        "icon": "🧩",
+        "url": "/modules/page_builder/admin/index.php",
+        "order": 65,
+        "parent": "content"
+    },
+    "database": {
+        "tables": [
+            "custom_pages"
+        ]
+    },
+    "settings": {
+        "enabled": true
+    },
+    "icon": "🧩",
+    "menu_group": "content"
+}

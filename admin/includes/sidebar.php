@@ -669,24 +669,7 @@ $baseSite  = SITE_URL;
         <small><?= htmlspecialchars($siteName) ?></small>
     </div>
 
-    <!-- Quick Action: Create Page -->
-    <div class="px-3 mt-3 mb-3">
-        <?= render_create_page_button('➕ ایجاد صفحه جدید', '/admin/editor.php', false) ?>
-    </div>
-    <style>
-        .px-3.mt-3.mb-3 a {
-            display: flex !important;
-            justify-content: center;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 10px !important;
-            font-size: 14px !important;
-            transition: background 0.3s;
-        }
-        .px-3.mt-3.mb-3 a:hover {
-            background: #5b21b6 !important;
-        }
-    </style>
+    
 
 
     <!-- User Info -->
@@ -925,6 +908,7 @@ $baseSite  = SITE_URL;
                 <span class="item-icon">✏️</span>
                 <span><?= __t('menu_editor', [], 'طراح قالب') ?></span>
             </a>
+            
             <?php endif; ?>
         </div>
     </div>
