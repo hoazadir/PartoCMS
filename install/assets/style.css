@@ -1,0 +1,121 @@
+/* PartoCMS Smart Installer - Clean White Theme */
+body {
+    background: #f4f6f9;
+    min-height: 100vh;
+    font-family: Tahoma, 'Vazirmatn', sans-serif;
+    padding: 30px 15px;
+    margin: 0;
+    color: #334155;
+}
+.installer-container {
+    max-width: 850px;
+    margin: 0 auto;
+}
+.installer-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+.installer-header {
+    background: #1e293b;
+    color: #fff;
+    padding: 25px 30px;
+    text-align: center;
+}
+.installer-header h1 { margin: 0 0 8px; font-size: 24px; font-weight: bold; }
+.installer-header p { margin: 0; opacity: 0.8; font-size: 13px; }
+
+/* Stepper (Horizontal) */
+.progress-steps {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px 30px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    gap: 10px;
+    overflow-x: auto;
+}
+.step-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    opacity: 0.6;
+}
+.step-wrapper.active, .step-wrapper.done { opacity: 1; }
+.step-indicator {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 6px;
+    z-index: 2;
+}
+.step-indicator.active { background: #3b82f6; box-shadow: 0 0 0 4px rgba(59,130,246,0.2); }
+.step-indicator.done { background: #10b981; }
+.step-label { font-size: 11px; color: #64748b; font-weight: 600; white-space: nowrap; }
+.step-wrapper.active .step-label { color: #3b82f6; }
+
+.installer-body { padding: 30px; }
+
+/* Forms */
+.form-control, .form-select {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    background: #fff;
+}
+.form-control:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59,130,246,0.1); }
+
+/* Buttons */
+.action-buttons {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+.btn-primary-custom {
+    background: #3b82f6;
+    border: none;
+    padding: 12px 28px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+    color: #fff !important;
+    text-decoration: none !important;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.btn-primary-custom:hover { background: #2563eb; }
+.btn-secondary-custom {
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none !important;
+    font-weight: bold;
+    font-size: 14px;
+    color: #475569 !important;
+    cursor: pointer;
+}
+.btn-secondary-custom:hover { background: #e2e8f0; }
+
+/* Alerts & Tables */
+.alert-success-custom { background: #ecfdf5; border: 1px solid #10b981; color: #065f46; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.alert-danger-custom { background: #fef2f2; border: 1px solid #ef4444; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+.check-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.check-table th, .check-table td { padding: 10px 15px; border-bottom: 1px solid #e2e8f0; text-align: right; font-size: 13px; }
+.check-table th { background: #f8fafc; font-weight: bold; color: #475569; }
+.status-icon { font-size: 16px; }
