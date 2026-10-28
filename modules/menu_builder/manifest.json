@@ -1,0 +1,16 @@
+{
+    "name": "منوساز حرفه‌ای",
+    "slug": "menu_builder",
+    "version": "2.0.0",
+    "description": "منوساز Drag & Drop با پشتیبانی از مگا منو، ایموجی و ساختار درختی",
+    "author": "PartoCMS",
+    "requires": { "php": ">=8.1" },
+    "permissions": ["menu_builder.view"],
+    "menu": {
+        "title": "منوساز",
+        "icon": "🎨",
+        "url": "/modules/menu_builder/admin/index.php",
+        "order": 60,
+        "parent": "content"
+    }
+}

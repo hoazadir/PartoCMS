@@ -883,6 +883,7 @@ $baseSite  = SITE_URL;
                 <span class="item-icon">🔗</span>
                 <span><?= __t('menu_menus', [], 'منوساز') ?></span>
             </a>
+            <a href="/modules/menu_builder/admin/index.php" class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'menu_builder') !== false ? 'active' : '' ?>">🎨 منوساز حرفه‌ای</a>
             <?php endif; ?>
         </div>
     </div>
