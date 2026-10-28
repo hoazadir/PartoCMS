@@ -87,6 +87,14 @@ class MenuManager {
                     return SITE_URL . '/post.php?id=' . (int) $item['target_id'];
                 }
                 return '#';
+            case 'custom_page':
+                if ($item['target_id']) {
+                    $stmt = $this->pdo->prepare("SELECT slug FROM custom_pages WHERE id = ?");
+                    $stmt->execute([(int) $item['target_id']]);
+                    $slug = $stmt->fetchColumn();
+                    return $slug ? SITE_URL . '/page.php?slug=' . $slug : '#';
+                }
+                return '#';
             case 'category':
                 if ($item['target_id']) {
                     $stmt = $this->pdo->prepare("SELECT slug FROM categories WHERE id = ?");

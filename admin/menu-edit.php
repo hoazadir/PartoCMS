@@ -2,204 +2,62 @@
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/auth_check.php';
 
-// چک لاگین
-if (!isLoggedIn()) {
-    header('Location: login.php');
-    exit;
-}
-
-$perm = getPermissions();
-$perm->require('content.view');
+if (!isLoggedIn()) { header('Location: login.php'); exit; }
 
 $pdo = getDB();
-$mm = getMenuManager();
-$siteName = getSetting('site_name', 'وب‌سایت من');
 $id = (int) ($_GET['id'] ?? 0);
-$success = '';
-$error = '';
 
-if (!$id) {
-    header('Location: menus.php');
+if (!$id) { header('Location: menus.php'); exit; }
+
+// ذخیره تنظیمات کلی
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'update_menu') {
+    $name = trim($_POST['name']);
+    $location = $_POST['location'] ?? 'header';
+    $isActive = isset($_POST['is_active']) ? 1 : 0;
+    $stmt = $pdo->prepare("UPDATE menus SET name=?, location=?, is_active=? WHERE id=?");
+    $stmt->execute([$name, $location, $isActive, $id]);
+    header('Location: menu-edit.php?id=' . $id . '&msg=saved');
     exit;
 }
 
-// دریافت منو
-$stmt = $pdo->prepare("SELECT * FROM menus WHERE id = ?");
-$stmt->execute([$id]);
-$menu = $stmt->fetch();
-if (!$menu) {
-    header('Location: menus.php');
-    exit;
-}
+$menu = $pdo->query("SELECT * FROM menus WHERE id = $id")->fetch();
+if (!$menu) { header('Location: menus.php'); exit; }
 
-// ذخیره تنظیمات منو
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
-    if ($_POST['action'] === 'update_menu') {
-        $name = trim($_POST['name']);
-        $location = $_POST['location'] ?? 'header';
-        $description = trim($_POST['description'] ?? '');
-        $isActive = isset($_POST['is_active']) ? 1 : 0;
+$siteName = getSetting('site_name', 'وب‌سایت من');
 
-        $stmt = $pdo->prepare("UPDATE menus SET name=?, location=?, description=?, is_active=? WHERE id=?");
-        $stmt->execute([$name, $location, $description, $isActive, $id]);
-        header('Location: menu-edit.php?id=' . $id . '&msg=saved');
-        exit;
-    }
+// داده‌های مورد نیاز برای Modal
+$pages = $pdo->query("SELECT id, title FROM content_items WHERE status='published' AND type_id IN (SELECT id FROM content_types WHERE slug='page') ORDER BY title LIMIT 100")->fetchAll();
+$posts = $pdo->query("SELECT id, title FROM content_items WHERE status='published' AND type_id IN (SELECT id FROM content_types WHERE slug='post') ORDER BY created_at DESC LIMIT 50")->fetchAll();
+$customPages = $pdo->query("SELECT id, title FROM custom_pages ORDER BY title ASC")->fetchAll();
 
-    if ($_POST['action'] === 'add_item') {
-        $title = trim($_POST['item_title'] ?? '');
-        $type = $_POST['item_type'] ?? 'custom';
-        $url = trim($_POST['item_url'] ?? '#');
-        $targetId = !empty($_POST['target_id']) ? (int) $_POST['target_id'] : null;
-        $icon = trim($_POST['item_icon'] ?? '');
-        $targetBlank = isset($_POST['target_blank']) ? 1 : 0;
-        $parentId = !empty($_POST['parent_id']) ? (int) $_POST['parent_id'] : null;
-
-        if ($title) {
-            // حداکثر sort_order
-            $maxOrder = $pdo->prepare("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM menu_items WHERE menu_id = ?");
-            $maxOrder->execute([$id]);
-            $nextOrder = $maxOrder->fetchColumn();
-
-            $stmt = $pdo->prepare("
-                INSERT INTO menu_items (menu_id, parent_id, title, url, type, target_id, icon, target_blank, sort_order, is_active)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
-            ");
-            $stmt->execute([$id, $parentId, $title, $url, $type, $targetId, $icon, $targetBlank, $nextOrder]);
-            header('Location: menu-edit.php?id=' . $id . '&msg=added');
-            exit;
-        }
-    }
-
-    if ($_POST['action'] === 'update_order') {
-        $tree = json_decode($_POST['tree'] ?? '[]', true);
-        if (is_array($tree)) {
-            $order = 1;
-            $mm->updateOrder($tree, $id, null, $order);
-        }
-        echo json_encode(['success' => true]);
-        exit;
-    }
-}
-
-// حذف آیتم
-if (isset($_GET['delete_item']) && is_numeric($_GET['delete_item'])) {
-    // حذف فرزندان هم به‌خاطر foreign key CASCADE انجام می‌شه
-    $pdo->prepare("DELETE FROM menu_items WHERE id = ? AND menu_id = ?")->execute([$_GET['delete_item'], $id]);
-    header('Location: menu-edit.php?id=' . $id . '&msg=item_deleted');
-    exit;
-}
-
-// تغییر وضعیت آیتم
-if (isset($_GET['toggle_item']) && is_numeric($_GET['toggle_item'])) {
-    $pdo->prepare("UPDATE menu_items SET is_active = NOT is_active WHERE id = ? AND menu_id = ?")->execute([$_GET['toggle_item'], $id]);
-    header('Location: menu-edit.php?id=' . $id . '&msg=toggled');
-    exit;
-}
-
-if (isset($_GET['msg'])) {
-    $msgs = ['saved' => 'منو ذخیره شد', 'added' => 'آیتم اضافه شد', 'item_deleted' => 'آیتم حذف شد', 'toggled' => 'وضعیت تغییر کرد'];
-    $success = $msgs[$_GET['msg']] ?? '';
-}
-
-// آیتم‌های تخت
-$items = $mm->getItemsFlat($id);
-
-// ساخت درخت
-$tree = [];
-$itemsById = [];
-foreach ($items as $i) {
-    $itemsById[$i['id']] = $i;
-    $itemsById[$i['id']]['children'] = [];
-}
-foreach ($items as $i) {
-    if ($i['parent_id'] && isset($itemsById[$i['parent_id']])) {
-        $itemsById[$i['parent_id']]['children'][] = &$itemsById[$i['id']];
-    } else {
-        $tree[] = &$itemsById[$i['id']];
-    }
-}
-
-// داده‌های کمکی برای انتخاب هدف
-$pages = $pdo->query("SELECT id, title FROM content_items WHERE status='published' AND type_id IN (SELECT id FROM content_types WHERE slug IN ('page','post')) ORDER BY title LIMIT 100")->fetchAll();
-$categories = $pdo->query("SELECT id, name FROM categories WHERE is_active = 1 ORDER BY name")->fetchAll();
-
-// تابع بازگشتی رندر آیتم‌ها
-function renderItemTree($items, $level = 0) {
-    foreach ($items as $item) {
-        $padding = $level * 25;
-        $hasChildren = !empty($item['children']);
-        ?>
-        <div class="menu-item" data-id="<?= $item['id'] ?>" style="padding-right: <?= $padding ?>px;">
-            <div class="item-inner">
-                <span class="drag-handle" title="جابجایی">⋮⋮</span>
-                <span class="item-icon"><?= htmlspecialchars($item['icon'] ?: '📄') ?></span>
-                <span class="item-title">
-                    <?= htmlspecialchars($item['title']) ?>
-                    <?php if ($item['type'] !== 'custom'): ?>
-                        <span class="item-type"><?= $item['type'] ?></span>
-                    <?php endif; ?>
-                    <?php if (!$item['is_active']): ?>
-                        <span class="badge bg-secondary" style="font-size:9px;">غیرفعال</span>
-                    <?php endif; ?>
-                </span>
-                <span class="item-url" title="<?= htmlspecialchars($item['url']) ?>"><?= htmlspecialchars(mb_substr($item['url'], 0, 35)) ?></span>
-                <div class="item-actions">
-                    <button type="button" class="btn btn-xs btn-outline-primary" onclick="editItem(<?= htmlspecialchars(json_encode($item)) ?>)">✏️</button>
-                    <a href="?id=<?= $item['menu_id'] ?>&toggle_item=<?= $item['id'] ?>" class="btn btn-xs btn-outline-warning"><?= $item['is_active'] ? '👁' : '🚫' ?></a>
-                    <a href="?id=<?= $item['menu_id'] ?>&delete_item=<?= $item['id'] ?>" class="btn btn-xs btn-outline-danger" onclick="return confirm('حذف این آیتم<?= $hasChildren ? ' و همه زیرآیتم‌هایش' : '' ?>؟')">🗑</a>
-                </div>
-            </div>
-            <?php if ($hasChildren): ?>
-                <div class="children">
-                    <?php renderItemTree($item['children'], $level + 1); ?>
-                </div>
-            <?php endif; ?>
-        </div>
-        <?php
-    }
-}
+$systemModules = [
+    ['title' => 'فروشگاه', 'url' => '/modules/shop/index.php'],
+    ['title' => 'خدمات', 'url' => '/modules/services/index.php'],
+    ['title' => 'نمونه‌کارها', 'url' => '/modules/portfolio/index.php'],
+    ['title' => 'تیم ما', 'url' => '/modules/team/index.php'],
+    ['title' => 'تماس با ما', 'url' => '/form.php?slug=contact'],
+];
 ?>
 <!DOCTYPE html>
 <html <?= __html_attrs() ?>>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ویرایش منو: <?= htmlspecialchars($menu['name']) ?> | <?= htmlspecialchars($siteName) ?></title>
+    <title>ویرایش منو: <?= htmlspecialchars($menu['name']) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap<?= (function_exists('getI18n') && getI18n() && getI18n()->isRtl()) ? '.rtl' : '' ?>.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <!-- jsTree CSS -->
+    <link rel="stylesheet" href="/libs/jstree/themes/default/style.min.css" />
+    
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; margin: 0; }
         .main { margin-right: 260px; padding: 25px; }
-        .top-bar { background: #fff; padding: 15px 25px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-        .card { border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 10px; margin-bottom: 20px; }
-        .card-header { background: #fff; border-bottom: 1px solid #eee; border-radius: 10px 10px 0 0 !important; padding: 15px 20px; font-weight: bold; }
-
-        /* Menu Builder */
-        .menu-builder { background: #f8f9fa; border-radius: 8px; padding: 15px; min-height: 200px; }
-        .menu-item { margin-bottom: 8px; }
-        .menu-item .item-inner {
-            background: #fff; border: 2px solid #e0e0e0; border-radius: 8px;
-            padding: 10px 15px; display: flex; align-items: center; gap: 12px;
-            transition: all 0.2s; cursor: move;
-        }
-        .menu-item .item-inner:hover { border-color: #3498db; box-shadow: 0 2px 8px rgba(52,152,219,0.15); }
-        .menu-item.dragging .item-inner { opacity: 0.5; }
-        .drag-handle { color: #95a5a6; font-size: 16px; cursor: grab; user-select: none; }
-        .item-icon { font-size: 18px; }
-        .item-title { font-weight: bold; color: #2c3e50; font-size: 14px; flex: 1; }
-        .item-type { display: inline-block; background: #e7f1ff; color: #2980b9; padding: 1px 6px; border-radius: 8px; font-size: 10px; margin-right: 5px; }
-        .item-url { font-family: monospace; font-size: 11px; color: #95a5a6; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .item-actions { display: flex; gap: 3px; }
-        .btn-xs { padding: 3px 7px; font-size: 12px; border-radius: 4px; }
-        .children { margin-top: 5px; margin-right: 25px; border-right: 2px dashed #bdc3c7; padding-right: 5px; }
-        .empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; }
-        .empty-state i { font-size: 50px; display: block; margin-bottom: 15px; }
-
-        @media (max-width: 1100px) {
-            .main { margin-right: 0; padding: 70px 15px 15px; }
-            .item-url { display: none; }
-        }
+        .card { border: none; box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-radius: 12px; margin-bottom: 20px; }
+        
+        /* تنظیمات ظاهر jsTree */
+        .jstree-default .jstree-anchor { font-size: 14px; line-height: 30px; height: 30px; }
+        .jstree-default .jstree-icon:empty { width: 24px; height: 24px; }
     </style>
 </head>
 <body>
@@ -207,52 +65,32 @@ function renderItemTree($items, $level = 0) {
 <?php require_once __DIR__ . '/includes/sidebar.php'; ?>
 
 <div class="main">
-    <div class="top-bar">
-        <div>
-            <h4 style="margin:0;">✏️ ویرایش منو: <?= htmlspecialchars($menu['name']) ?></h4>
-            <small class="text-muted"><code><?= htmlspecialchars($menu['slug']) ?></code></small>
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;">
-            <button type="button" class="btn btn-success btn-sm" onclick="saveOrder()">
-                <i class="bi bi-save"></i> ذخیره ترتیب
-            </button>
-            <a href="menus.php" class="btn btn-outline-secondary btn-sm">
-                <i class="bi bi-arrow-right"></i> بازگشت
-            </a>
+    <div class="card">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
+            <h5 class="mb-0 fw-bold">✏️ ویرایش منو: <?= htmlspecialchars($menu['name']) ?></h5>
+            <div>
+                <button class="btn btn-primary" onclick="openAddModal()">➕ افزودن آیتم جدید</button>
+                <a href="menus.php" class="btn btn-outline-secondary">بازگشت</a>
+            </div>
         </div>
     </div>
 
-    <?php if ($success): ?><div class="alert alert-success">✅ <?= htmlspecialchars($success) ?></div><?php endif; ?>
-
     <div class="row">
-        <!-- ستون اصلی: آیتم‌های منو -->
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header d-flex justify-content-between">
-                    <span>🎯 آیتم‌های منو (<?= count($items) ?>)</span>
-                    <small class="text-muted">با کشیدن، جابجا کنید</small>
+                <div class="card-header bg-white fw-bold d-flex justify-content-between">
+                    <span>🧱 ساختار منو</span>
+                    <small class="text-muted">برای جابجایی، آیتم‌ها را بکشید (Drag & Drop)</small>
                 </div>
                 <div class="card-body">
-                    <div class="menu-builder" id="menuBuilder">
-                        <?php if (empty($tree)): ?>
-                            <div class="empty-state">
-                                <i class="bi bi-inbox"></i>
-                                <h5>هنوز آیتمی اضافه نشده</h5>
-                                <p>از فرم کنار برای افزودن آیتم استفاده کنید</p>
-                            </div>
-                        <?php else: ?>
-                            <?php renderItemTree($tree); ?>
-                        <?php endif; ?>
-                    </div>
+                    <!-- کانتینر jsTree -->
+                    <div id="jstree"></div>
                 </div>
             </div>
         </div>
-
-        <!-- ستون کنار: تنظیمات و افزودن -->
         <div class="col-md-4">
-            <!-- تنظیمات منو -->
             <div class="card">
-                <div class="card-header">⚙️ تنظیمات منو</div>
+                <div class="card-header bg-white fw-bold">⚙️ تنظیمات منو</div>
                 <div class="card-body">
                     <form method="post">
                         <input type="hidden" name="action" value="update_menu">
@@ -261,222 +99,217 @@ function renderItemTree($items, $level = 0) {
                             <input type="text" name="name" class="form-control" value="<?= htmlspecialchars($menu['name']) ?>" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">مکان نمایش</label>
+                            <label class="form-label">محل نمایش</label>
                             <select name="location" class="form-select">
-                                <option value="header" <?= $menu['location'] === 'header' ? 'selected' : '' ?>>🔝 هدر</option>
-                                <option value="footer" <?= $menu['location'] === 'footer' ? 'selected' : '' ?>>🔻 فوتر</option>
-                                <option value="sidebar" <?= $menu['location'] === 'sidebar' ? 'selected' : '' ?>>📑 سایدبار</option>
-                                <option value="mobile" <?= $menu['location'] === 'mobile' ? 'selected' : '' ?>>📱 موبایل</option>
+                                <option value="header" <?= $menu['location'] === 'header' ? 'selected' : '' ?>>هدر</option>
+                                <option value="footer" <?= $menu['location'] === 'footer' ? 'selected' : '' ?>>فوتر</option>
                             </select>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">توضیحات</label>
-                            <input type="text" name="description" class="form-control" value="<?= htmlspecialchars($menu['description'] ?? '') ?>">
-                        </div>
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" name="is_active" id="menuActive" <?= $menu['is_active'] ? 'checked' : '' ?>>
-                            <label class="form-check-label" for="menuActive">منو فعال باشد</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-save"></i> ذخیره</button>
+                        <button type="submit" class="btn btn-primary w-100">ذخیره تنظیمات</button>
                     </form>
                 </div>
             </div>
-
-            <!-- افزودن آیتم -->
-            <div class="card">
-                <div class="card-header">➕ افزودن آیتم جدید</div>
-                <div class="card-body">
-                    <form method="post">
-                        <input type="hidden" name="action" value="add_item">
-
-                        <div class="mb-3">
-                            <label class="form-label">عنوان <span class="text-danger">*</span></label>
-                            <input type="text" name="item_title" class="form-control" required>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">آیکون (ایموجی)</label>
-                            <input type="text" name="item_icon" class="form-control" placeholder="🏠" maxlength="4">
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">نوع</label>
-                            <select name="item_type" class="form-select" id="itemType" onchange="toggleTargetField()">
-                                <option value="custom">🔗 لینک دلخواه</option>
-                                <option value="home">🏠 صفحه اصلی</option>
-                                <option value="page">📄 صفحه</option>
-                                <option value="post">📝 مقاله</option>
-                                <option value="category">🏷 دسته</option>
-                            </select>
-                        </div>
-
-                        <div class="mb-3" id="urlField">
-                            <label class="form-label">آدرس</label>
-                            <input type="text" name="item_url" class="form-control" value="#" placeholder="about.php یا https://...">
-                        </div>
-
-                        <div class="mb-3" id="pageField" style="display:none;">
-                            <label class="form-label">صفحه/مقاله</label>
-                            <select name="target_id" class="form-select">
-                                <option value="">— انتخاب کنید —</option>
-                                <?php foreach ($pages as $p): ?>
-                                    <option value="<?= $p['id'] ?>"><?= htmlspecialchars($p['title']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3" id="categoryField" style="display:none;">
-                            <label class="form-label">دسته</label>
-                            <select name="target_id" class="form-select">
-                                <option value="">— انتخاب کنید —</option>
-                                <?php foreach ($categories as $c): ?>
-                                    <option value="<?= $c['id'] ?>"><?= htmlspecialchars($c['name']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">والد (زیرمنو)</label>
-                            <select name="parent_id" class="form-select">
-                                <option value="">— بدون والد (آیتم اصلی) —</option>
-                                <?php foreach ($items as $it): ?>
-                                    <option value="<?= $it['id'] ?>"><?= htmlspecialchars($it['title']) ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" name="target_blank" id="targetBlank">
-                            <label class="form-check-label" for="targetBlank">در تب جدید باز شود</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-success w-100"><i class="bi bi-plus-lg"></i> افزودن</button>
-                    </form>
-                </div>
+            <div class="alert alert-info mt-3">
+                <strong>راهنما:</strong><br>
+                * برای ساخت زیرمنو، آیتم را روی آیتم دیگر بکشید.<br>
+                * برای ویرایش، روی آیتم <strong>دابل کلیک</strong> کنید.
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal برای ویرایش/افزودن آیتم -->
+<div class="modal fade" id="itemModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">ویرایش/افزودن آیتم</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="itemForm">
+                    <input type="hidden" name="id" id="itemId" value="0">
+                    <input type="hidden" name="menu_id" value="<?= $id ?>">
+                    <input type="hidden" name="parent_id" id="itemParentId" value="">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">عنوان</label>
+                        <input type="text" name="title" id="itemTitle" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">نوع آیتم</label>
+                        <select name="type" id="itemType" class="form-select" onchange="changeType(this.value)">
+                            <option value="custom">🔗 لینک دلخواه</option>
+                            <option value="page">📄 صفحه</option>
+                            <option value="post">📝 مقاله</option>
+                            <option value="custom_page">🧩 صفحه‌ساز</option>
+                            <option value="module">🧱 ماژول سیستم</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3" id="targetSelector" style="display:none;">
+                        <label class="form-label">انتخاب مورد</label>
+                        <select id="itemTargetId" class="form-select" onchange="updateUrlFromSelector(this)"></select>
+                    </div>
+
+                    <div class="mb-3" id="urlField">
+                        <label class="form-label">آدرس (URL)</label>
+                        <input type="text" name="url" id="itemUrl" class="form-control" placeholder="/modules/shop/index.php">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">آیکون (ایموجی)</label>
+                        <input type="text" name="icon" id="itemIcon" class="form-control" placeholder="🏠">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="saveItem()">ذخیره</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- اسکریپت‌ها -->
+<script src="/libs/jstree/jquery.min.js"></script>
+<script src="/libs/jstree/jstree.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 <script>
-// تغییر فیلدها بر اساس نوع
-function toggleTargetField() {
-    const type = document.getElementById('itemType').value;
-    document.getElementById('urlField').style.display = (type === 'custom') ? 'block' : 'none';
-    document.getElementById('pageField').style.display = (type === 'page' || type === 'post') ? 'block' : 'none';
-    document.getElementById('categoryField').style.display = (type === 'category') ? 'block' : 'none';
-}
+    const menuId = <?= $id ?>;
+    const pages = <?= json_encode($pages) ?>;
+    const posts = <?= json_encode($posts) ?>;
+    const customPages = <?= json_encode($customPages) ?>;
+    const systemModules = <?= json_encode($systemModules) ?>;
 
-// Drag & Drop
-let dragEl = null;
-
-document.addEventListener('DOMContentLoaded', () => {
-    const builder = document.getElementById('menuBuilder');
-    if (!builder) return;
-
-    builder.querySelectorAll('.menu-item').forEach(item => {
-        const inner = item.querySelector('.item-inner');
-        if (!inner) return;
-        inner.setAttribute('draggable', 'true');
-
-        inner.addEventListener('dragstart', e => {
-            dragEl = item;
-            item.classList.add('dragging');
-            e.stopPropagation();
+    $(function() {
+        // راه‌اندازی jsTree
+        $('#jstree').jstree({
+            'core': {
+                'data': {
+                    'url': 'ajax/get-menu-tree.php?menu_id=' + menuId,
+                    'dataType': 'json'
+                },
+                'check_callback': true,
+                'themes': { 'stripes': true, 'dots': false }
+            },
+            'plugins': ['dnd', 'types', 'state']
         });
 
-        inner.addEventListener('dragend', e => {
-            item.classList.remove('dragging');
-            dragEl = null;
+        // ذخیره ترتیب پس از هر جابجایی (Drag & Drop)
+        $('#jstree').on('move_node.jstree', function(e, data) {
+            const treeData = $('#jstree').jstree(true).get_json('#', { flat: true });
+            
+            fetch('ajax/menu-save-order.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ menu_id: menuId, items: treeData })
+            }).then(r => r.json()).then(res => {
+                if(!res.success) console.error('خطا در ذخیره ترتیب:', res.message);
+            });
         });
 
-        item.addEventListener('dragover', e => {
-            e.preventDefault();
-            if (!dragEl || dragEl === item) return;
-
-            const rect = item.getBoundingClientRect();
-            const offset = e.clientY - rect.top;
-            const isAfter = offset > rect.height / 2;
-
-            if (isAfter) {
-                item.parentNode.insertBefore(dragEl, item.nextSibling);
-            } else {
-                item.parentNode.insertBefore(dragEl, item);
-            }
+        // باز کردن Modal با دابل کلیک
+        $('#jstree').on('dblclick.jstree', function (e) {
+            const instance = $.jstree.reference(this);
+            const node = instance.get_node(e.target.id);
+            openEditModal(node.id, node.text.replace(/[^\w\s\u0600-\u06FF]/g, '').trim(), node.data);
         });
     });
-});
 
-// استخراج ساختار درختی از DOM
-function buildTreeFromDOM(parentEl) {
-    const tree = [];
-    parentEl.childNodes.forEach(node => {
-        if (node.nodeType !== 1) return;
-        if (!node.classList.contains('menu-item')) return;
+    function openAddModal() {
+        document.getElementById('modalTitle').innerText = 'افزودن آیتم جدید';
+        document.getElementById('itemId').value = '0';
+        document.getElementById('itemTitle').value = '';
+        document.getElementById('itemUrl').value = '';
+        document.getElementById('itemIcon').value = '';
+        document.getElementById('itemType').value = 'custom';
+        document.getElementById('itemParentId').value = ''; // به صورت پیش‌فرض بدون والد
+        changeType('custom');
+        
+        new bootstrap.Modal(document.getElementById('itemModal')).show();
+    }
 
-        const id = parseInt(node.dataset.id);
-        const item = { id: id };
+    function openEditModal(id, title, data) {
+        document.getElementById('modalTitle').innerText = 'ویرایش آیتم';
+        document.getElementById('itemId').value = id;
+        document.getElementById('itemTitle').value = title;
+        document.getElementById('itemUrl').value = data.url || '';
+        document.getElementById('itemIcon').value = data.icon || '';
+        document.getElementById('itemType').value = data.type || 'custom';
+        
+        changeType(data.type || 'custom');
+        
+        // انتخاب مقدار در سلکتور
+        setTimeout(() => {
+            if (data.type === 'page') document.getElementById('itemTargetId').value = data.target_id;
+            if (data.type === 'post') document.getElementById('itemTargetId').value = data.target_id;
+            if (data.type === 'custom_page') document.getElementById('itemTargetId').value = data.target_id;
+            if (data.type === 'module') document.getElementById('itemTargetId').value = data.url;
+        }, 100);
 
-        const childrenContainer = node.querySelector(':scope > .children');
-        if (childrenContainer) {
-            const kids = buildTreeFromDOM(childrenContainer);
-            if (kids.length > 0) {
-                item.children = kids;
-            }
+        // آیتم والد (از ساختار jsTree خوانده می‌شود، برای سادگی فعلا از آن صرف‌نظر می‌کنیم چون jsTree خودش مدیریت می‌کند)
+        document.getElementById('itemParentId').value = '';
+
+        new bootstrap.Modal(document.getElementById('itemModal')).show();
+    }
+
+    function changeType(type) {
+        const targetSelector = document.getElementById('targetSelector');
+        const urlField = document.getElementById('urlField');
+        const select = document.getElementById('itemTargetId');
+        
+        select.innerHTML = '<option value="">— انتخاب کنید —</option>';
+        
+        if (type === 'custom') {
+            targetSelector.style.display = 'none';
+            urlField.style.display = 'block';
+        } 
+        else if (type === 'module') {
+            targetSelector.style.display = 'block';
+            urlField.style.display = 'none';
+            systemModules.forEach(m => select.innerHTML += `<option value="${m.url}">${m.title}</option>`);
         }
+        else {
+            targetSelector.style.display = 'block';
+            urlField.style.display = 'none';
+            let list = type === 'page' ? pages : (type === 'post' ? posts : customPages);
+            list.forEach(p => select.innerHTML += `<option value="${p.id}">${p.title}</option>`);
+        }
+    }
 
-        tree.push(item);
-    });
-    return tree;
-}
+    function updateUrlFromSelector(select) {
+        // این تابع صرفاً برای آپدیت فیلد url در پس‌زمینه است
+    }
 
-// ذخیره ترتیب
-function saveOrder() {
-    const builder = document.getElementById('menuBuilder');
-    if (!builder) return;
-
-    const tree = buildTreeFromDOM(builder);
-
-    fetch('', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: 'action=update_order&tree=' + encodeURIComponent(JSON.stringify(tree))
-    })
-    .then(r => r.json())
-    .then(data => {
-        if (data.success) {
-            alert('✅ ترتیب ذخیره شد');
+    function saveItem() {
+        const formData = new FormData(document.getElementById('itemForm'));
+        formData.append('action', 'save');
+        
+        const type = formData.get('type');
+        const targetVal = document.getElementById('itemTargetId').value;
+        
+        if (type === 'module') {
+            formData.set('url', targetVal);
+            formData.set('target_id', '');
+        } else if (type !== 'custom') {
+            formData.set('target_id', targetVal);
+            formData.set('url', '#');
         } else {
-            alert('❌ خطا در ذخیره');
+            formData.set('target_id', '');
         }
-    })
-    .catch(() => alert('❌ خطا در ارتباط'));
-}
 
-// ویرایش سریع آیتم
-function editItem(item) {
-    const newTitle = prompt('عنوان جدید:', item.title);
-    if (newTitle === null) return;
-
-    const newIcon = prompt('آیکون (ایموجی):', item.icon || '');
-    if (newIcon === null) return;
-
-    const newUrl = prompt('آدرس:', item.url);
-    if (newUrl === null) return;
-
-    // ذخیره از طریق fetch
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.innerHTML = `
-        <input name="action" value="edit_item">
-        <input name="item_id" value="${item.id}">
-        <input name="item_title" value="${newTitle.replace(/"/g, '&quot;')}">
-        <input name="item_icon" value="${newIcon.replace(/"/g, '&quot;')}">
-        <input name="item_url" value="${newUrl.replace(/"/g, '&quot;')}">
-    `;
-    document.body.appendChild(form);
-    form.submit();
-}
+        fetch('ajax/menu-save-item.php', { method: 'POST', body: formData })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // برای سادگی و اطمینان از رفرش شدن jsTree
+                } else {
+                    alert(data.message);
+                }
+            });
+    }
 </script>
 </body>
 </html>
