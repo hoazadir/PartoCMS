@@ -1,0 +1,35 @@
+{
+    "name": "مشاور املاک",
+    "slug": "real_estate",
+    "version": "1.0.0",
+    "description": "ماژول مدیریت املاک با جستجوی پیشرفته، نقشه و گالری تصاویر.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "real_estate.view",
+        "real_estate.create",
+        "real_estate.edit",
+        "real_estate.delete"
+    ],
+    "menu": {
+        "title": "املاک",
+        "icon": "🏠",
+        "url": "/modules/real_estate/admin/index.php",
+        "order": 80,
+        "parent": "marketing"
+    },
+    "database": {
+        "tables": ["real_estate_properties"]
+    },
+    "settings": {
+        "enabled": true,
+        "items_per_page": 12
+    },
+    "icon": "🏠",
+    "menu_group": "marketing"
+}
