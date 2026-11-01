@@ -24,6 +24,7 @@ class Property
     private ?float $latitude = null;
     private ?float $longitude = null;
     private ?string $featuredImage = null;
+    private ?string $videoUrl = null;
     private array $gallery = [];
     private array $features = [];
     private ?string $agentName = null;
@@ -94,6 +95,9 @@ class Property
     public function getFeaturedImage(): ?string { return $this->featuredImage; }
     public function setFeaturedImage(?string $img): self { $this->featuredImage = $img; return $this; }
     
+    public function getVideoUrl(): ?string { return $this->videoUrl; }
+    public function setVideoUrl(?string $url): self { $this->videoUrl = $url; return $this; }
+    
     public function getGallery(): array { return $this->gallery; }
     public function setGallery(array $gallery): self { $this->gallery = $gallery; return $this; }
     
@@ -152,6 +156,7 @@ class Property
         $property->setLatitude(isset($data['latitude']) ? (float)$data['latitude'] : null);
         $property->setLongitude(isset($data['longitude']) ? (float)$data['longitude'] : null);
         $property->setFeaturedImage($data['featured_image'] ?? null);
+        $property->setVideoUrl($data['video_url'] ?? null);
         
         if (!empty($data['gallery'])) {
             $property->setGallery(json_decode($data['gallery'], true) ?: []);
@@ -197,6 +202,7 @@ class Property
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
             'featured_image' => $this->featuredImage,
+            'video_url' => $this->videoUrl,
             'gallery' => !empty($this->gallery) ? json_encode($this->gallery, JSON_UNESCAPED_UNICODE) : null,
             'features' => !empty($this->features) ? json_encode($this->features, JSON_UNESCAPED_UNICODE) : null,
             'agent_name' => $this->agentName,

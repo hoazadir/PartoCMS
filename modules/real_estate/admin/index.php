@@ -1,6 +1,7 @@
 <?php
 require_once dirname(__DIR__, 3) . '/config.php';
-require_once dirname(__DIR__, 2) . '/src/Infrastructure/Persistence/PropertyRepository.php';
+require_once dirname(__DIR__, 1) . '/src/Domain/Entity/Property.php';
+require_once dirname(__DIR__, 1) . '/src/Infrastructure/Persistence/PropertyRepository.php';
 
 use PartoCMS\RealEstate\Infrastructure\Persistence\PropertyRepository;
 
@@ -9,7 +10,6 @@ if (!isLoggedIn()) { header('Location: /admin/login.php'); exit; }
 $pdo = getDB();
 $repo = new PropertyRepository($pdo);
 
-// فیلترها
 $filters = [
     'status' => $_GET['status'] ?? '',
     'property_type' => $_GET['property_type'] ?? '',
@@ -17,17 +17,14 @@ $filters = [
     'city' => $_GET['city'] ?? '',
 ];
 
-// صفحه‌بندی
 $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 15;
 $offset = ($page - 1) * $perPage;
 
-// دریافت داده‌ها
 $properties = $repo->findAll($filters, $perPage, $offset);
 $totalCount = $repo->count($filters);
 $totalPages = ceil($totalCount / $perPage);
 
-// آمار
 $stats = [
     'total' => $repo->count(),
     'published' => $repo->count(['status' => 'published']),
@@ -43,9 +40,55 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
 ?>
 
 <div class="main-content">
+    <!-- Header with Help Button -->
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold">🏠 مدیریت املاک</h2>
-        <a href="create.php" class="btn btn-primary px-4">➕ افزودن ملک جدید</a>
+        <div class="d-flex align-items-center gap-3">
+            <h2 class="fw-bold mb-0">🏠 مدیریت املاک</h2>
+            <button class="btn btn-outline-info btn-sm" data-bs-toggle="collapse" data-bs-target="#helpPanel">
+                <i class="bi bi-question-circle"></i> راهنما
+            </button>
+        </div>
+        <a href="edit.php" class="btn btn-primary px-4">
+            <i class="bi bi-plus-circle"></i> افزودن ملک جدید
+        </a>
+    </div>
+
+    <!-- Help Panel (Collapsible) -->
+    <div class="collapse mb-4" id="helpPanel">
+        <div class="card border-0 shadow-sm bg-light">
+            <div class="card-body">
+                <h5 class="fw-bold mb-3">📚 راهنمای مدیریت املاک</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <div class="fs-3">➕</div>
+                            <div>
+                                <strong>افزودن ملک جدید</strong>
+                                <p class="text-muted small mb-0">برای ثبت یک ملک، روی دکمه «افزودن ملک جدید» کلیک کنید و فرم را پر کنید.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <div class="fs-3">🖼️</div>
+                            <div>
+                                <strong>گالری و ویدیو</strong>
+                                <p class="text-muted small mb-0">در صفحه ویرایش، می‌توانید URL تصاویر گالری و لینک ویدیو را وارد کنید.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="d-flex gap-2">
+                            <div class="fs-3">🔍</div>
+                            <div>
+                                <strong>جستجو و فیلتر</strong>
+                                <p class="text-muted small mb-0">از فرم فیلتر برای یافتن سریع املاک بر اساس نوع، شهر یا وضعیت استفاده کنید.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <?php if (isset($_GET['msg']) && $_GET['msg'] === 'deleted'): ?>
@@ -54,15 +97,12 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         <div class="alert alert-success">تغییرات با موفقیت ذخیره شد.</div>
     <?php endif; ?>
 
-    <!-- کارت‌های آماری -->
+    <!-- Stat Cards -->
     <div class="row g-3 mb-4">
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0 fw-bold"><?= number_format($stats['total']) ?></h4>
-                        <small class="text-muted">کل املاک</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold"><?= number_format($stats['total']) ?></h4><small class="text-muted">کل املاک</small></div>
                     <div class="fs-1 text-primary">🏠</div>
                 </div>
             </div>
@@ -70,10 +110,7 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0 fw-bold text-success"><?= number_format($stats['published']) ?></h4>
-                        <small class="text-muted">منتشر شده</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold text-success"><?= number_format($stats['published']) ?></h4><small class="text-muted">منتشر شده</small></div>
                     <div class="fs-1 text-success">✅</div>
                 </div>
             </div>
@@ -81,10 +118,7 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0 fw-bold text-warning"><?= number_format($stats['draft']) ?></h4>
-                        <small class="text-muted">پیش‌نویس</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold text-warning"><?= number_format($stats['draft']) ?></h4><small class="text-muted">پیش‌نویس</small></div>
                     <div class="fs-1 text-warning">📝</div>
                 </div>
             </div>
@@ -92,17 +126,14 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         <div class="col-md-3 col-6">
             <div class="card border-0 shadow-sm p-3">
                 <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h4 class="mb-0 fw-bold text-danger"><?= number_format($stats['featured']) ?></h4>
-                        <small class="text-muted">ویژه</small>
-                    </div>
+                    <div><h4 class="mb-0 fw-bold text-danger"><?= number_format($stats['featured']) ?></h4><small class="text-muted">ویژه</small></div>
                     <div class="fs-1 text-danger">⭐</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- فیلترها -->
+    <!-- Filters -->
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body">
             <form method="get" class="row g-2 align-items-end">
@@ -148,7 +179,7 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         </div>
     </div>
 
-    <!-- لیست املاک -->
+    <!-- List -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">
@@ -166,7 +197,11 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                     </thead>
                     <tbody>
                         <?php if (empty($properties)): ?>
-                            <tr><td colspan="7" class="text-center py-5 text-muted">هیچ ملکی یافت نشد.</td></tr>
+                            <tr><td colspan="7" class="text-center py-5 text-muted">
+                                <div class="fs-1 mb-3">🏠</div>
+                                <p>هنوز هیچ ملکی ثبت نشده است.</p>
+                                <a href="edit.php" class="btn btn-primary btn-sm">➕ افزودن اولین ملک</a>
+                            </td></tr>
                         <?php else: ?>
                             <?php foreach ($properties as $prop): ?>
                                 <tr>
@@ -193,15 +228,15 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <?php 
+                                        <?php
                                             $statusMap = ['published' => 'success', 'draft' => 'warning', 'sold' => 'danger', 'rented' => 'info'];
                                             $color = $statusMap[$prop->getStatus()] ?? 'secondary';
                                         ?>
                                         <span class="badge bg-<?= $color ?>"><?= htmlspecialchars($prop->getStatus()) ?></span>
                                     </td>
                                     <td class="text-end pe-4">
-                                        <a href="edit.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-primary">✏️</a>
-                                        <a href="delete.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('حذف شود؟')">🗑</a>
+                                        <a href="edit.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-primary" title="ویرایش">✏️</a>
+                                        <a href="delete.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('حذف شود؟')" title="حذف">🗑</a>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>

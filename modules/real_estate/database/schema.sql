@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS real_estate_properties (
     latitude DECIMAL(10,7) DEFAULT NULL,
     longitude DECIMAL(10,7) DEFAULT NULL,
     featured_image VARCHAR(500) DEFAULT NULL,
+    video_url VARCHAR(500) DEFAULT NULL,
     gallery LONGTEXT DEFAULT NULL,
     features LONGTEXT DEFAULT NULL,
     agent_name VARCHAR(150) DEFAULT NULL,

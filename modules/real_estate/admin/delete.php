@@ -1,6 +1,6 @@
 <?php
 require_once dirname(__DIR__, 3) . '/config.php';
-require_once dirname(__DIR__, 2) . '/src/Infrastructure/Persistence/PropertyRepository.php';
+require_once dirname(__DIR__, 1) . '/src/Infrastructure/Persistence/PropertyRepository.php';
 
 use PartoCMS\RealEstate\Infrastructure\Persistence\PropertyRepository;
 

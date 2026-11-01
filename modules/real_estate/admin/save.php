@@ -1,7 +1,7 @@
 <?php
 require_once dirname(__DIR__, 3) . '/config.php';
-require_once dirname(__DIR__, 2) . '/src/Domain/Entity/Property.php';
-require_once dirname(__DIR__, 2) . '/src/Infrastructure/Persistence/PropertyRepository.php';
+require_once dirname(__DIR__, 1) . '/src/Domain/Entity/Property.php';
+require_once dirname(__DIR__, 1) . '/src/Infrastructure/Persistence/PropertyRepository.php';
 
 use PartoCMS\RealEstate\Domain\Entity\Property;
 use PartoCMS\RealEstate\Infrastructure\Persistence\PropertyRepository;
@@ -14,13 +14,15 @@ $repo = new PropertyRepository($pdo);
 $id = (int)($_POST['id'] ?? 0);
 $property = $id ? $repo->findById($id) : new Property();
 
-if (!$property) {
-    die('ملک یافت نشد.');
+if (!$property) { die('ملک یافت نشد.'); }
+
+function createSlug(string $title): string {
+    $slug = strtolower(trim(preg_replace('/[^a-z0-9-]+/', '-', str_replace(' ', '-', $title))));
+    return trim($slug, '-') ?: 'property-' . time();
 }
 
-// تنظیم فیلدها
 $property->setTitle(trim($_POST['title'] ?? ''));
-$property->setSlug(trim($_POST['slug'] ?? '') ?: $this->createSlug($_POST['title'] ?? ''));
+$property->setSlug(trim($_POST['slug'] ?? '') ?: createSlug($_POST['title'] ?? ''));
 $property->setDescription($_POST['description'] ?? null);
 $property->setPropertyType($_POST['property_type'] ?? 'apartment');
 $property->setListingType($_POST['listing_type'] ?? 'sale');
@@ -37,6 +39,7 @@ $property->setRegion(trim($_POST['region'] ?? ''));
 $property->setLatitude(!empty($_POST['latitude']) ? (float)$_POST['latitude'] : null);
 $property->setLongitude(!empty($_POST['longitude']) ? (float)$_POST['longitude'] : null);
 $property->setFeaturedImage(trim($_POST['featured_image'] ?? ''));
+$property->setVideoUrl(trim($_POST['video_url'] ?? '') ?: null);
 $property->setAgentName(trim($_POST['agent_name'] ?? ''));
 $property->setAgentPhone(trim($_POST['agent_phone'] ?? ''));
 $property->setAgentEmail(trim($_POST['agent_email'] ?? ''));
@@ -44,11 +47,10 @@ $property->setStatus($_POST['status'] ?? 'published');
 $property->setIsFeatured(isset($_POST['is_featured']));
 $property->setSortOrder((int)($_POST['sort_order'] ?? 0));
 
-// تابع ساخت اسلاگ
-function createSlug(string $title): string {
-    $slug = strtolower(trim(preg_replace('/[^a-z0-9-]+/', '-', str_replace(' ', '-', $title))));
-    return trim($slug, '-') ?: 'property-' . time();
-}
+// پردازش گالری (هر خط یک URL)
+$galleryLines = explode("\n", $_POST['gallery'] ?? '');
+$gallery = array_values(array_filter(array_map('trim', $galleryLines), fn($url) => !empty($url)));
+$property->setGallery($gallery);
 
 if ($repo->save($property)) {
     header('Location: index.php?msg=saved');

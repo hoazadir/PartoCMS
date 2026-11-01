@@ -171,7 +171,28 @@ $roleLabels = [
     <div class="top-bar">
         <h5><?= htmlspecialchars($pageTitle) ?></h5>
         <div class="user-info">
-            <div class="avatar"><?= mb_substr($username, 0, 1) ?></div>
+            <div class="avatar" id="adminAvatar" style="position:relative; cursor:pointer; overflow:hidden;" onclick="document.getElementById('avatarUploadInput').click()" title="کلیک برای تغییر آواتار">
+                <?php 
+                // اگر سشن آواتار خالی است، از دیتابیس بخوان
+                if (empty($_SESSION['user_avatar'])) {
+                    try {
+                        $pdo = getDB();
+                        $stmt = $pdo->prepare("SELECT avatar FROM users WHERE id = ?");
+                        $stmt->execute([$_SESSION['user_id']]);
+                        $dbAvatar = $stmt->fetchColumn();
+                        if (!empty($dbAvatar)) {
+                            $_SESSION['user_avatar'] = $dbAvatar;
+                        }
+                    } catch (Exception $e) {}
+                }
+                ?>
+                <?php if (!empty($_SESSION['user_avatar'])): ?>
+                    <img id="adminAvatarImg" src="<?= htmlspecialchars($_SESSION['user_avatar']) ?>" style="width:100%; height:100%; object-fit:cover;">
+                <?php else: ?>
+                    <span id="adminAvatarInitial"><?= mb_substr($username, 0, 1) ?></span>
+                <?php endif; ?>
+            </div>
+            <input type="file" id="avatarUploadInput" accept="image/*" style="display:none;">
             <div class="info">
                 <strong><?= htmlspecialchars($username) ?></strong>
                 <span class="role"><?= $roleLabels[$userRole] ?? $userRole ?></span>

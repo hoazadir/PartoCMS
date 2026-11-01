@@ -5,6 +5,7 @@ namespace PartoCMS\RealEstate\Infrastructure\Persistence;
 
 use PDO;
 use PartoCMS\RealEstate\Domain\Entity\Property;
+require_once __DIR__ . '/../../Domain/Entity/Property.php';
 
 class PropertyRepository
 {
