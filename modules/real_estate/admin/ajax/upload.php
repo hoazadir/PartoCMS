@@ -41,7 +41,7 @@ $ext = pathinfo($file['name'], PATHINFO_EXTENSION) ?: ($isImage ? 'jpg' : 'mp4')
 $filename = 're_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
 
 // مسیر آپلود - دقیقاً در پوشه assets
-$uploadDir = dirname(__DIR__, 3) . '/assets/uploads/real_estate/';
+$uploadDir = dirname(__DIR__, 4) . '/assets/uploads/real_estate/';
 $targetPath = $uploadDir . $filename;
 $publicUrl = '/assets/uploads/real_estate/' . $filename;
 
