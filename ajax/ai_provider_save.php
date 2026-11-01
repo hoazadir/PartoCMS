@@ -222,10 +222,10 @@ function validateApiKey(string $provider, string $key): array
             break;
 
         case 'gemini':
-            if (!preg_match('/^AIza[a-zA-Z0-9_-]{30,}$/', $key)) {
+            if (!preg_match('/^(AIza[a-zA-Z0-9_-]{30,}|AQ\.[a-zA-Z0-9_.-]{10,})$/', $key)) {
                 return [
                     'ok' => false,
-                    'error' => 'شکل Gemini API Key نامعتبر است. باید با AIza شروع شود.',
+                    'error' => 'شکل Gemini API Key نامعتبر است. باید با AIza یا AQ.Ab شروع شود.',
                 ];
             }
             break;
