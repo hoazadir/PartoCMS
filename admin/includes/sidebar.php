@@ -884,7 +884,6 @@ $baseSite  = SITE_URL;
                 <span><?= __t('menu_menus', [], 'منوساز') ?></span>
             </a>
             <a href="/modules/menu_builder/admin/index.php" class="nav-link <?= strpos($_SERVER['REQUEST_URI'], 'menu_builder') !== false ? 'active' : '' ?>">🎨 منوساز حرفه‌ای</a>
-            <a href="/modules/real_estate/admin/index.php" class="nav-link">🏠 مشاور املاک</a>
             <?php endif; ?>
         </div>
     </div>

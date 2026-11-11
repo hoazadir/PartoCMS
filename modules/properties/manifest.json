@@ -1,0 +1,51 @@
+{
+    "name": "املاک",
+    "slug": "properties",
+    "version": "1.0.0",
+    "description": "سیستم مدیریت املاک با معماری DDD، TinyMCE، گالری تصاویر، نقشه Leaflet و فیلتر پیشرفته.",
+    "author": "Hooman Oliaei",
+    "author_url": "https://github.com/hoazadir",
+    "license": "Proprietary",
+    "requires": {
+        "php": ">=8.1",
+        "partocms": ">=1.0.0"
+    },
+    "permissions": [
+        "properties.view",
+        "properties.create",
+        "properties.edit",
+        "properties.delete",
+        "properties.approve",
+        "properties.settings"
+    ],
+    "menu": {
+        "title": "املاک",
+        "icon": "🏠",
+        "url": "/modules/properties/admin/index.php",
+        "order": 80,
+        "parent": "marketing",
+        "submenu": [
+            {
+                "title": "لیست املاک",
+                "url": "/modules/properties/admin/index.php",
+                "icon": "📋"
+            },
+            {
+                "title": "افزودن ملک",
+                "url": "/modules/properties/admin/create.php",
+                "icon": "➕"
+            },
+            {
+                "title": "تنظیمات",
+                "url": "/modules/properties/admin/settings.php",
+                "icon": "⚙️"
+            }
+        ]
+    },
+    "database": {
+        "tables": ["properties"]
+    },
+    "settings": {
+        "enabled": true
+    }
+}

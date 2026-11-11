@@ -61,8 +61,19 @@ $roleLabels = [
         
         .main-content {
             margin-right: 240px;
+            margin-left: 0;
+            width: calc(100% - 240px);
             padding: 25px;
             min-height: 100vh;
+            box-sizing: border-box;
+        }
+        @media (max-width: 1100px) {
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding: 15px;
+                padding-top: 70px;
+            }
         }
         
         .top-bar {
@@ -126,12 +137,13 @@ $roleLabels = [
         .table { font-size: 13px; }
         .table th { background: #f8f9fa; font-weight: 600; }
         
-        @media (max-width: 768px) {
-            .sidebar { width: 60px; }
-            .sidebar .brand h4, .sidebar .brand small { display: none; }
-            .sidebar a span { display: none; }
-            .sidebar a { justify-content: center; padding: 14px 5px; }
-            .main-content { margin-right: 60px; padding: 15px; }
+        @media (max-width: 1100px) {
+            .main-content {
+                margin-right: 0;
+                width: 100%;
+                padding: 15px;
+                padding-top: 70px;
+            }
         }
     </style>
 </head>

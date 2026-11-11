@@ -273,6 +273,26 @@ class ModuleRegistry {
             ],
             'includes' => [],
         ],
+        'properties' => [
+            'name'          => 'املاک',
+            'icon'          => '🏠',
+            'description'   => 'ماژول مدیریت املاک با جستجوی پیشرفته و گالری تصاویر',
+            'version'       => '1.0.0',
+            'menu_group'    => 'marketing',
+            'sort_order'    => 80,
+            'is_core'       => 0,
+            'permissions'   => [
+                'real_estate_view'   => 'مشاهده املاک',
+                'real_estate_create' => 'افزودن ملک',
+                'real_estate_edit'   => 'ویرایش ملک',
+                'real_estate_delete' => 'حذف ملک',
+            ],
+            'pages' => [
+                'list' => 'modules/properties/admin/index.php',
+                'form' => 'modules/properties/admin/edit.php',
+            ],
+        ],
+
         'services' => [
             'name' => 'خدمات',
             'icon' => '🛠️',

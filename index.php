@@ -326,6 +326,44 @@ if ($menuHtml):
         }
     }
     ?>
+
+    <!-- Properties Widget Auto-Render -->
+    <?php
+    $propFile = __DIR__ . '/modules/properties/src/Widget/PropertyWidget.php';
+    if (file_exists($propFile)) {
+        require_once __DIR__ . '/modules/properties/bootstrap.php';
+        require_once $propFile;
+
+        $propSettings = function_exists('properties_get_settings') ? properties_get_settings('widget') : [];
+        $propLocation = $propSettings['widget_location'] ?? 'none';
+        $propEnabled  = (bool) ($propSettings['is_enabled'] ?? false);
+
+        $currentContentId = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+        $currentPage      = isset($_GET['page']) ? (int)$_GET['page'] : 0;
+        $shouldRenderProp = false;
+
+        if ($propEnabled) {
+            if ($propLocation === 'home' && $currentContentId === 0 && $currentPage === 0) {
+                $shouldRenderProp = true;
+            } elseif ($propLocation === 'all_pages' && $currentContentId === 0) {
+                $shouldRenderProp = true;
+            } elseif ($propLocation === 'footer') {
+                $shouldRenderProp = true;
+            } elseif (strpos($propLocation, 'content_') === 0) {
+                $targetId = (int) str_replace('content_', '', $propLocation);
+                if ($currentContentId === $targetId) {
+                    $shouldRenderProp = true;
+                }
+            }
+        }
+
+        if ($shouldRenderProp) {
+            echo '<div class="container my-5" style="margin-top: 40px; margin-bottom: 40px;">';
+            echo \PartoCMS\Properties\Widget\PropertyWidget::render($propSettings);
+            echo '</div>';
+        }
+    }
+    ?>
     
 <footer style="background: #2c3e50; color: #bdc3c7; padding: 25px; text-align: center; font-size: 13px; margin-top: 50px;">
     © ۲۰۲۶ - <?= htmlspecialchars($siteName) ?>

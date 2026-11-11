@@ -1,182 +1,52 @@
-# ==================== فایل‌های حساس (هرگز به Git نروند) ====================
-config.php
+# ─── Security (Critical) ───
 config.local.php
-.env
-.env.local
-.env.*.local
-*.pem
-*.key
-*.crt
-*.p12
-*.pfx
 cert.pem
 key.pem
-mkcert
-cloudflared
+*.pem
+*.key
+aether.toml
+aether-secondary.toml
 stunnel.conf
 
-# ==================== وابستگی‌ها ====================
-/vendor/*
-/node_modules/
-
-# ==================== لاگ‌ها و کش ====================
-logs/
-*.log
-!logs/.gitkeep
-cache/
-*.cache
-
-# ==================== Backup و نسخه‌های قدیمی ====================
-*.bak
+# ─── Backups ───
 *.bak-*
-*.backup
-*.broken
+*.bak
 backups/
 _backups_archive/
 
-# ==================== فایل‌های حجیم ====================
-ngrok-v3-*.tgz
-*.tgz
+# ─── Logs & Sessions ───
+logs/
+*.log
+logs/sessions/
 
-# ==================== فایل‌های موقت و IDE ====================
-*.tmp
-*.temp
-*.swp
-*~
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
-*.sublime-*
-*.code-workspace
+# ─── Uploads (production data) ───
+assets/uploads/
+uploads/
+modules/properties/assets/uploads/
+modules/*/assets/uploads/
 
-# ==================== فایل‌های شخصی ====================
-notes.txt
-personal/
-private/
+# ─── Vendor (third-party libs) ───
+vendor/
 
-# ==================== فایل‌های تست محلی ====================
-test_mic.php
-test_mic_diag.php
-https_test.php
-test_record.html
-test_upload.html
-chat_test.php
-find-free-port.sh
-check-ports.sh
-audit.sh
-
-# ==================== فایل‌های عجیب ====================
-pdo
-tb
-
-# ==================== backup با شماره ====================
-*.bak[0-9]
-*.bak[0-9][0-9]
-*.step[0-9].bak
-*.pre-*
-*.before_*
-*.urlfix.bak
-
-# ==================== فایل‌های صوتی تست ====================
-uploads/ai_audio/
-*.wav
-*.mp3
-*.ogg
-!assets/audio/*.mp3
-
-# ==================== assets/vendor ====================
-assets/vendor/
-
-# ==================== stunnel و ابزارهای محلی ====================
+# ─── Test & Temp ───
+test_*.php
+test-*.php
+test_*.html
+cookies*.txt
+response*.html
+props_block_new.txt
+bootstrap_props.php
+php.log
 stunnel-debug.log
 stunnel.log
-stunnel.conf
-cert.pem
-key.pem
-mkcert
-ngrok-v3-*.tgz
-ngrok
+main
+test_record.html
 
-# ==================== mPDF/dompdf font cache ====================
-# این فایل‌ها خودکار ساخته می‌شوند — نباید در Git باشند
-assets/fonts/*.afm
-assets/fonts/*.afm.json
-assets/fonts/*.ufm
-assets/fonts/*.ufm.json
-assets/fonts/installed-fonts.json
-assets/fonts/vazirmatn_*
-
-# ==================== mPDF temp files ====================
-logs/mpdf/
-
-# ==================== استثنا: فونت‌های اصلی باید کامیت شوند ====================
-!assets/fonts/Vazirmatn-Regular.ttf
-!assets/fonts/Vazirmatn-Bold.ttf
-
-# ==================== فایل‌های آپلودی کاربران ====================
-# این‌ها خودکار ساخته می‌شوند و نباید در Git باشند
-assets/uploads/ads/
-assets/uploads/shop/
-assets/uploads/products/
-assets/uploads/images/
-assets/uploads/thumbnails/
-assets/uploads/editor/
-
-# استثنا: پوشه ریشه آپلود (نگه‌داشتن ساختار)
-!assets/uploads/.gitkeep
-
-# ==================== فایل‌های debug ====================
-admin/sidebar-debug.php
-admin/*-debug.php
-*-debug.php
-!debug_lang.php
-
-# ==================== فایل خالی main ====================
-/main
-
-# ─── Module configs (no secrets, must be committed) ───
-!modules/*/config.php
-!modules/*/*/config.php
-
-# ─── Force track PHPMailer (installed manually) ───
-!vendor/phpmailer/
-!vendor/phpmailer/**
-
-# موقت: بکاپ‌های migration/responsive
-_backup_*/
-
-# Newsletter cron worker artifacts
-modules/newsletter/cron/worker.log
+# ─── Newsletter locks ───
 modules/newsletter/cron/worker.lock
+modules/newsletter/cron/worker.log
 
-# ==================== VPN/Proxy secrets (aether) ====================
-# فقط secrets جدا می‌شوند. ساختار، اسکریپت‌ها و exampleها کامیت می‌شوند.
-aether.toml
-aether-masque.toml
-aether.local.toml
-aether-masque.local.toml
-aether-*.local.toml
-aether-*.token
-
-# استثنا: exampleها + اسکریپت + lastconn در Git می‌مانند
-!aether.example.toml
-!aether.example-masque.toml
-!aether.sh
-!aether-lastconn.toml
-
-# gool secondary identity (WireGuard inner — contains secrets!)
-aether-secondary.toml
-aether-*-secondary.toml
-
-# gool secondary identity (WireGuard inner — contains secrets!)
-aether-secondary.toml
-aether-*-secondary.toml
-
-
-# Portfolio uploads
-assets/uploads/portfolio/
-!assets/uploads/portfolio/.htaccess
-assets/uploads/services/*
-!assets/uploads/services/.htaccess
-assets/uploads/avatars/*
+# ─── Caches ───
+logs/ads_cache/
+logs/i18n_cache/
+logs/mpdf/

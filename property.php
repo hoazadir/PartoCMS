@@ -1,22 +1,33 @@
 <?php
-require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/modules/real_estate/src/Domain/Entity/Property.php';
-require_once __DIR__ . '/modules/real_estate/src/Infrastructure/Persistence/PropertyRepository.php';
+declare(strict_types=1);
 
-use PartoCMS\RealEstate\Infrastructure\Persistence\PropertyRepository;
+require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/modules/properties/bootstrap.php';
 
 $id = (int)($_GET['id'] ?? 0);
 if (!$id) { header('Location: properties.php'); exit; }
 
-$pdo = getDB();
-$repo = new PropertyRepository($pdo);
-$property = $repo->findById($id);
+$service  = properties_service();
+$property = $service->getById($id);
 
-if (!$property) { http_response_code(404); die('ملک یافت نشد.'); }
+if (!$property || $property->getStatus() !== 'published') {
+    http_response_code(404);
+    die('ملک یافت نشد.');
+}
 
 $siteName = getSetting('site_name', 'وب‌سایت من');
-$gallery = $property->getGallery();
-$videoUrl = $property->getVideoUrl();
+$gallery  = $property->getGallery();
+
+// قیمت
+$priceDisplay = 'تماس بگیرید';
+if ($property->getDealType() === 'sale' && $property->getPrice()) {
+    $priceDisplay = number_format((float)$property->getPrice()) . ' تومان';
+} elseif ($property->getRentPrice() || $property->getDeposit()) {
+    $parts = [];
+    if ($property->getDeposit()) $parts[] = 'رهن: ' . number_format((float)$property->getDeposit());
+    if ($property->getRentPrice()) $parts[] = 'اجاره: ' . number_format((float)$property->getRentPrice());
+    $priceDisplay = implode(' | ', $parts);
+}
 ?>
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
@@ -26,6 +37,7 @@ $videoUrl = $property->getVideoUrl();
     <title><?= htmlspecialchars($property->getTitle()) ?> | <?= htmlspecialchars($siteName) ?></title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="/modules/properties/assets/css/properties.css">
     <style>
         body { font-family: Tahoma, sans-serif; background: #f4f6f9; }
         .gallery-main { width: 100%; height: 450px; object-fit: cover; border-radius: 12px; cursor: pointer; }
@@ -45,67 +57,39 @@ $videoUrl = $property->getVideoUrl();
 </nav>
 
 <div class="container mb-5">
-    <!-- Header -->
     <div class="mb-4">
-        <span class="badge <?= $property->getListingType() === 'sale' ? 'bg-success' : 'bg-info' ?> fs-6">
-            <?= $property->getListingType() === 'sale' ? 'فروش' : 'اجاره' ?>
+        <span class="badge <?= $property->getDealType() === 'sale' ? 'bg-success' : 'bg-info' ?> fs-6">
+            <?= htmlspecialchars($property->getDealTypeLabel()) ?>
         </span>
-        <span class="badge bg-secondary fs-6"><?= htmlspecialchars($property->getPropertyType()) ?></span>
+        <span class="badge bg-secondary fs-6"><?= htmlspecialchars($property->getPropertyTypeLabel()) ?></span>
         <h1 class="fw-bold mt-3"><?= htmlspecialchars($property->getTitle()) ?></h1>
-        <p class="text-muted"><i class="bi bi-geo-alt"></i> <?= htmlspecialchars($property->getCity()) ?> - <?= htmlspecialchars($property->getRegion()) ?></p>
+        <p class="text-muted">
+            <i class="bi bi-geo-alt"></i>
+            <?= htmlspecialchars($property->getCity() ?? '—') ?>
+            <?php if ($property->getRegion()): ?> - <?= htmlspecialchars($property->getRegion()) ?><?php endif; ?>
+        </p>
     </div>
 
     <div class="row g-4">
-        <!-- ستون راست: تصاویر و ویدیو -->
         <div class="col-md-8">
-            <!-- تصویر شاخص / اسلایدشو -->
-            <?php if ($property->getFeaturedImage()): ?>
-                <img src="<?= htmlspecialchars($property->getFeaturedImage()) ?>" id="mainImage" class="gallery-main mb-3" alt="<?= htmlspecialchars($property->getTitle()) ?>">
+            <?php if ($property->getThumbnailUrl()): ?>
+                <img src="<?= htmlspecialchars($property->getThumbnailUrl()) ?>" id="mainImage" class="gallery-main mb-3" alt="<?= htmlspecialchars($property->getTitle()) ?>">
             <?php else: ?>
                 <div class="gallery-main bg-light d-flex align-items-center justify-content-center mb-3">
                     <span style="font-size:80px;">🏠</span>
                 </div>
             <?php endif; ?>
 
-            <!-- گالری تصاویر -->
             <?php if (!empty($gallery)): ?>
                 <div class="row g-2 mb-4">
                     <?php foreach ($gallery as $i => $img): ?>
                         <div class="col-3">
-                            <img src="<?= htmlspecialchars($img) ?>" class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>" onclick="changeImage('<?= htmlspecialchars($img) ?>', this)">
+                            <img src="<?= htmlspecialchars($img) ?>" class="gallery-thumb <?= $i === 0 ? 'active' : '' ?>" onclick="changeImage('<?= htmlspecialchars($img) ?>', this)" alt="گالری <?= $i + 1 ?>">
                         </div>
                     <?php endforeach; ?>
                 </div>
             <?php endif; ?>
 
-            <!-- ویدیو تبلیغاتی -->
-            <?php if ($videoUrl): ?>
-                <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">🎬 ویدیو تبلیغاتی</div>
-                    <div class="card-body">
-                        <?php if (strpos($videoUrl, 'youtube.com') !== false || strpos($videoUrl, 'youtu.be') !== false): ?>
-                            <?php
-                                preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]+)/', $videoUrl, $matches);
-                                $ytId = $matches[1] ?? '';
-                            ?>
-                            <iframe width="100%" height="400" src="https://www.youtube.com/embed/<?= $ytId ?>" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>
-                        <?php elseif (strpos($videoUrl, 'aparat.com') !== false): ?>
-                            <?php
-                                preg_match('/aparat\.com\/v\/([a-zA-Z0-9]+)/', $videoUrl, $matches);
-                                $apId = $matches[1] ?? '';
-                            ?>
-                            <iframe width="100%" height="400" src="https://www.aparat.com/video/video/embed/videohash/<?= $apId ?>/vt/frame" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>
-                        <?php else: ?>
-                            <video controls width="100%" style="border-radius:8px;">
-                                <source src="<?= htmlspecialchars($videoUrl) ?>" type="video/mp4">
-                                مرورگر شما از ویدیو پشتیبانی نمی‌کند.
-                            </video>
-                        <?php endif; ?>
-                    </div>
-                </div>
-            <?php endif; ?>
-
-            <!-- توضیحات -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-white fw-bold">📝 توضیحات ملک</div>
                 <div class="card-body">
@@ -113,56 +97,75 @@ $videoUrl = $property->getVideoUrl();
                 </div>
             </div>
 
-            <!-- مشخصات -->
+            <?php if ($property->getContent()): ?>
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white fw-bold">📋 جزئیات بیشتر</div>
+                <div class="card-body"><?= $property->getContent() ?></div>
+            </div>
+            <?php endif; ?>
+
             <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-bold">📐 مشخصات ملک</div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-4"><div class="spec-item">📐 <strong><?= $property->getArea() ?></strong> متر</div></div>
-                        <div class="col-md-4"><div class="spec-item">🛏 <strong><?= $property->getRooms() ?></strong> اتاق</div></div>
-                        <div class="col-md-4"><div class="spec-item">🚿 <strong><?= $property->getBathrooms() ?></strong> سرویس</div></div>
-                        <div class="col-md-4"><div class="spec-item">📅 سال ساخت: <strong><?= $property->getYearBuilt() ?? '—' ?></strong></div></div>
+                        <?php if ($property->getArea()): ?>
+                            <div class="col-md-4"><div class="spec-item">📐 <strong><?= $property->getArea() ?></strong> متر</div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getBedrooms()): ?>
+                            <div class="col-md-4"><div class="spec-item">🛏 <strong><?= $property->getBedrooms() ?></strong> خواب</div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getBathrooms()): ?>
+                            <div class="col-md-4"><div class="spec-item">🚿 <strong><?= $property->getBathrooms() ?></strong> سرویس</div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getFloor() !== null): ?>
+                            <div class="col-md-4"><div class="spec-item">🏢 طبقه: <strong><?= $property->getFloor() ?></strong></div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getTotalFloors()): ?>
+                            <div class="col-md-4"><div class="spec-item">🏬 کل طبقات: <strong><?= $property->getTotalFloors() ?></strong></div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getYearBuilt()): ?>
+                            <div class="col-md-4"><div class="spec-item">📅 سال ساخت: <strong><?= $property->getYearBuilt() ?></strong></div></div>
+                        <?php endif; ?>
+                        <?php if ($property->getDocumentType()): ?>
+                            <div class="col-md-4"><div class="spec-item">📄 سند: <strong><?= htmlspecialchars($property->getDocumentType()) ?></strong></div></div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
+
+            <?php if (!empty($property->getAmenities())): ?>
+            <div class="card border-0 shadow-sm mt-4">
+                <div class="card-header bg-white fw-bold">✨ امکانات</div>
+                <div class="card-body">
+                    <?php foreach ($property->getAmenities() as $a): ?>
+                        <span class="badge bg-light text-dark border me-1 mb-1"><?= htmlspecialchars($a) ?></span>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endif; ?>
         </div>
 
-        <!-- ستون چپ: قیمت و مشاور -->
         <div class="col-md-4">
             <div class="price-box mb-4">
                 <p class="mb-1" style="opacity:0.8;">قیمت</p>
-                <h3 class="fw-bold mb-0">
-                    <?= $property->getPrice() ? number_format($property->getPrice()) . ' تومان' : 'تماس بگیرید' ?>
-                </h3>
+                <h3 class="fw-bold mb-0"><?= htmlspecialchars($priceDisplay) ?></h3>
             </div>
 
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-white fw-bold">👤 مشاور املاک</div>
-                <div class="card-body">
-                    <p class="mb-2"><strong><?= htmlspecialchars($property->getAgentName() ?? 'ثبت نشده') ?></strong></p>
-                    <?php if ($property->getAgentPhone()): ?>
-                        <p class="mb-2"><i class="bi bi-telephone"></i> <?= htmlspecialchars($property->getAgentPhone()) ?></p>
-                    <?php endif; ?>
-                    <?php if ($property->getAgentEmail()): ?>
-                        <p class="mb-3"><i class="bi bi-envelope"></i> <?= htmlspecialchars($property->getAgentEmail()) ?></p>
-                    <?php endif; ?>
-                    <a href="tel:<?= htmlspecialchars($property->getAgentPhone() ?? '') ?>" class="btn btn-primary w-100 rounded-pill">📞 تماس با مشاور</a>
-                </div>
-            </div>
-
-            <div class="card border-0 shadow-sm">
                 <div class="card-header bg-white fw-bold">📍 موقعیت</div>
                 <div class="card-body">
                     <p class="mb-1"><?= htmlspecialchars($property->getAddress() ?? '—') ?></p>
                     <?php if ($property->getLatitude() && $property->getLongitude()): ?>
                         <div class="mt-3" style="border-radius:8px; overflow:hidden;">
-                            <iframe width="100%" height="200" frameborder="0" style="border:0" 
+                            <iframe width="100%" height="220" frameborder="0" style="border:0"
                                 src="https://www.openstreetmap.org/export/embed.html?bbox=<?= ($property->getLongitude() - 0.01) ?>%2C<?= ($property->getLatitude() - 0.01) ?>%2C<?= ($property->getLongitude() + 0.01) ?>%2C<?= ($property->getLatitude() + 0.01) ?>&layer=mapnik&marker=<?= $property->getLatitude() ?>%2C<?= $property->getLongitude() ?>">
                             </iframe>
                         </div>
                     <?php endif; ?>
                 </div>
             </div>
+
+            <a href="properties.php" class="btn btn-outline-secondary w-100">← بازگشت به لیست املاک</a>
         </div>
     </div>
 </div>
