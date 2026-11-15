@@ -50,3 +50,17 @@ modules/newsletter/cron/worker.log
 logs/ads_cache/
 logs/i18n_cache/
 logs/mpdf/
+
+# ─── Security (Critical) - NEVER TRACK ───
+config.php
+cert.pem
+key.pem
+*.key
+stunnel.conf
+aether.toml
+
+# ─── Personal Scripts ───
+audit.sh
+chat_test.php
+check-ports.sh
+find-free-port.sh
