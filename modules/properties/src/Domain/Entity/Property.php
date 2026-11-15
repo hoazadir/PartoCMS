@@ -54,10 +54,12 @@ final class Property
     private ?float  $deposit;
     private ?string $address;
     private ?string $city;
+    private ?int $cityId;
     private ?string $region;
     private ?float  $latitude;
     private ?float  $longitude;
     private ?string $thumbnailUrl;
+    private ?string $videoUrl;
     private array   $gallery;
     private array   $amenities;
     private ?int    $agentId;
@@ -90,10 +92,12 @@ final class Property
         ?float  $deposit = null,
         ?string $address = null,
         ?string $city = null,
+        ?int $cityId = null,
         ?string $region = null,
         ?float  $latitude = null,
         ?float  $longitude = null,
         ?string $thumbnailUrl = null,
+        ?string $videoUrl = null,
         array   $gallery = [],
         array   $amenities = [],
         ?int    $agentId = null,
@@ -128,10 +132,12 @@ final class Property
         $this->deposit       = $deposit;
         $this->address       = $address;
         $this->city          = $city;
+        $this->cityId        = $cityId;
         $this->region        = $region;
         $this->latitude      = $latitude;
         $this->longitude     = $longitude;
         $this->thumbnailUrl  = $thumbnailUrl;
+        $this->videoUrl      = $videoUrl;
         $this->gallery       = $gallery;
         $this->amenities     = $amenities;
         $this->agentId       = $agentId;
@@ -176,10 +182,12 @@ final class Property
             isset($row['deposit']) && $row['deposit'] !== null ? (float) $row['deposit'] : null,
             $row['address']         ?? null,
             $row['city']            ?? null,
+            $row['city_id']         ?? null,
             $row['region']          ?? null,
             isset($row['latitude']) && $row['latitude'] !== null ? (float) $row['latitude'] : null,
             isset($row['longitude']) && $row['longitude'] !== null ? (float) $row['longitude'] : null,
             $row['thumbnail_url']   ?? null,
+            $row['video_url']       ?? null,
             $gallery,
             $amenities,
             isset($row['agent_id']) && $row['agent_id'] !== null ? (int) $row['agent_id'] : null,
@@ -215,10 +223,12 @@ final class Property
             'deposit'       => $this->deposit,
             'address'       => $this->address,
             'city'          => $this->city,
+            'city_id'       => $this->cityId,
             'region'        => $this->region,
             'latitude'      => $this->latitude,
             'longitude'     => $this->longitude,
             'thumbnail_url' => $this->thumbnailUrl,
+            'video_url'     => $this->videoUrl,
             'gallery'       => !empty($this->gallery) ? json_encode($this->gallery, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : null,
             'amenities'     => !empty($this->amenities) ? json_encode($this->amenities, JSON_UNESCAPED_UNICODE) : null,
             'agent_id'      => $this->agentId,
@@ -255,10 +265,12 @@ final class Property
     public function getDeposit(): ?float       { return $this->deposit; }
     public function getAddress(): ?string      { return $this->address; }
     public function getCity(): ?string         { return $this->city; }
+    public function getCityId(): ?int          { return $this->cityId; }
     public function getRegion(): ?string       { return $this->region; }
     public function getLatitude(): ?float      { return $this->latitude; }
     public function getLongitude(): ?float     { return $this->longitude; }
     public function getThumbnailUrl(): ?string { return $this->thumbnailUrl; }
+    public function getVideoUrl(): ?string     { return $this->videoUrl; }
     public function getGallery(): array        { return $this->gallery; }
     public function getAmenities(): array      { return $this->amenities; }
     public function getAgentId(): ?int         { return $this->agentId; }
@@ -327,6 +339,8 @@ final class Property
     public function setDeposit(?float $d): void        { $this->deposit = $d; }
     public function setAddress(?string $a): void       { $this->address = $a; }
     public function setCity(?string $c): void          { $this->city = $c; }
+    public function setCityId(?int $id): void          { $this->cityId = $id; }
+    public function setVideoUrl(?string $url): void    { $this->videoUrl = $url; }
     public function setRegion(?string $r): void        { $this->region = $r; }
     public function setLatitude(?float $lat): void     { $this->latitude = $lat; }
     public function setLongitude(?float $lng): void    { $this->longitude = $lng; }

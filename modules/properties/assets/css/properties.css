@@ -135,15 +135,32 @@
 }
 
 /* ── حالت اسلایدر (اختیاری) ───────────────────────────── */
-.properties-container[data-style="slider"] .properties-grid {
-    display: flex;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    padding-bottom: 10px;
+.properties-container[data-style="slider"] .swiper {
+    padding: 10px 0 50px;
 }
-.properties-container[data-style="slider"] .property-card {
-    min-width: 300px;
-    scroll-snap-align: start;
+.properties-container[data-style="slider"] .swiper-slide {
+    height: auto;
+}
+.properties-container[data-style="slider"] .swiper-button-prev,
+.properties-container[data-style="slider"] .swiper-button-next {
+    color: #0d6efd;
+    background: rgba(255,255,255,0.9);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.properties-container[data-style="slider"] .swiper-button-prev::after,
+.properties-container[data-style="slider"] .swiper-button-next::after {
+    font-size: 16px;
+    font-weight: bold;
+}
+.properties-container[data-style="slider"] .swiper-pagination-bullet {
+    background: #0d6efd;
+    opacity: 0.4;
+}
+.properties-container[data-style="slider"] .swiper-pagination-bullet-active {
+    opacity: 1;
 }
 
 /* ── حالت لیست ────────────────────────────────────────── */

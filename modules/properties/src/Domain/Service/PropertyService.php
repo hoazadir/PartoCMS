@@ -84,10 +84,12 @@ final class PropertyService
         if (array_key_exists('deposit', $data))    $p->setDeposit($data['deposit'] !== '' ? (float) $data['deposit'] : null);
         if (isset($data['address']))       $p->setAddress((string) $data['address']);
         if (isset($data['city']))          $p->setCity((string) $data['city']);
+        if (array_key_exists('city_id', $data)) $p->setCityId($data['city_id'] !== '' && $data['city_id'] !== null ? (int) $data['city_id'] : null);
         if (isset($data['region']))        $p->setRegion((string) $data['region']);
         if (array_key_exists('latitude', $data))  $p->setLatitude($data['latitude'] !== '' ? (float) $data['latitude'] : null);
         if (array_key_exists('longitude', $data)) $p->setLongitude($data['longitude'] !== '' ? (float) $data['longitude'] : null);
         if (isset($data['thumbnail_url'])) $p->setThumbnailUrl((string) $data['thumbnail_url']);
+        if (array_key_exists('video_url', $data)) $p->setVideoUrl($data['video_url'] !== '' && $data['video_url'] !== null ? (string) $data['video_url'] : null);
         if (isset($data['gallery']))       $p->setGallery(is_array($data['gallery']) ? $data['gallery'] : []);
         if (isset($data['amenities']))     $p->setAmenities(is_array($data['amenities']) ? $data['amenities'] : []);
         if (array_key_exists('agent_id', $data)) $p->setAgentId($data['agent_id'] !== '' ? (int) $data['agent_id'] : null);

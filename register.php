@@ -9,7 +9,52 @@ if (isLoggedIn()) {
 $error = '';
 $success = '';
 
+// ═══════════════════════════════════════════════════════
+// ─── CSRF ───
+// ═══════════════════════════════════════════════════════
+if (empty($_SESSION['reg_csrf'])) {
+    $_SESSION['reg_csrf'] = bin2hex(random_bytes(32));
+}
+
+// ═══════════════════════════════════════════════════════
+// ─── Rate Limit (حداکثر ۳ ثبت‌نام در ساعت) ───
+// ═══════════════════════════════════════════════════════
+$now = time();
+$_SESSION['reg_attempts'] = $_SESSION['reg_attempts'] ?? [];
+$_SESSION['reg_attempts'] = array_filter($_SESSION['reg_attempts'], fn($t) => $t > $now - 3600);
+$isRateLimited = count($_SESSION['reg_attempts']) >= 3;
+
+// ═══════════════════════════════════════════════════════
+// ─── لاگ امنیتی ───
+// ═══════════════════════════════════════════════════════
+function log_security_event(PDO $pdo, string $type, string $message, ?int $userId = null): void {
+    try {
+        $stmt = $pdo->prepare("INSERT INTO security_logs (type, message, ip, user_id, created_at) VALUES (?, ?, ?, ?, NOW())");
+        $stmt->execute([$type, $message, $_SERVER['REMOTE_ADDR'] ?? 'unknown', $userId]);
+    } catch (Throwable $e) {
+        error_log('Security log error: ' . $e->getMessage());
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // ─── Rate Limit ───
+    if ($isRateLimited) {
+        $error = 'تعداد تلاش‌های شما بیش از حد مجاز است. لطفاً یک ساعت دیگر تلاش کنید.';
+    }
+    // ─── CSRF ───
+    elseif (!hash_equals($_SESSION['reg_csrf'], $_POST['_csrf'] ?? '')) {
+        $error = 'توکن امنیتی نامعتبر است. لطفاً صفحه را رفرش کنید.';
+    }
+    // ─── Honeypot ───
+    elseif (!empty($_POST['website'])) {
+        $error = 'درخواست مشکوک شناسایی شد.';
+        try {
+            $pdo = getDB();
+            log_security_event($pdo, 'honeypot_triggered', 'ربات در ثبت‌نام شناسایی شد');
+        } catch (Throwable $e) {}
+    }
+    // ─── پردازش اصلی ───
+    else {
     $username = trim($_POST['username'] ?? '');
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -21,7 +66,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (strlen($username) < 3) $errors[] = __t('fe_username_min3', [], 'نام کاربری حداقل ۳ کاراکتر');
     if (!preg_match('/^[a-zA-Z0-9_]+$/', $username)) $errors[] = __t('fe_username_format', [], 'نام کاربری فقط حروف انگلیسی، عدد و آندرلاین');
     if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) $errors[] = __t('fe_email_invalid', [], 'ایمیل معتبر الزامی است');
-    if (strlen($password) < 6) $errors[] = __t('fe_password_min6', [], 'رمز عبور حداقل ۶ کاراکتر');
+    // سیاست رمز عبور قوی: حداقل ۱۰ کاراکتر، حروف بزرگ و کوچک، عدد و نماد
+    if (strlen($password) < 10 || !preg_match('/[a-z]/', $password) || !preg_match('/[A-Z]/', $password) || !preg_match('/[0-9]/', $password) || !preg_match('/[^A-Za-z0-9]/', $password)) {
+        $errors[] = 'رمز عبور باید حداقل ۱۰ کاراکتر بوده و شامل حروف بزرگ، کوچک، عدد و نمادهای ویژه باشد.';
+    }
     if ($password !== $password2) $errors[] = __t('fe_password_mismatch', [], 'رمز عبور و تکرار آن مطابقت ندارند');
 
     if (empty($errors)) {
@@ -67,6 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 // --- پایان همگام‌سازی ---
 
                 
+                // ─── ثبت موفق: لاگ + Rate Limit ───
+                $_SESSION['reg_attempts'][] = $now;
+                $_SESSION['reg_csrf'] = null; // یکبارمصرف
+                log_security_event($pdo, 'user_registered', 'ثبت‌نام موفق: ' . $username . ' (' . $email . ')', (int)$newUserId);
+
                 $success = __t('fe_account_created', [], 'حساب شما با موفقیت ساخته شد!');
             }
         } catch (PDOException $e) {
@@ -75,6 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $error = implode('<br>', $errors);
     }
+    } // end of else (security checks)
 }
 
 $siteName = getSetting('site_name', 'وب‌سایت من');
@@ -118,6 +172,43 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             transition: border-color 0.2s;
         }
         .form-group input:focus { border-color: #667eea; outline: none; }
+        /* کانتینر اختصاصی فیلد رمز عبور */
+        .password-field-container {
+            display: flex;
+            width: 100%;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+        .password-field-container:focus-within {
+            border-color: #667eea;
+        }
+        .password-field-container input {
+            flex: 1; /* کادر متن کمی کوچکتر می‌شود تا دکمه جا شود */
+            border: none !important;
+            padding: 11px 14px;
+            font-family: Tahoma;
+            font-size: 14px;
+            outline: none;
+            background: transparent;
+        }
+        .password-field-container .toggle-password {
+            background: #f8f9fa;
+            border: none;
+            border-right: 1px solid #e0e0e0; /* خط جداکننده در سمت راست (چون RTL است) */
+            padding: 0 15px;
+            cursor: pointer;
+            color: #7f8c8d;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+        .password-field-container .toggle-password:hover {
+            background: #eef0f2;
+        }
         .form-group small { font-size: 11px; color: #95a5a6; }
         .btn-register {
             width: 100%; padding: 13px;
@@ -175,6 +266,11 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
 
         <?php if (!$success): ?>
         <form method="post">
+            <input type="hidden" name="_csrf" value="<?= htmlspecialchars($_SESSION['reg_csrf'] ?? '') ?>">
+            <!-- Honeypot: برای ربات‌ها — کاربر واقعی این را نمی‌بیند -->
+            <div style="position:absolute;left:-9999px;" aria-hidden="true">
+                <input type="text" name="website" tabindex="-1" autocomplete="off">
+            </div>
             <div class="form-group">
                 <label>نام کاربری *</label>
                 <input type="text" name="username" value="<?= htmlspecialchars($_POST['username'] ?? '') ?>" required>
@@ -186,12 +282,40 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             </div>
             <div class="form-group">
                 <label>رمز عبور *</label>
-                <input type="password" name="password" required>
-                <small>حداقل ۶ کاراکتر</small>
+                <div class="password-field-container">
+                    <input type="password" id="password" name="password" required minlength="10">
+                    <button type="button" class="toggle-password" data-target="password" title="نمایش/مخفی">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+                
+                <!-- لیست داینامیک قوانین رمز عبور -->
+                <div id="password-rules" style="margin-top: 10px; font-size: 12px;">
+                    <div class="rule text-muted" id="rule-length" style="margin-bottom: 4px; transition: 0.3s;">
+                        <i class="bi bi-x-circle-fill text-danger"></i> حداقل ۱۰ کاراکتر
+                    </div>
+                    <div class="rule text-muted" id="rule-lower" style="margin-bottom: 4px; transition: 0.3s;">
+                        <i class="bi bi-x-circle-fill text-danger"></i> شامل حروف کوچک انگلیسی (a-z)
+                    </div>
+                    <div class="rule text-muted" id="rule-upper" style="margin-bottom: 4px; transition: 0.3s;">
+                        <i class="bi bi-x-circle-fill text-danger"></i> شامل حروف بزرگ انگلیسی (A-Z)
+                    </div>
+                    <div class="rule text-muted" id="rule-number" style="margin-bottom: 4px; transition: 0.3s;">
+                        <i class="bi bi-x-circle-fill text-danger"></i> شامل عدد (0-9)
+                    </div>
+                    <div class="rule text-muted" id="rule-special" style="margin-bottom: 4px; transition: 0.3s;">
+                        <i class="bi bi-x-circle-fill text-danger"></i> شامل نمادهای ویژه (@, #, $, %, ...)
+                    </div>
+                </div>
             </div>
             <div class="form-group">
                 <label>تکرار رمز عبور *</label>
-                <input type="password" name="password2" required>
+                <div class="password-field-container">
+                    <input type="password" id="password2" name="password2" required minlength="10">
+                    <button type="button" class="toggle-password" data-target="password2" title="نمایش/مخفی">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
             </div>
             <button type="submit" class="btn-register">
                 <i class="bi bi-person-plus"></i> ایجاد حساب
@@ -203,5 +327,62 @@ $siteName = getSetting('site_name', 'وب‌سایت من');
             قبلاً ثبت‌نام کردید؟ <a href="login.php">وارد شوید</a>
         </div>
     </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ─── دکمه نمایش/مخفی رمز عبور ───
+    document.querySelectorAll('.toggle-password').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const icon = this.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        });
+    });
+
+    // ─── اعتبارسنجی داینامیک قوانین رمز عبور ───
+    const passwordInput = document.getElementById('password');
+    if (passwordInput) {
+        passwordInput.addEventListener('input', function() {
+            const val = this.value;
+            
+            const rules = {
+                'rule-length':  val.length >= 10,
+                'rule-lower':   /[a-z]/.test(val),
+                'rule-upper':   /[A-Z]/.test(val),
+                'rule-number':  /[0-9]/.test(val),
+                'rule-special': /[^A-Za-z0-9]/.test(val)
+            };
+
+            for (const [id, isMet] of Object.entries(rules)) {
+                const el = document.getElementById(id);
+                if (!el) continue;
+                const icon = el.querySelector('i');
+                
+                if (isMet) {
+                    // تیک سبز
+                    icon.classList.remove('bi-x-circle-fill', 'text-danger');
+                    icon.classList.add('bi-check-circle-fill', 'text-success');
+                    el.classList.remove('text-muted');
+                    el.classList.add('text-success');
+                } else {
+                    // ضربدر قرمز
+                    icon.classList.remove('bi-check-circle-fill', 'text-success');
+                    icon.classList.add('bi-x-circle-fill', 'text-danger');
+                    el.classList.remove('text-success');
+                    el.classList.add('text-muted');
+                }
+            }
+        });
+    }
+});
+</script>
 </body>
 </html>

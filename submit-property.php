@@ -6,6 +6,11 @@ require_once __DIR__ . '/modules/properties/bootstrap.php';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+if (!isLoggedIn()) {
+    header('Location: /admin/login.php');
+    exit;
+}
+
 // CSRF عمومی برای این فرم (در کوکی، نه session — برای پایداری در Termux)
 if (empty($_COOKIE['properties_public_csrf'])) {
     $newCsrf = bin2hex(random_bytes(32));
@@ -97,6 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'thumbnail_url' => $thumbnailUrl,
                     'gallery'       => $gallery,
                     'amenities'     => $_POST['amenities'] ?? [],
+                    'agent_id'      => $_SESSION['user_id'] ?? null,
                 ], $_SERVER['REMOTE_ADDR'] ?? null);
 
                 $_SESSION['properties_flash'] = [

@@ -1,14 +1,37 @@
 <?php
 declare(strict_types=1);
-require_once dirname(__DIR__, 3) . '/config.php';
-require_once dirname(__DIR__, 1) . '/bootstrap.php';
+require_once __DIR__ . '/_bootstrap.php';
 
 use PartoCMS\Properties\Domain\Entity\Property;
 
 if (!isLoggedIn()) { header('Location: /admin/login.php'); exit; }
 
+// ─── مقداردهی اولیه ───────────────────────────────────
 $service = properties_service();
-$stats = $service->getStats();
+$stats   = $service->getStats();
+$success = '';
+$error   = '';
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'], $_POST['id'])) {
+    if (!properties_csrf_verify($_POST['_csrf'] ?? null)) {
+        $error = 'توکن امنیتی نامعتبر است.';
+    } else {
+        $id = (int)$_POST['id'];
+        try {
+            if ($_POST['action'] === 'publish') {
+                $service->publish($id);
+                $success = 'آگهی با موفقیت منتشر شد.';
+            } elseif ($_POST['action'] === 'reject') {
+                $service->hide($id);
+                $success = 'آگهی رد شد (مخفی).';
+            }
+        } catch (Throwable $e) {
+            $error = 'خطا: ' . $e->getMessage();
+        }
+    }
+}
+
 
 // فیلترها
 $filters = [
@@ -99,6 +122,19 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
         <?php elseif ($_GET['msg'] === 'deleted'): ?>
             <div class="alert alert-success">🗑️ ملک با موفقیت حذف شد.</div>
         <?php endif; ?>
+    <?php endif; ?>
+
+    <?php if (!empty($success)): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            ✅ <?= htmlspecialchars($success) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    <?php endif; ?>
+    <?php if (!empty($error)): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            ❌ <?= htmlspecialchars($error) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
     <?php endif; ?>
 
     <!-- Stat Cards -->
@@ -268,6 +304,20 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                                         <span class="badge bg-<?= $st[0] ?>"><?= $st[1] ?></span>
                                     </td>
                                     <td class="text-end pe-4">
+                                        <?php if ($prop->getStatus() === 'pending'): ?>
+                                            <form method="post" style="display:inline-block;" onsubmit="return confirm('آیا از انتشار این آگهی مطمئن هستید؟');">
+                                                <input type="hidden" name="_csrf" value="<?= properties_csrf_token() ?>">
+                                                <input type="hidden" name="action" value="publish">
+                                                <input type="hidden" name="id" value="<?= $prop->getId() ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="تأیید و انتشار">✅</button>
+                                            </form>
+                                            <form method="post" style="display:inline-block;" onsubmit="return confirm('آیا از رد این آگهی مطمئن هستید؟');">
+                                                <input type="hidden" name="_csrf" value="<?= properties_csrf_token() ?>">
+                                                <input type="hidden" name="action" value="reject">
+                                                <input type="hidden" name="id" value="<?= $prop->getId() ?>">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="رد آگهی">❌</button>
+                                            </form>
+                                        <?php endif; ?>
                                         <a href="edit.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-primary" title="ویرایش">✏️</a>
                                         <a href="delete.php?id=<?= $prop->getId() ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('حذف شود؟')" title="حذف">🗑</a>
                                     </td>

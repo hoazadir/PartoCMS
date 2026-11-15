@@ -69,7 +69,19 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                     <div class="card-header bg-white fw-bold">📍 موقعیت</div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-6"><label class="form-label">شهر</label><input type="text" name="city" class="form-control"></div>
+                            <div class="col-md-6">
+                                <label class="form-label">استان</label>
+                                <select id="province-select" class="form-select" style="width:100%">
+                                    <option value="">-- انتخاب استان --</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">شهر</label>
+                                <select id="city-select" name="city_id" class="form-select" style="width:100%">
+                                    <option value="">-- ابتدا استان را انتخاب کنید --</option>
+                                </select>
+                                <input type="hidden" name="city" id="city-name-input">
+                            </div>
                             <div class="col-md-6"><label class="form-label">منطقه</label><input type="text" name="region" class="form-control"></div>
                             <div class="col-12"><label class="form-label">آدرس دقیق</label><input type="text" name="address" class="form-control"></div>
                             <div class="col-md-6"><label class="form-label">عرض جغرافیایی</label><input type="text" name="latitude" class="form-control" dir="ltr"></div>
@@ -90,12 +102,16 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                 </div>
 
                 <div class="card border-0 shadow-sm mb-4">
-                    <div class="card-header bg-white fw-bold">👤 مشاور</div>
+                    <div class="card-header bg-white fw-bold">👤 مشاور املاک</div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <div class="col-md-4"><input type="text" name="agent_name" class="form-control" placeholder="نام"></div>
-                            <div class="col-md-4"><input type="text" name="agent_phone" class="form-control" placeholder="تلفن" dir="ltr"></div>
-                            <div class="col-md-4"><input type="email" name="agent_email" class="form-control" placeholder="ایمیل" dir="ltr"></div>
+                            <div class="col-12">
+                                <label class="form-label">انتخاب مشاور (جستجو بر اساس نام کاربری یا کد ملی)</label>
+                                <select id="agent-select" name="agent_id" class="form-select" style="width:100%">
+                                    <option value="">-- جستجوی مشاور --</option>
+                                </select>
+                                <small class="text-muted">فقط کاربران با نقش «مشاور املاک» نمایش داده می‌شوند.</small>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -142,10 +158,13 @@ require_once dirname(__DIR__, 3) . '/admin/includes/sidebar.php';
                 </div>
 
                 <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-white fw-bold">🖼️ تصویر شاخص</div>
+                    <div class="card-header bg-white fw-bold">🖼️ تصویر شاخص و ویدیو</div>
                     <div class="card-body">
-                        <input type="text" name="thumbnail_url" class="form-control mb-2" placeholder="https://...">
-                        <small class="text-muted">URL تصویر اصلی ملک.</small>
+                        <label class="form-label small">URL تصویر شاخص</label>
+                        <input type="text" name="thumbnail_url" class="form-control mb-3" placeholder="https://...">
+                        <label class="form-label small">URL ویدیو (YouTube/Aparat/MP4)</label>
+                        <input type="text" name="video_url" class="form-control mb-2" placeholder="https://youtube.com/watch?v=... یا https://aparat.com/v/...">
+                        <small class="text-muted">اختیاری. لینک ویدیو معرفی ملک.</small>
                     </div>
                 </div>
             </div>

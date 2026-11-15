@@ -343,7 +343,7 @@ if ($menuHtml):
         $shouldRenderProp = false;
 
         if ($propEnabled) {
-            if ($propLocation === 'home' && $currentContentId === 0 && $currentPage === 0) {
+            if ($propLocation === 'home' && $currentContentId === 0) {
                 $shouldRenderProp = true;
             } elseif ($propLocation === 'all_pages' && $currentContentId === 0) {
                 $shouldRenderProp = true;
